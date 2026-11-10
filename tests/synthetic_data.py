@@ -170,6 +170,11 @@ SIH_FIELDS = (
     FieldSpec("CAR_INT", "C", 2),
     FieldSpec("COMPLEX", "C", 2),
     FieldSpec("RACA_COR", "C", 2),
+    FieldSpec("MUNIC_RES", "C", 6),
+    FieldSpec("MUNIC_MOV", "C", 6),
+    FieldSpec("DIAG_PRINC", "C", 4),
+    FieldSpec("NAT_JUR", "C", 4),
+    FieldSpec("GESTAO", "C", 1),
     *(FieldSpec(name, "N", length, 2) for name, length in MONEY_COMPONENTS),
     FieldSpec("VAL_TOT", "N", 14, 2),
     FieldSpec("VAL_UTI", "N", 8, 2),
@@ -200,6 +205,11 @@ class SihRecord:
     car_int: str = "02"
     complex: str = "02"
     raca_cor: str = "03"
+    munic_res: str = "330455"
+    munic_mov: str = "330455"
+    diag_princ: str = "J189"
+    nat_jur: str = "1023"
+    gestao: str = "1"
 
     @property
     def val_tot(self) -> str:
@@ -214,7 +224,8 @@ class SihRecord:
             "2024", "01", self.n_aih, self.ident, self.nasc, self.dt_inter, self.dt_saida,
             self.cod_idade, str(self.idade), str(self.dias_perm), str(self.morte), cobranca,
             self.proc_rea, str(self.seq), self.cnes, self.sexo, self.espec, self.car_int,
-            self.complex, self.raca_cor, *money, self.val_tot, self.val_uti,
+            self.complex, self.raca_cor, self.munic_res, self.munic_mov, self.diag_princ,
+            self.nat_jur, self.gestao, *money, self.val_tot, self.val_uti,
         ]  # fmt: skip
 
 
@@ -222,7 +233,7 @@ SIH_RECORDS = (
     SihRecord("3324100000001", "1", "20240102", "20240105", "4", 40, 3, 0, "0303010010", "800.00", "200.00", 1),
     SihRecord("3324100000002", "1", "20231220", "20231228", "4", 70, 8, 1, "0415010010", "4000.00", "1000.50", 2, sexo="3", espec="01", cnes="0000002"),
     SihRecord("3324100000003", "1", "20240110", "20240111", "2", 15, 1, 0, "0303150010", "300.00", "0.00", 3),
-    SihRecord("3324100000004", "1", "20240103", "20240110", "3", 6, 7, 0, "0303150010", "600.00", "50.00", 4, sexo="3", car_int="01", raca_cor="01"),
+    SihRecord("3324100000004", "1", "20240103", "20240110", "3", 6, 7, 0, "0303150010", "600.00", "50.00", 4, sexo="3", car_int="01", raca_cor="01", munic_res="350000"),
     SihRecord("3324100000005", "1", "20240105", "20240106", "5", 2, 1, 1, "0303060010", "900.00", "100.00", 5),
     SihRecord("3324100000006", "1", "20231101", "20231130", "4", 55, 29, 0, "0415020010", "9000.00", "3000.00", 6, espec="01", complex="03",
               val_uti="166200.0"),

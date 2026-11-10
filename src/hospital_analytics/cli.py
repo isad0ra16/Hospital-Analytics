@@ -13,8 +13,10 @@ import json
 import logging
 import stat
 import sys
+from decimal import Decimal
 from pathlib import Path
 
+from hospital_analytics import powerbi
 from hospital_analytics.analysis import run_analysis
 from hospital_analytics.analysis import write_report as analysis_write
 from hospital_analytics.audit import run_audit
@@ -255,6 +257,69 @@ def cmd_analysis(args: argparse.Namespace) -> int:
     return 0
 
 
+def cmd_powerbi(args: argparse.Namespace) -> int:
+    """Export the star schema, write the summary and generated docs, validate the files."""
+    root = args.root
+    processed = args.processed or _defaults(root)["processed"]
+    out = args.output or root / "data" / "powerbi"
+    summary = powerbi.export_model(processed, out, parquet=args.parquet, reports=root / "reports")
+    powerbi.write_summary(summary, root / "reports" / "powerbi" / "export_summary.json")
+    docs = root / "docs" / "powerbi"
+    docs.mkdir(parents=True, exist_ok=True)
+    (docs / "dicionario_campos.md").write_text(powerbi.field_dictionary_markdown(), "utf-8")
+    (docs / "consultas_power_query.pq").write_text(powerbi.power_query_m(), "utf-8")
+    for name, entry in summary["tables"].items():
+        print(f"exported {name:<28} rows={entry['rows']}")
+
+    reconciliation = json.loads(
+        (root / "reports" / "indicators" / "reconciliation.json").read_text()
+    )
+    full = reconciliation["aggregates"]["base"]["full"]
+    expected = {
+        "records": full["records"],
+        "val_tot_cents": full["val_tot_cents"],
+        "deaths": full["deaths"],
+        "dias_perm_sum": full["dias_perm_sum"],
+        "age_years_count": full["age_years_count"],
+        "distinct_aih": full["records"]
+        - reconciliation["aggregates"]["repeated_aih"]["excess_records"],
+    }
+    checks = powerbi.validate_model(out, expected)
+    indicator = {r["id"]: r for r in reconciliation["indicators"]}
+    measures = powerbi.measure_values(out)
+    pairs = {
+        "registros_aih": ("records_full", 1),
+        "valor_total": ("val_tot_full", 1),
+        "valor_medio": ("val_mean_full", 1),
+        "permanencia_media": ("los_mean_full", 1),
+        "obitos": ("deaths_full", 1),
+        "mortalidade_razao": ("mortality_full", 100),
+        "idade_media_anos": ("age_mean_years_full", 1),
+        "concentracao_top10_razao": ("top10_share_full", 100),
+    }
+    q = Decimal("0.0001")
+    for measure, (indicator_id, scale) in pairs.items():
+        reference = (Decimal(indicator[indicator_id]["reproduced"]) / scale).quantize(q)
+        checks.append(
+            powerbi.ModelCheck(
+                f"measure {measure} == indicator {indicator_id}",
+                reference,
+                measures[measure].quantize(q),
+            )
+        )
+    failed = [c for c in checks if not c.passed]
+    for check in checks:
+        print(
+            f"[{'PASS' if check.passed else 'FAIL'}] {check.name}: "
+            f"expected={check.expected} observed={check.observed}"
+        )
+    print(
+        f"RESULT: {'ALL CHECKS PASSED' if not failed else f'{len(failed)} CHECKS FAILED'}"
+        f" ({len(checks)} checks)"
+    )
+    return 0 if not failed else 1
+
+
 def cmd_verify(args: argparse.Namespace) -> int:
     """Check that every file in the manifest exists and matches its SHA-256 (read-only)."""
     root = args.root
@@ -335,6 +400,12 @@ def build_parser() -> argparse.ArgumentParser:
     p = sub.add_parser("analysis", help="descriptive exploratory analyses -> reports/analysis/")
     p.add_argument("--processed", type=Path)
     p.set_defaults(func=cmd_analysis)
+
+    p = sub.add_parser("powerbi", help="export the Power BI star schema (CSV) and validate it")
+    p.add_argument("--processed", type=Path)
+    p.add_argument("--output", type=Path, help="default: data/powerbi")
+    p.add_argument("--parquet", action="store_true", help="also write Parquet files")
+    p.set_defaults(func=cmd_powerbi)
 
     p = sub.add_parser("verify", help="check every manifest file exists and matches its SHA-256")
     p.set_defaults(func=cmd_verify)

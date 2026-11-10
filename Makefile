@@ -1,4 +1,4 @@
-.PHONY: help install install-notebook test lint format check fetch-data verify convert validate processed audit indicators analysis pipeline
+.PHONY: hooks hooks-uninstall help install install-notebook test lint format check fetch-data verify convert validate processed audit indicators analysis pipeline
 
 help:  ## List available targets
 	@grep -E '^[a-zA-Z_-]+:.*?## ' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "  %-18s %s\n", $$1, $$2}'
@@ -47,3 +47,11 @@ analysis:  ## Descriptive exploratory analyses -> reports/analysis/
 	uv run hospital-analytics analysis
 
 pipeline: convert validate processed audit indicators analysis  ## Everything after fetch-data
+
+hooks:  ## Enable the versioned git hooks (scripts/git-hooks) for this clone - explicit opt-in
+	git config core.hooksPath scripts/git-hooks
+	@echo "git hooks enabled: core.hooksPath=scripts/git-hooks (undo with: make hooks-uninstall)"
+
+hooks-uninstall:  ## Disable the versioned git hooks for this clone
+	git config --unset core.hooksPath || true
+	@echo "git hooks disabled"

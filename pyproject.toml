@@ -52,3 +52,4 @@ select = ["E", "F", "W", "I", "B", "UP", "SIM"]
 [tool.ruff.lint.per-file-ignores]
 # Synthetic records are kept one per line (tabular) so columns can be compared at a glance.
 "tests/synthetic_data.py" = ["E501"]
+"tests/test_reference.py" = ["E501"]

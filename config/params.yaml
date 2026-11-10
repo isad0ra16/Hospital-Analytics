@@ -94,3 +94,40 @@ historical_reference:
   field_preservation:
     groups_with_differences: {value: 0, status: criterion_unknown,
                               note: "Groups compared were not recorded; check will be redefined."}
+
+# ---------------------------------------------------------------------------
+# Official reference sources for dimension enrichment (not integrated yet).
+# Size and SHA-256 as confirmed by the author on her own download (evidence A2);
+# they become A1 once the files are re-hashed in the execution environment.
+# key_column: expected key name, to be CONFIRMED on the real file by the diagnostic.
+# ---------------------------------------------------------------------------
+reference_sources:
+  cnes_st:
+    filename: STRJ2401.dbc
+    size_bytes: 1416490
+    sha256: 13f364d6f4e41f610717cc087d66e3ecb88ac63d834099b00b6f20f622ae7aa1
+    official_dir: ftp://ftp.datasus.gov.br/dissemin/publicos/CNES/200508_/Dados/ST/
+    competence: "2024-01"
+    uf: RJ
+    key_column: CNES
+    dimension: dim_estabelecimento.cnes
+  tab_cnes:
+    filename: TAB_CNES.zip
+    size_bytes: 127950292
+    sha256: 11c8876331f4255efa18a12daaee7ed3183db71376e57b8dc9de13196fb9b559
+    official_dir: ftp://ftp.datasus.gov.br/dissemin/publicos/CNES/200508_/Auxiliar/
+    competence: "package current at download date"
+  sigtap:
+    filename: TabelaUnificada_202401_v2402072029.zip
+    size_bytes: 2031390
+    sha256: ea520664ab2f2e5fddf0aaa2ec5b82a1861d2ac9bc75c6194b906a9b0f13a367
+    official_dir: ftp://ftp2.datasus.gov.br/pub/sistemas/tup/downloads/
+    competence: "2024-01"
+    tables:
+      tb_procedimento: {key_column: CO_PROCEDIMENTO, dimension: dim_procedimento.procedimento_cod}
+      tb_cid: {key_column: CO_CID, dimension: fato_registro_aih.diagnostico_principal_cod}
+  ibge_municipios:
+    filename: municipios_ibge.json
+    official_url: https://servicodados.ibge.gov.br/api/v1/localidades/municipios
+    competence: "API not versioned: record the query date"
+    dimension: dim_municipio_residencia.municipio_residencia_cod (6-digit prefix of the IBGE id)

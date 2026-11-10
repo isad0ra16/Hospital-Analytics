@@ -16,7 +16,7 @@ import sys
 from decimal import Decimal
 from pathlib import Path
 
-from hospital_analytics import powerbi
+from hospital_analytics import powerbi, reference_diagnose
 from hospital_analytics.analysis import run_analysis
 from hospital_analytics.analysis import write_report as analysis_write
 from hospital_analytics.audit import run_audit
@@ -320,6 +320,24 @@ def cmd_powerbi(args: argparse.Namespace) -> int:
     return 0 if not failed else 1
 
 
+def cmd_reference_diagnose(args: argparse.Namespace) -> int:
+    """Read-only diagnostic of the official reference files (no enrichment)."""
+    root = args.root
+    incoming = args.incoming or root / "data" / "reference" / "incoming"
+    report = reference_diagnose.run_diagnostic(incoming, root / "data" / "powerbi")
+    path = reference_diagnose.write_diagnostic(report, root / "reports" / "reference")
+    for name, entry in report["sources"].items():
+        integrity = entry["integrity"]
+        status = (
+            "ausente"
+            if not integrity["present"]
+            else ("OK" if integrity.get("integrity_ok") else "INTEGRIDADE DIVERGENTE")
+        )
+        print(f"{name:<16} {integrity['file']:<45} {status}")
+    print(f"written: {_key(path, root)}")
+    return 0
+
+
 def cmd_verify(args: argparse.Namespace) -> int:
     """Check that every file in the manifest exists and matches its SHA-256 (read-only)."""
     root = args.root
@@ -406,6 +424,12 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument("--output", type=Path, help="default: data/powerbi")
     p.add_argument("--parquet", action="store_true", help="also write Parquet files")
     p.set_defaults(func=cmd_powerbi)
+
+    p = sub.add_parser(
+        "reference-diagnose", help="read-only diagnostic of official reference files"
+    )
+    p.add_argument("--incoming", type=Path, help="default: data/reference/incoming")
+    p.set_defaults(func=cmd_reference_diagnose)
 
     p = sub.add_parser("verify", help="check every manifest file exists and matches its SHA-256")
     p.set_defaults(func=cmd_verify)

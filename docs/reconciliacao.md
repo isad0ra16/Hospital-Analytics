@@ -11,9 +11,9 @@ iguais com **2 casas decimais**.
 
 | # | Indicador | Base | Histórico | Reproduzido | Critério usado | Status |
 |---|---|---|---:|---:|---|---|
-| 1 | Registros | completa | 73.046 | | | ⏳ |
-| 2 | Colunas | completa | 113 | | | ⏳ |
-| 3 | Soma `VAL_TOT` | completa | R$ 125.440.636,13 | | | ⏳ |
+| 1 | Registros | completa | 73.046 | 73.046 | Linhas do Parquet bruto = registros do cabeçalho DBF | ✅ |
+| 2 | Colunas | completa | 113 | 113 | Campos do DBF | ✅ |
+| 3 | Soma `VAL_TOT` | completa | R$ 125.440.636,13 | R$ 125.440.636,13 | Soma exata em `Decimal` do texto original; 0 vazios, 0 malformados; confirmada também no DuckDB (`DECIMAL(18,2)`) | ✅ |
 | 4 | Saídas em 2023 | completa | 29.279 | | | ⏳ |
 | 5 | Saídas em 2024 | completa | 43.767 | | | ⏳ |
 | 6 | Permanência média | completa | 6,12 | | | ⏳ |
@@ -37,3 +37,13 @@ iguais com **2 casas decimais**.
 | 24 | Cirúrgicos | ? | 51,57% | | | ⏳ |
 | 25 | Clínicos | ? | 44,38% | | | ⏳ |
 | 26 | Grupos com diferenças (preservação) | — | 0 | | | ⏳ |
+
+## Observações da Fase 2
+
+- Base reproduzida a partir do `.dbc` com SHA-256 `a3f0ea9a…0d7dfc9c` e data de atualização do
+  cabeçalho DBF **2025-02-08** (ver `data/MANIFEST.json`). Não há registro de qual versão do arquivo
+  foi usada no projeto original; a coincidência exata das três referências indica que o conteúdo
+  é o mesmo nesses aspectos.
+- `DIAGSEC9` e `INFEHOSP`, citadas no histórico como sem preenchimento, estão 100% vazias na base
+  recuperada, o que é consistente com o histórico. Também estão 100% vazias: `NUM_PROC`,
+  `CPF_AUT`, `GESTOR_DT` e `DIAGSEC8` (a auditar na Fase 3).

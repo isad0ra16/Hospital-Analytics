@@ -1,4 +1,4 @@
-.PHONY: help install install-notebook test lint format check
+.PHONY: help install install-notebook test lint format check fetch-data verify convert validate
 
 help:  ## List available targets
 	@grep -E '^[a-zA-Z_-]+:.*?## ' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "  %-18s %s\n", $$1, $$2}'
@@ -21,3 +21,15 @@ format:  ## Auto-format code
 	uv run ruff check --fix .
 
 check: lint test  ## Everything that must pass before a commit
+
+convert:  ## Untreated .dbc -> Parquet conversion (source must be registered in data/MANIFEST.json)
+	uv run hospital-analytics convert
+
+validate:  ## Validate the raw Parquet against historical references and the manifest
+	uv run hospital-analytics validate
+
+fetch-data:  ## Recover the original .dbc from the GitHub Release and verify it against the manifest
+	./scripts/fetch_source.sh
+
+verify:  ## Check every file listed in data/MANIFEST.json (exists + SHA-256)
+	uv run hospital-analytics verify

@@ -44,6 +44,8 @@ iguais com **2 casas decimais**.
   cabeçalho DBF **2025-02-08** (ver `data/MANIFEST.json`). Não há registro de qual versão do arquivo
   foi usada no projeto original; a coincidência exata das três referências indica que o conteúdo
   é o mesmo nesses aspectos.
+- Encoding corrigido para CP850 (D-019): somente o texto de 23 valores de `AUD_JUST` mudou;
+  registros, colunas e `VAL_TOT` foram revalidados (Pandas e DuckDB concordam).
 - `DIAGSEC9` e `INFEHOSP`, citadas no histórico como sem preenchimento, estão 100% vazias na base
   recuperada, o que é consistente com o histórico. Também estão 100% vazias: `NUM_PROC`,
   `CPF_AUT`, `GESTOR_DT` e `DIAGSEC8` (a auditar na Fase 3).

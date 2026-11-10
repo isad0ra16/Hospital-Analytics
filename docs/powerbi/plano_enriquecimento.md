@@ -1,13 +1,14 @@
 # Plano operacional de enriquecimento — fontes oficiais de referência
 
-> **Status:** plano para aprovação (revisão 2). Nada foi integrado ao modelo. Dados originais,
+> **Status:** plano para aprovação (revisão 3 — confirmações diretas da autora em 2026-11-10). Nada foi integrado ao modelo. Dados originais,
 > camadas, fato, identificadores técnicos e testes permanecem intactos.
 
 ## Classes de evidência
 
 | Classe | Significado |
 |---|---|
-| **A — acessado diretamente** | o projeto obteve um arquivo oficial deste endereço e conferiu o SHA-256 |
+| **A1 — confirmado com integridade** | arquivo oficial obtido diretamente, com SHA-256 registrado |
+| **A2 — acesso direto pela autora** | o endereço respondeu, ou o arquivo aparece na **listagem oficial** do diretório, consultada pela autora no Windows; SHA-256 ainda não registrado (passa a A1 quando registrado) |
 | **B — corroborado por automação pública ativa** | código público que baixa deste endereço **em execução recorrente com sucesso** (commits automáticos verificados em 2026-11-10) |
 | **C — corroborado por código público** | o endereço/nome aparece no código-fonte de ferramentas públicas que usam a fonte oficial |
 | **D — indexado por busca** | página oficial encontrada por mecanismo de busca, **não aberta** por este projeto |
@@ -27,14 +28,16 @@ exterior; o bloqueio é do ambiente de execução deste projeto (revisa a hipót
 
 | Item | Evidência | Classe |
 |---|---|---|
-| Pasta de dados `ftp://ftp.datasus.gov.br/dissemin/publicos/SIHSUS/200801_/Dados/` | download do `RDRJ2401.dbc` (SHA-256 conferido) | **A** |
-| Pacote auxiliar `ftp://ftp.datasus.gov.br/dissemin/publicos/SIHSUS/200801_/Auxiliar/TAB_SIH.zip` | citado em página da SES-RJ ("Versão do Aplicativo TabWin SIHSUS") e em fórum (dadosabertos.social); descrito como atualizado mensalmente; não aparece em código | **D** |
+| Pasta de dados `ftp://ftp.datasus.gov.br/dissemin/publicos/SIHSUS/200801_/Dados/` | download do `RDRJ2401.dbc` (SHA-256 conferido) | **A1** |
+| Pasta `ftp://ftp.datasus.gov.br/dissemin/publicos/SIHSUS/200801_/Auxiliar/` | listagem oficial pela autora: `TAB_SIH.zip`, `TAB_SIH_199201-199712.zip`, `TAB_SIH_199801-200307.zip`, `TAB_SIH_200308-200712.zip` | **A2** |
+| Pacote auxiliar `…/SIHSUS/200801_/Auxiliar/TAB_SIH.zip` | presente na listagem oficial; os demais pacotes têm períodos no nome (até 2007-12), logo `TAB_SIH.zip` é o pacote **sem período**, a usar para a competência 2024-01 (a confirmar pelo conteúdo) | **A2** |
 | Página "Manuais do SIH" `http://www2.datasus.gov.br/SIHD/manuais` (Dicionário de Dados, layout da AIH Reduzida, Informes Técnicos) | resultado de busca | **D** |
 | Página "Reduzida do AIH" `http://www2.datasus.gov.br/SIHD/reduzida` | resultado de busca | **D** |
 | Nomes exatos dos documentos (PDF) | — | **E** |
 
-- **Versão:** `TAB_SIH.zip` vigente no download (registrar data e SHA-256); documentação cuja
-  vigência cubra a competência 2024-01.
+- **Versão:** `TAB_SIH.zip` (o único sem período no nome) vigente no download — registrar data e
+  SHA-256; os pacotes com período (1992–2007) **não** se aplicam a 2024-01. Documentação cuja
+  vigência cubra a competência 2024-01 (página de manuais ainda **D**).
 - **Relacionamento:** códigos do RD (`ESPEC`, `CAR_INT`, `COBRANCA`, `NAT_JUR`, `GESTAO`, `IDENT`,
   `COD_IDADE`, `MARCA_UTI`, `MUNIC_RES`/`MUNIC_MOV`, `PROC_REA`, `DIAG_PRINC`) ↔ tabelas de conversão.
 - **Uso:** confirmar/corrigir o dicionário secundário (P-001, P-009), rotular `ESPEC` 10/14/87
@@ -48,8 +51,9 @@ exterior; o bloqueio é do ambiente de execução deste projeto (revisa a hipót
 | Item | Evidência | Classe |
 |---|---|---|
 | Documentação `https://servicodados.ibge.gov.br/api/docs/localidades` | resultado de busca (página oficial) | **D** |
-| `https://servicodados.ibge.gov.br/api/v1/localidades/municipios` (todos) e `…/api/v1/localidades/estados/{UF}/municipios` | código do pacote PyPI `ibge` 0.0.5 + documentação indexada | **C** |
-| Identificador do município com 7 dígitos | conhecimento prévio | **E** (verificar no JSON) |
+| `https://servicodados.ibge.gov.br/api/v1/localidades/municipios` (todos) | resposta obtida pela autora: `municipios_ibge.json`, ≈ 2,35 MB (SHA-256 pendente); também no código do pacote `ibge` 0.0.5 | **A2** |
+| `…/api/v1/localidades/estados/{UF}/municipios` | código do pacote PyPI `ibge` 0.0.5 + documentação indexada | **C** |
+| Identificador do município com 7 dígitos | conhecimento prévio | **E** (verificar no JSON recebido) |
 
 - **Versão:** a API não é versionada por data — registrar a data da consulta. Alternativa
   versionada (DTB anual do IBGE): **E**, endereço não corroborado.
@@ -64,9 +68,10 @@ exterior; o bloqueio é do ambiente de execução deste projeto (revisa a hipót
 
 | Item | Evidência | Classe |
 |---|---|---|
-| `ftp://ftp.datasus.gov.br/dissemin/publicos/CNES/200508_/Dados/` | código do `microdatasus` e do `PySUS` | **C** |
-| Grupo `ST` = "Estabelecimentos" (nome do arquivo por grupo + UF + ano + mês) | código do `PySUS` | **C** |
-| Subpasta e nome exato do arquivo RJ 2024-01 | — | **E** (listar) |
+| `ftp://ftp.datasus.gov.br/dissemin/publicos/CNES/200508_/Dados/` | listagem oficial pela autora (também no código do `microdatasus` e do `PySUS`) | **A2** |
+| Subpasta `…/CNES/200508_/Dados/ST/` | presente na listagem oficial | **A2** |
+| `ST` = "Estabelecimentos" (arquivo por grupo + UF + ano + mês) | código do `PySUS` | **C** |
+| Nome exato do arquivo RJ 2024-01 dentro de `ST/` | — | **E** (aguarda listagem de `ST/`) |
 | `ftp://ftp.datasus.gov.br/dissemin/publicos/CNES/200508_/Auxiliar/TAB_CNES.zip` | código do `microdatasus` | **C** |
 | Extração por competência `http://cnes.datasus.gov.br/pages/estabelecimentos/extracao.jsp` | resultado de busca | **D** |
 | OpenDataSUS `https://opendatasus.saude.gov.br/dataset/cnes-cadastro-nacional-de-estabelecimentos-de-saude` | resultado de busca (indica atualização diária — provavelmente **não** é a fotografia de jan/2024) | **D** |
@@ -108,6 +113,17 @@ exterior; o bloqueio é do ambiente de execução deste projeto (revisa a hipót
   subcategoria e, na falta, categoria.
 - **Riscos:** versão "V2008" × atualizações posteriores da CID-10 — refazer a cobertura com o
   arquivo oficial; termos de uso não verificados.
+
+## Quadro de situação (revisão 3)
+
+| Fonte | Confirmado diretamente | Ainda pendente |
+|---|---|---|
+| SIH — dados | `…/SIHSUS/200801_/Dados/RDRJ2401.dbc` (**A1**) | — |
+| SIH — auxiliares TabWin | pasta `…/200801_/Auxiliar/` e `TAB_SIH.zip` na listagem (**A2**) | download + SHA-256 de `TAB_SIH.zip`; documentação da AIH Reduzida (**D**) |
+| IBGE | API `…/localidades/municipios` respondeu (**A2**) | SHA-256 e data/hora da consulta de `municipios_ibge.json`; termos de uso |
+| CNES | pasta `…/CNES/200508_/Dados/` e subpasta `ST/` (**A2**) | listagem de `ST/` → nome exato do arquivo RJ 2024-01 + SHA-256; `TAB_CNES.zip` (**C**, pasta `Auxiliar/` do CNES ainda não listada) |
+| SIGTAP | — | listagem de `ftp2…/tup/downloads/` (**B**) → nome exato `TabelaUnificada_202401_v….zip` + SHA-256 |
+| CID-10 | — | página oficial (**D**) e arquivos CSV (**C**) + SHA-256 |
 
 ## Testes de aceitação (obrigatórios antes de qualquer integração)
 

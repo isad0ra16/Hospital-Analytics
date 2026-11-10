@@ -33,7 +33,7 @@ processing:
 
 # ---------------------------------------------------------------------------
 # Historical reference values
-# Provenance: recovered from previous ChatGPT conversations; the original code
+# Provenance: recovered from records of previous conversations; the original code
 # and data were lost. These are RECONCILIATION TARGETS, not ground truth:
 # results must never be adjusted to match them.
 #

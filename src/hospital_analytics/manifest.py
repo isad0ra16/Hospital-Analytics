@@ -168,6 +168,53 @@ def record_derived(
     return entry
 
 
+def record_processed(
+    manifest: dict[str, Any],
+    key: str,
+    raw_key: str,
+    report: Any,
+    *,
+    supersede_reason: str | None = None,
+) -> dict[str, Any]:
+    """Record the processed layer, derived from a recorded raw-layer file.
+
+    The fingerprint of its original (uppercase) columns must equal the raw content fingerprint.
+    """
+    raw = manifest["derived"].get(raw_key)
+    if raw is None:
+        raise ManifestError(f"Raw layer {raw_key} is not recorded.")
+    if report.original_columns_fingerprint != raw["content_fingerprint"]:
+        raise ManifestError(f"{key}: original columns differ from the raw layer {raw_key}.")
+
+    entry = {
+        "derived_from": raw_key,
+        "step": "processed_layer (original columns untouched + derived columns)",
+        "sha256": report.sha256,
+        "size_bytes": report.size_bytes,
+        "records": report.records,
+        "original_columns": report.original_columns,
+        "derived_columns": report.derived_columns,
+        "original_columns_fingerprint": report.original_columns_fingerprint,
+        "invalid_dates": report.invalid_dates,
+        "reversibility_checked": report.reversibility_checked,
+        "reduced_precision_values": report.reduced_precision_values,
+        "tool_versions": report.tool_versions,
+        "created_at": report.created_at,
+    }
+    existing = manifest["derived"].get(key)
+    if existing is not None and _comparable(existing) == _comparable(entry):
+        return existing
+    if existing is not None:
+        if existing["sha256"] != entry["sha256"] and not supersede_reason:
+            raise ManifestError(f"{key} is already recorded with different content; give a reason.")
+        previous = {k: v for k, v in existing.items() if k != "history"}
+        previous["superseded_at"] = _now()
+        previous["superseded_reason"] = supersede_reason or "regenerated"
+        entry["history"] = [*existing.get("history", []), previous]
+    manifest["derived"][key] = entry
+    return entry
+
+
 def _comparable(entry: dict[str, Any]) -> dict[str, Any]:
     return {k: v for k, v in entry.items() if k not in {"created_at", "history"}}
 

@@ -29,7 +29,7 @@ consistência e de higiene do repositório, documentação base.
 | Testes e lint | 108 testes ✅ · ruff ✅ |
 | Recuperação em clone limpo | `fetch-data → convert → validate` ✅, sem alterações no repositório |
 
-Commits: `c66f8fb`, `bfded14`, `f5a9987`, `92e055b`, `5c9817c`, `273e474`.
+Commits: `c66f8fb`, `bfded14`, `f5a9987`, `92e055b`, `5c9817c`, `273e474`. *(hashes do branch original; equivalentes no branch `-v2` na tabela de 2026-11-10 — histórico sem linhas automáticas)*
 
 ## 2026-11-10 — Fase 3: auditoria e camada tratada ✅ implementada · Fase 4: indicadores ✅ implementada
 
@@ -70,3 +70,35 @@ arredondamento; chaves `_cents` com valores em reais; pirâmide etária com eixo
 da curva de Lorenz inconsistente com o indicador (ambos vistos ao inspecionar os gráficos).
 
 **Testes:** 150 ✅ · ruff ✅. Pipeline completo reproduzido em clone limpo sem alterações.
+
+## 2026-11-10 — Histórico sem linhas automáticas (branch `work/hospital-analytics-reconstruction-v2`)
+
+Diretriz da autora: commits apenas com a identidade dela, sem coautoria automática nem referências
+de sessão. Os 13 commits do branch de desenvolvimento foram **recriados** sobre o mesmo `main`
+(`d50f9ad`) com `git commit-tree`: **mesma árvore de arquivos, mesmo autor/committer e mesmas datas**;
+das mensagens foram removidas somente as linhas automáticas. Verificado par a par (13/13) e pela
+igualdade da árvore final. Sem *force push*; `main`, tag `data-rdrj2401`, Release e o branch original
+não foram alterados.
+
+| Original | Recriado (v2) | Commit |
+|---|---|---|
+| `c66f8fb` | `9ead2e6` | feat: add untreated .dbc to Parquet raw-layer pipeline with integrity checks |
+| `bfded14` | `571a1de` | data: register RDRJ2401.dbc and its raw Parquet conversion in the manifest |
+| `f5a9987` | `d88247c` | docs: document raw data pipeline, recovery strategy and Phase 2 decisions |
+| `92e055b` | `87aa0c3` | fix: keep manifest unchanged when regenerating identical derived files |
+| `5c9817c` | `4b854a4` | fix: decode DBF text with the code page declared in its header (CP850) |
+| `273e474` | `6638d93` | data: regenerate raw Parquet with CP850 and document decision D-019 |
+| `16f4786` | `2fd77d8` | docs: mark Phase 2 as technically complete and start execution log |
+| `36b6746` | `ea63797` | feat: add processed layer, data audit and historical indicators with SQL |
+| `aa7a044` | `7db4c95` | data: record processed layer and generate audit and reconciliation reports |
+| `745cbcc` | `d7e5117` | docs: document data quality, indicators, architecture and decisions D-020 to D-027 |
+| `b989edb` | `76c7cee` | feat: add descriptive exploratory analyses with versioned SQL and charts |
+| `4e282aa` | `dc11265` | data: generate exploratory analysis report and figures |
+| `4a34a3a` | `40695a5` | docs: rewrite README for portfolio and document exploratory analyses |
+
+Commits adicionais no v2: proveniência dos indicadores em termos neutros ("registros de conversas
+anteriores"); hook `commit-msg` versionado (`scripts/git-hooks/`, ativação explícita com `make hooks`)
+e convenções em `CONTRIBUTING.md`.
+
+Pendente (decisão da autora): os 3 commits do `main` (`c1dd436`, `99b96c9`, `d50f9ad`) ainda contêm as
+linhas automáticas; o branch original segue preservado até a verificação do v2.

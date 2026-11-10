@@ -12,6 +12,7 @@ dependencies = [
     "pyreaddbc>=2.0.4,<3",   # .dbc -> .dbf decompression (DATASUS "blast" format)
     "dbfread>=2.0.7,<3",     # .dbf reader
     "pyyaml>=6.0",
+    "matplotlib>=3.9",   # static charts for reports
 ]
 
 [project.scripts]

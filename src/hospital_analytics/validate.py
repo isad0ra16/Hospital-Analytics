@@ -151,4 +151,12 @@ def validate_raw_parquet(
             derived_entry["content_fingerprint"],
             parquet_fingerprint(parquet_path).hexdigest(),
         )
+        if "raw_bytes_fingerprint" in derived_entry:
+            report.add(
+                "raw bytes fingerprint == manifest (original bytes preserved)",
+                derived_entry["raw_bytes_fingerprint"],
+                parquet_fingerprint(
+                    parquet_path, encode_with=derived_entry["encoding"]
+                ).hexdigest(),
+            )
     return report

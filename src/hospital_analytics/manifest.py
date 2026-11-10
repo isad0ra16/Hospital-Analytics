@@ -107,20 +107,23 @@ def register_source(
 
 
 def record_derived(
-    manifest: dict[str, Any], key: str, source_key: str, report: ConversionReport
+    manifest: dict[str, Any],
+    key: str,
+    source_key: str,
+    report: ConversionReport,
+    *,
+    supersede_reason: str | None = None,
 ) -> dict[str, Any]:
-    """Record a file derived from a registered source."""
+    """Record a file derived from a registered source.
+
+    Regenerating identical output changes nothing. Recording different content for an
+    existing key requires ``supersede_reason``; the previous entry is kept in ``history``.
+    """
     source = manifest["sources"].get(source_key)
     if source is None:
         raise ManifestError(f"Source {source_key} is not registered.")
     if source["sha256"] != report.source_sha256:
         raise ManifestError(f"{key} was produced from a file that does not match {source_key}.")
-
-    existing = manifest["derived"].get(key)
-    if existing is not None and existing["content_fingerprint"] != report.content_fingerprint:
-        raise ManifestError(
-            f"{key} is already recorded with different content; investigate before replacing."
-        )
 
     entry = {
         "derived_from": source_key,
@@ -131,6 +134,7 @@ def record_derived(
         "records": report.records,
         "columns": report.columns,
         "content_fingerprint": report.content_fingerprint,
+        "raw_bytes_fingerprint": report.raw_bytes_fingerprint,
         "encoding": report.encoding,
         "intermediate_dbf": {
             "sha256": report.dbf_sha256,
@@ -138,19 +142,34 @@ def record_derived(
             "version": report.dbf_version,
             "last_update": report.dbf_last_update,
             "language_driver": report.dbf_language_driver,
+            "declared_encoding": report.dbf_declared_encoding,
             "header_records": report.dbf_header_records,
         },
         "tool_versions": report.tool_versions,
         "created_at": report.created_at,
     }
-    if existing is not None and _without_timestamp(existing) == _without_timestamp(entry):
+
+    existing = manifest["derived"].get(key)
+    if existing is None:
+        manifest["derived"][key] = entry
+        return entry
+    if _comparable(existing) == _comparable(entry):
         return existing  # idempotent: regenerating identical output changes nothing
+    if existing["content_fingerprint"] != entry["content_fingerprint"] and not supersede_reason:
+        raise ManifestError(
+            f"{key} is already recorded with different content; investigate, then record it "
+            "again with an explicit supersede reason."
+        )
+    previous = {k: v for k, v in existing.items() if k != "history"}
+    previous["superseded_at"] = _now()
+    previous["superseded_reason"] = supersede_reason or "regenerated with identical content"
+    entry["history"] = [*existing.get("history", []), previous]
     manifest["derived"][key] = entry
     return entry
 
 
-def _without_timestamp(entry: dict[str, Any]) -> dict[str, Any]:
-    return {k: v for k, v in entry.items() if k != "created_at"}
+def _comparable(entry: dict[str, Any]) -> dict[str, Any]:
+    return {k: v for k, v in entry.items() if k not in {"created_at", "history"}}
 
 
 def verify_file(entry: dict[str, Any], file_path: Path) -> tuple[bool, str]:

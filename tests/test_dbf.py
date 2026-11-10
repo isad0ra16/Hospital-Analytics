@@ -4,7 +4,14 @@ import pytest
 from synthetic_data import SYNTHETIC_FIELDS, FieldSpec, build_dbf, write
 
 from hospital_analytics.dbc import DbcError
-from hospital_analytics.dbf import DbfError, decode_value, inspect_dbf, iter_raw_rows
+from hospital_analytics.dbf import (
+    DbfError,
+    declared_encoding,
+    decode_value,
+    inspect_dbf,
+    iter_raw_rows,
+    strip_padding,
+)
 
 
 def test_structure_and_counts(tmp_path, dbf_bytes, rows):
@@ -21,12 +28,38 @@ def test_values_are_preserved_as_text(tmp_path, dbf_bytes, rows):
     assert decoded == rows  # leading zeros kept, padding removed, blanks are ""
 
 
-def test_latin1_bytes_are_decoded_reversibly(tmp_path):
-    fields = [FieldSpec("NOME", "C", 10)]
-    path = write(tmp_path / "t.dbf", build_dbf(fields, [["SÃO JOÃO"]]))
+@pytest.mark.parametrize("encoding", ["cp850", "latin-1"])
+def test_text_is_decoded_reversibly(tmp_path, encoding):
+    fields = [FieldSpec("NOME", "C", 12)]
+    path = write(tmp_path / "t.dbf", build_dbf(fields, [["MÉDICO ÁREA"]], encoding=encoding))
     (raw,) = next(iter_raw_rows(path))
-    assert decode_value(raw) == "SÃO JOÃO"
-    assert decode_value(raw).encode("latin-1") == raw.rstrip(b" ")
+    assert decode_value(raw, encoding) == "MÉDICO ÁREA"
+    assert decode_value(raw, encoding).encode(encoding) == strip_padding(raw)
+
+
+def test_cp850_bytes_seen_in_aud_just():
+    """Bytes 0x90 and 0xA0 (found in the real AUD_JUST field) are 'É' and 'á' in CP850."""
+    assert decode_value(b"\x90 \xa0 ") == "É á"
+    assert b"\x90\xa0".decode("latin-1") != "Éá"  # the previous, wrong interpretation
+
+
+@pytest.mark.parametrize("encoding", ["cp850", "latin-1"])
+def test_every_byte_roundtrips(encoding):
+    """No byte can be lost: all 256 values decode and encode back unchanged."""
+    every_byte = bytes(range(256))
+    assert every_byte.decode(encoding).encode(encoding) == every_byte
+
+
+def test_space_is_the_only_byte_decoding_to_space():
+    """Guarantees decode-then-strip == strip-then-decode, so text maps back to raw bytes."""
+    for encoding in ("cp850", "latin-1"):
+        assert [b for b in range(256) if bytes([b]).decode(encoding) == " "] == [0x20]
+
+
+@pytest.mark.parametrize(("driver", "expected"), [(0x02, "cp850"), (0x03, "cp1252"), (0x00, None)])
+def test_declared_encoding(tmp_path, rows, driver, expected):
+    path = write(tmp_path / "t.dbf", build_dbf(SYNTHETIC_FIELDS, rows, language_driver=driver))
+    assert declared_encoding(inspect_dbf(path).language_driver) == expected
 
 
 def test_deleted_records_are_counted(tmp_path, rows):

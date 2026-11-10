@@ -8,6 +8,8 @@ Two different questions need two different tools:
   same order?". Parquet files embed writer metadata (library version, compression), so two
   conversions of identical data can have different file hashes; the content fingerprint
   stays the same. It is used to prove that no value was lost between the DBF and Parquet.
+  Values may be text (hashed as UTF-8) or raw bytes (hashed as they are): a fingerprint over
+  raw bytes does not depend on the text encoding used to decode them.
 """
 
 from __future__ import annotations
@@ -41,13 +43,13 @@ class ContentFingerprint:
         self.rows = 0
         self._update_values(column_names)
 
-    def _update_values(self, values: Iterable[str]) -> None:
+    def _update_values(self, values: Iterable[str | bytes]) -> None:
         for value in values:
-            encoded = value.encode("utf-8")
+            encoded = value if isinstance(value, bytes) else value.encode("utf-8")
             self._digest.update(len(encoded).to_bytes(4, "little"))
             self._digest.update(encoded)
 
-    def update_row(self, values: Sequence[str]) -> None:
+    def update_row(self, values: Sequence[str | bytes]) -> None:
         if len(values) != self._n_columns:
             raise ValueError(f"Row has {len(values)} values; expected {self._n_columns}.")
         self._update_values(values)

@@ -89,3 +89,29 @@ def test_record_derived_is_idempotent_for_identical_output(tmp_path, dbc_file):
     again.created_at = "2099-01-01T00:00:00+00:00"
     assert record_derived(manifest, "x", "k", again) == first_copy
     assert manifest["derived"]["x"]["created_at"] == first_copy["created_at"]
+
+
+def test_different_content_requires_supersede_reason_and_keeps_history(tmp_path):
+    from synthetic_data import FieldSpec, build_dbc, build_dbf
+
+    dbf = build_dbf([FieldSpec("T", "C", 4)], [["É"]], encoding="cp850")
+    src = write(tmp_path / "s.dbc", build_dbc(dbf))
+    manifest = empty_manifest()
+    register_source(manifest, "k", src, **SOURCE_INFO)
+    old = record_derived(
+        manifest, "x", "k", convert_dbc_to_parquet(src, tmp_path / "a.pq", encoding="latin-1")
+    )
+    new_report = convert_dbc_to_parquet(src, tmp_path / "b.pq", encoding="cp850")
+
+    with pytest.raises(ManifestError, match="supersede"):
+        record_derived(manifest, "x", "k", new_report)
+    assert manifest["derived"]["x"] is old  # unchanged after refusal
+
+    new = record_derived(manifest, "x", "k", new_report, supersede_reason="adopt CP850")
+    assert new["encoding"] == "cp850"
+    assert new["raw_bytes_fingerprint"] == old["raw_bytes_fingerprint"]
+    (previous,) = new["history"]
+    assert previous["content_fingerprint"] == old["content_fingerprint"]
+    assert previous["superseded_reason"] == "adopt CP850"
+    # identical regeneration after a supersede is still a no-op (history kept)
+    assert record_derived(manifest, "x", "k", new_report) is new

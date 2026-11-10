@@ -1,6 +1,7 @@
 # Plano operacional de enriquecimento — fontes oficiais de referência
 
-> **Status:** plano para aprovação (revisão 3 — confirmações diretas da autora em 2026-11-10). Nada foi integrado ao modelo. Dados originais,
+> **Status:** plano para aprovação (revisão 4 — arquivos obtidos pela autora; leitores e diagnóstico
+> preparados, **sem integração**). Nada foi integrado ao modelo. Dados originais,
 > camadas, fato, identificadores técnicos e testes permanecem intactos.
 
 ## Classes de evidência
@@ -114,7 +115,55 @@ exterior; o bloqueio é do ambiente de execução deste projeto (revisa a hipót
 - **Riscos:** versão "V2008" × atualizações posteriores da CID-10 — refazer a cobertura com o
   arquivo oficial; termos de uso não verificados.
 
-## Quadro de situação (revisão 3)
+## Arquivos obtidos pela autora (revisão 4)
+
+Baixados das fontes oficiais pela autora no Windows; tamanho e SHA-256 informados por ela; ZIPs
+aprovados no teste de CRC. **Ainda não estão no ambiente de execução** (verificado: ausentes do
+sistema de arquivos, das Releases e dos branches). Classe **A2** até serem conferidos aqui pelo
+diagnóstico; depois, **A1**. Declarados em `config/params.yaml` → `reference_sources`.
+
+| Arquivo | Origem oficial | Competência | Tamanho (bytes) | SHA-256 |
+|---|---|---|---:|---|
+| `STRJ2401.dbc` | `…/CNES/200508_/Dados/ST/` | 2024-01, RJ | 1.416.490 | `13f364d6f4e41f610717cc087d66e3ecb88ac63d834099b00b6f20f622ae7aa1` |
+| `TAB_CNES.zip` | `…/CNES/200508_/Auxiliar/` | pacote vigente no download | 127.950.292 | `11c8876331f4255efa18a12daaee7ed3183db71376e57b8dc9de13196fb9b559` |
+| `TabelaUnificada_202401_v2402072029.zip` | `ftp://ftp2.datasus.gov.br/pub/sistemas/tup/downloads/` | 2024-01 | 2.031.390 | `ea520664ab2f2e5fddf0aaa2ec5b82a1861d2ac9bc75c6194b906a9b0f13a367` |
+| `municipios_ibge.json` | API IBGE `…/localidades/municipios` | data da consulta (a registrar) | ≈ 2,35 MB | **pendente** |
+| `TAB_SIH.zip` | `…/SIHSUS/200801_/Auxiliar/` | pacote vigente no download | pendente | **pendente** |
+
+Conteúdo informado pela autora: o SIGTAP contém `tb_procedimento.txt`/`tb_procedimento_layout.txt`
+e `tb_cid.txt`/`tb_cid_layout.txt` (posições fixas conforme os layouts); o `TAB_CNES.zip` contém
+`Estabelecimento.def` e tabelas auxiliares.
+
+**Consequência para a CID-10:** o `tb_cid` do SIGTAP é tabela **oficial da mesma competência
+(2024-01)**. Ele pode fornecer as descrições de diagnóstico, sem depender da publicação "V2008"
+(a confirmar pela cobertura dos 3.759 códigos do RD).
+
+## Preparação técnica (pronta, não executada sobre os arquivos reais)
+
+| Componente | Função |
+|---|---|
+| `reference.parse_layout` / `read_sigtap_table` | lê o layout publicado **dentro do próprio ZIP** e recorta cada linha pelas posições oficiais; exige cabeçalho `Coluna,Tamanho,Inicio,Fim,Tipo`, tamanho = fim − início + 1, colunas contíguas e largura exata em todas as linhas; tudo como texto; só codificações de 1 byte (posição em bytes = posição em caracteres). Formato do layout corroborado por leitor público (`btran12/SIGTAP`); codificação Latin-1 **a confirmar** no arquivo real |
+| leitura do `STRJ2401.dbc` | mesmo pipeline validado do RD (`convert_dbc_to_parquet`): tamanho do DBF, contagem do cabeçalho, encoding declarado — em diretório temporário, sem tocar `data/` |
+| `reference.read_ibge_municipios` | `id` como texto, nome e UF a partir da hierarquia; falha se faltar a UF |
+| `reference.key_report` / `coverage` | unicidade, vazios, comprimentos e não dígitos da chave; cobertura **a partir da dimensão**, com códigos não encontrados e **ambíguos** (chave repetida na referência = risco de multiplicação) |
+| `reference.enrichment_guard` | reprova qualquer enriquecimento que mude nº de linhas, conjunto de chaves, duplique chaves ou altere colunas originais |
+| `reference.fact_unchanged` | o fato tem de continuar byte a byte igual ao registrado em `reports/powerbi/export_summary.json` |
+| `hospital-analytics reference-diagnose` | confere tamanho e SHA-256 **antes** de ler; arquivo divergente não é lido; gera `reports/reference/diagnostico_referencias.json` (estrutura, colunas reais, chaves, cobertura) |
+| `tests/test_reference.py` | 22 testes com dados sintéticos (layout inconsistente, largura errada, chave duplicada, hash divergente, guarda de cardinalidade, fato inalterado) |
+
+Nomes de coluna-chave esperados (`CNES`, `CO_PROCEDIMENTO`, `CO_CID`) são **hipóteses** em
+`reference_sources`; o diagnóstico lista as colunas reais e marca a hipótese como não encontrada,
+se for o caso.
+
+## Transferência para o ambiente de execução
+
+Mesmo método do `.dbc` do RD: uma **Release criada pela autora** (ex.: tag `ref-2024-01`) com os
+arquivos como *assets*; o diagnóstico baixa pela API e confere os hashes. Para o `TAB_CNES.zip`
+(128 MB), primeiro identificar **qual arquivo interno** contém os nomes dos estabelecimentos —
+pode bastar transferir esse arquivo e o `Estabelecimento.def` (registrando o SHA-256 do ZIP de
+origem e do arquivo extraído).
+
+## Quadro de situação (revisão 3 — mantido como histórico)
 
 | Fonte | Confirmado diretamente | Ainda pendente |
 |---|---|---|

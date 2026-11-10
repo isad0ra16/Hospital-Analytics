@@ -77,3 +77,15 @@ def test_verify_file_detects_modification(tmp_path, dbc_file):
     assert verify_file(entry, dbc_file)[0]
     tampered = write(tmp_path / "t.dbc", dbc_file.read_bytes()[:-1] + b"\x00")
     assert not verify_file(entry, tampered)[0]
+
+
+def test_record_derived_is_idempotent_for_identical_output(tmp_path, dbc_file):
+    """Regenerating the same Parquet must not change the manifest (no noisy git diffs)."""
+    manifest = empty_manifest()
+    register_source(manifest, "k", dbc_file, **SOURCE_INFO)
+    first = record_derived(manifest, "x", "k", convert_dbc_to_parquet(dbc_file, tmp_path / "a.pq"))
+    first_copy = dict(first)
+    again = convert_dbc_to_parquet(dbc_file, tmp_path / "b.pq")
+    again.created_at = "2099-01-01T00:00:00+00:00"
+    assert record_derived(manifest, "x", "k", again) == first_copy
+    assert manifest["derived"]["x"]["created_at"] == first_copy["created_at"]

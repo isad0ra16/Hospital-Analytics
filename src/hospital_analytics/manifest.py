@@ -143,8 +143,14 @@ def record_derived(
         "tool_versions": report.tool_versions,
         "created_at": report.created_at,
     }
+    if existing is not None and _without_timestamp(existing) == _without_timestamp(entry):
+        return existing  # idempotent: regenerating identical output changes nothing
     manifest["derived"][key] = entry
     return entry
+
+
+def _without_timestamp(entry: dict[str, Any]) -> dict[str, Any]:
+    return {k: v for k, v in entry.items() if k != "created_at"}
 
 
 def verify_file(entry: dict[str, Any], file_path: Path) -> tuple[bool, str]:

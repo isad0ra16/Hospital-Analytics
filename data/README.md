@@ -9,5 +9,14 @@ oficial do DATASUS e regenerados pelo pipeline.
 | `raw/` | `RDRJ2401.dbc` oficial e sua conversão direta para Parquet | Imutável após gravado |
 | `processed/` | Versões tipadas e tratadas (colunas derivadas) | Regenerável a partir de `raw/` |
 
-`MANIFEST.json` (Fase 2) registrará, para cada arquivo bruto: URL de origem, data do download,
-tamanho e SHA-256 — permitindo detectar se o DATASUS republicou o arquivo.
+`MANIFEST.json` (versionado) registra, para cada arquivo: origem oficial, cópia arquivada (Release
+do GitHub), data do download, tamanho, SHA-256, versão dos dados e, para derivados, ferramentas e
+impressão digital do conteúdo. Detecta republicações do DATASUS e qualquer alteração local.
+
+| Arquivo | Papel |
+|---|---|
+| `raw/RDRJ2401.dbc` | Original do DATASUS (somente leitura) |
+| `raw/RDRJ2401.parquet` | Conversão direta, sem tratamento: 113 colunas de texto |
+
+Recuperação do zero: `make fetch-data && make convert && make validate`
+(ver [`docs/recuperacao_dados.md`](../docs/recuperacao_dados.md)).

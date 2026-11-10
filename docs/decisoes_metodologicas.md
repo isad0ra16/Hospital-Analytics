@@ -149,17 +149,82 @@ está no dado de origem). Caracteres de controle na base: 13 → 0.
 anterior foi mantida em `history` no manifesto (substituição explícita com motivo, via
 `convert --supersede`). Registros, colunas e `VAL_TOT` inalterados.
 
+## D-020 — Dicionário por fonte secundária, com status explícito
+**Status:** Adotada (Fase 3)
+**Contexto:** a fonte primária (Informe Técnico SIH/SUS, pasta `Doc` do FTP do DATASUS) não é
+alcançável deste ambiente (D-011).
+**Alternativas:** (a) aguardar a fonte primária — bloquearia a Fase 3; (b) usar conhecimento prévio
+sem fonte — viola "não inventar interpretações"; (c) **fonte secundária pública e citável**
+(`microdatasus`, que decodifica o SIH a partir da documentação oficial), corroborada pelos dados.
+**Decisão:** (c). Cada interpretação em `dictionary.py` declara fonte e status (`secondary` ou
+`prior_knowledge`); nada é rotulado como confirmado pela fonte primária.
+**Corroboração nos dados:** `IDENT` só 1 e 5 (contagens históricas); `MORTE`=1 ⇔ `COBRANCA` 4x;
+`COD_IDADE`=5 com `IDADE` 0–23.
+**Consequência:** pendência P-009 (confirmar na fonte primária).
+
+## D-021 — Camada tratada: originais intactos + derivadas em minúsculas
+**Status:** Adotada (Fase 3)
+**Decisão:** `sih_rj_2024_01_tratado.parquet` contém os 113 campos originais (arrays Arrow copiados
+sem alteração) e 50 colunas derivadas. A impressão digital das colunas originais deve ser idêntica à
+da camada bruta (verificado e registrado no manifesto). Conversões de formato (centavos, inteiros,
+datas) são verificadas como reversíveis linha a linha; interpretações de códigos ficam em colunas
+próprias, com status da fonte.
+**Alternativa descartada:** substituir os campos por versões tipadas — perderia a rastreabilidade.
+
+## D-022 — Precisão reduzida pela largura do campo
+**Status:** Adotada (Fase 3)
+**Contexto:** `VAL_UTI` (`N8.2`) contém `166200.0`: `166200.00` não cabe em 8 caracteres.
+**Decisão:** aceitar menos casas decimais **somente** quando a forma completa excede a largura e
+difere apenas por zeros finais; ler o valor como escrito (16.620.000 centavos); contar no manifesto.
+Qualquer outro formato interrompe o build.
+**Consequência:** uma eventual segunda casa decimal pode ter sido perdida na origem (≤ R$ 0,09);
+não afeta `VAL_TOT`.
+
+## D-023 — Nomes derivados distintos ignorando maiúsculas
+**Status:** Adotada (Fase 3)
+**Contexto:** a primeira versão usava `dt_inter`; o DuckDB resolve nomes sem distinguir caixa e
+leu a coluna original `DT_INTER` (texto) — defeito encontrado ao executar a auditoria.
+**Decisão:** datas derivadas renomeadas (`admission_date`, `discharge_date`, `birth_date`); o build
+recusa qualquer colisão de nomes ignorando caixa (teste dedicado).
+
+## D-024 — Indicadores: duas engines, agregados exatos e status por regra
+**Status:** Adotada (Fase 4)
+**Decisão:** Pandas e DuckDB calculam os mesmos agregados inteiros; médias/percentuais em `Decimal`,
+arredondamento half-up na precisão histórica; status definido por regra (`indicators.status_for`),
+nunca escolhido manualmente. Valores históricos lidos somente de `config/params.yaml`.
+
+## D-025 — Idade: indicador histórico mantido, corrigido publicado ao lado
+**Status:** Adotada (Fase 4)
+**Contexto:** 43,96 só é reproduzido ignorando a unidade `COD_IDADE` (critério incorreto).
+**Decisão:** publicar ambos: "critério histórico" (para reconciliação) e "em anos — corrigida"
+(43,85), com aviso para usar o corrigido em conclusões. O histórico não é alterado nem escondido.
+
+## D-026 — Relatórios determinísticos e sem valores sensíveis
+**Status:** Adotada (Fase 3)
+**Decisão:** relatórios gerados (`reports/`) não têm carimbo de hora (mesmos dados + mesmo código =
+arquivos idênticos; a proveniência vem do git) e nunca contêm valores de colunas identificadoras
+ou de texto livre (`N_AIH`, `CEP`, `NASC`, `CPF_AUT`, `GESTOR_CPF`, `AUD_JUST`, `SIS_JUST`,
+`INSC_PN`) — apenas estatísticas agregadas. Testes verificam ambas as propriedades.
+
+## D-027 — Nomenclatura dos tipos de AIH
+**Status:** Adotada (Fase 4)
+**Decisão:** documentação e relatórios usam "AIH tipo 1 (principal)" e "AIH tipo 5 (longa
+permanência)"; o rótulo histórico "continuidade" é citado apenas como referência histórica.
+
 ---
 
 ## Decisões pendentes
 
-| ID | Tema | Depende de |
+| ID | Tema | Situação |
 |---|---|---|
-| P-001 | Interpretação de `IDENT`, `COD_IDADE`, `DIAS_PERM`, `MORTE`, `CAR_INT` | Documentação oficial (início da Fase 3) |
-| P-002 | Campo de permanência usado nos indicadores | P-001 + testes na Fase 4 |
-| P-003 | Conversão de idade (`COD_IDADE`) | P-001 + testes na Fase 4 |
-| P-004 | Critério de concentração de gastos (top 10%) | Fase 4 |
-| P-005 | Campo de classificação clínico/cirúrgico | Fase 4 |
-| P-006 | Papel de cada arquivo Parquet. **Parcial:** `data/raw/RDRJ2401.parquet` = conversão direta sem tratamento (D-012). Pendentes: `processed/sih_rj_2024_01*.parquet` | Fase 3 |
+| P-001 | Interpretação de `IDENT`, `COD_IDADE`, `DIAS_PERM`, `MORTE`, `CAR_INT` | **Parcial:** fonte secundária + corroboração nos dados (D-020); confirmação primária em P-009 |
+| ~~P-002~~ | Campo de permanência | **Resolvida:** `DIAS_PERM` (reproduz os 3 valores) |
+| ~~P-003~~ | Conversão de idade | **Resolvida:** histórico ignora `COD_IDADE`; corrigido publicado (D-025) |
+| P-004 | Critério da concentração top 10% (58,20%) | **Aberta:** não reproduzida; variantes documentadas em `indicadores.md` |
+| ~~P-005~~ | Classificação clínico/cirúrgico | **Resolvida:** participação no `VAL_TOT` por grupo SIGTAP, AIH tipo 1 |
+| ~~P-006~~ | Papel dos arquivos Parquet | **Resolvida:** `raw/RDRJ2401.parquet` (bruto) e `processed/sih_rj_2024_01_tratado.parquet` (D-021). O intermediário histórico `sih_rj_2024_01.parquet` não foi reconstruído (função desconhecida; não necessário) |
 | P-007 | Licença do projeto | Antes da Fase 6 |
-| ~~P-008~~ | Encoding — **resolvida pela D-019** | — |
+| ~~P-008~~ | Encoding | **Resolvida pela D-019** |
+| P-009 | Confirmar o dicionário na fonte primária (Informe Técnico SIH/SUS) | **Bloqueada** neste ambiente: requer download pela autora |
+| P-010 | Códigos de `ESPEC` 10, 14 e 87 (364 registros) | Aberta: ausentes da fonte secundária |
+| P-011 | Grupos SIGTAP 02–05 (rótulos) | Conhecimento prévio; confirmar na Tabela SIGTAP |

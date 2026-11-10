@@ -1,0 +1,128 @@
+// =============================================================================
+// Hospital Analytics — medidas DAX (tabela de medidas: _Medidas)
+// Modelo: fato_registro_aih (1 linha = 1 REGISTRO de AIH) + dimensões (ver modelo.md).
+//
+// Conceitos (não confundir):
+//   Registro de AIH  = 1 linha do arquivo RD do SIH/SUS (unidade de contagem padrão).
+//   AIH distinta     = número de AIH distinto (aih_id). Uma AIH pode ter vários registros
+//                      (ex.: longa permanência apresentada em períodos sucessivos).
+//   Internação       = episódio de cuidado. NÃO é identificável com segurança nesta base:
+//                      não existe medida de "internações".
+//   Paciente         = pessoa. NÃO há identificador de paciente: não existe medida de pacientes.
+//
+// Valores de referência validados no pipeline (base completa, competência 2024-01):
+//   Registros 73.046 · Valor R$ 125.440.636,13 · Valor médio R$ 1.717,28 · Permanência 6,12 dias
+//   Óbitos 4.664 · Mortalidade 6,39% · Idade média 43,85 anos · Top 10% do valor 57,74%
+// =============================================================================
+
+
+// ---- Contagens ---------------------------------------------------------------
+
+// Formato: número inteiro. Denominador: —. Unidade: registro de AIH.
+Registros de AIH =
+COUNTROWS ( fato_registro_aih )
+
+// Formato: número inteiro. Conta números de AIH distintos (pseudônimo aih_id).
+// Limitação: AIH distinta não é paciente nem internação.
+AIHs distintas =
+DISTINCTCOUNT ( fato_registro_aih[aih_id] )
+
+// Formato: número inteiro. Registros cujo número de AIH aparece em mais de um registro.
+// Nada foi removido: são sinalizados para a página de qualidade.
+Registros de AIH repetida =
+CALCULATE ( [Registros de AIH], fato_registro_aih[aih_repetida] = 1 )
+
+// Formato: número inteiro. Diferença entre registros e AIHs distintas (base completa: 56).
+Registros excedentes de AIH =
+[Registros de AIH] - [AIHs distintas]
+
+// Formato: número inteiro. AIH tipo 5 (longa permanência, fonte secundária).
+Registros de longa permanência =
+CALCULATE ( [Registros de AIH], dim_tipo_aih[tipo_aih_cod] = "5" )
+
+// Formato: número inteiro. Contagem pelo MÊS DE INTERNAÇÃO (relação inativa com dim_mes).
+// Use em visuais por mês de internação; o padrão do modelo é o mês de saída.
+Registros por mês de internação =
+CALCULATE (
+    [Registros de AIH],
+    USERELATIONSHIP ( fato_registro_aih[mes_internacao], dim_mes[mes] )
+)
+
+
+// ---- Valores financeiros -----------------------------------------------------
+
+// Formato: moeda (R$), 2 casas. Soma de VAL_TOT.
+Valor total =
+SUM ( fato_registro_aih[valor_total] )
+
+// Formato: moeda (R$), 2 casas. Denominador: registros de AIH (não pacientes).
+Valor médio por registro =
+DIVIDE ( [Valor total], [Registros de AIH] )
+
+// Formato: número inteiro. Registros com VAL_TOT = 0 (na base: 241, todos com ESPEC 87).
+Registros com valor zero =
+CALCULATE ( [Registros de AIH], fato_registro_aih[valor_total_centavos] = 0 )
+
+// Formato: porcentagem, 2 casas. Participação no valor do contexto selecionado.
+% do valor =
+DIVIDE ( [Valor total], CALCULATE ( [Valor total], ALLSELECTED () ) )
+
+// Formato: porcentagem, 2 casas. Participação no VAL_TOT dos k = INT(0,1·n) registros de maior
+// valor do contexto atual. O 2º critério de ordenação (registro_id) desempata o corte para que
+// TOPN devolva exatamente k registros (sem ele, TOPN inclui todos os empatados).
+// Base completa: 57,74%. A referência histórica de 58,20% NÃO foi reproduzida — não usar.
+Concentração do valor - top 10% =
+VAR n = [Registros de AIH]
+VAR k = INT ( n * 0.1 )
+VAR topk =
+    TOPN (
+        k,
+        fato_registro_aih,
+        fato_registro_aih[valor_total_centavos], DESC,
+        fato_registro_aih[registro_id], ASC
+    )
+RETURN
+    IF ( k > 0, DIVIDE ( SUMX ( topk, fato_registro_aih[valor_total] ), [Valor total] ) )
+
+
+// ---- Permanência -------------------------------------------------------------
+
+// Formato: decimal, 2 casas. Média de DIAS_PERM por registro.
+// ATENÇÃO: na AIH tipo 5 (longa permanência) DIAS_PERM mede o período coberto por aquele
+// registro (máx. 31 dias), não a internação inteira. Analise por tipo de AIH.
+// Base completa 6,12 · tipo 1: 5,93 · tipo 5: 27,90.
+Permanência média (dias) =
+AVERAGE ( fato_registro_aih[dias_permanencia] )
+
+// Formato: decimal, 2 casas. Permanência média apenas da AIH principal (tipo 1): 5,93.
+Permanência média - AIH principal =
+CALCULATE ( [Permanência média (dias)], dim_tipo_aih[tipo_aih_cod] = "1" )
+
+
+// ---- Mortalidade -------------------------------------------------------------
+
+// Formato: número inteiro. Registros com MORTE = 1.
+Óbitos =
+SUM ( fato_registro_aih[obito] )
+
+// Formato: PORCENTAGEM, 2 casas (a medida retorna a razão; não multiplicar por 100).
+// Numerador: registros com óbito. Denominador: registros de AIH do contexto.
+// Taxa BRUTA, por registro (não por paciente nem por internação), sem ajuste por idade,
+// gravidade ou casemix: não comparar estabelecimentos ou grupos como medida de qualidade.
+// Base completa: 0,063850 → 6,39%.
+Mortalidade hospitalar (razão) =
+DIVIDE ( [Óbitos], [Registros de AIH] )
+
+
+// ---- Perfil ------------------------------------------------------------------
+
+// Formato: decimal, 2 casas. Idade em anos convertida por COD_IDADE (fonte secundária).
+// Registros sem unidade de idade válida ficam em branco e não entram na média. Base: 43,85.
+// (O valor histórico 43,96 usava IDADE sem a unidade — critério incorreto.)
+Idade média (anos) =
+AVERAGE ( fato_registro_aih[idade_anos] )
+
+// Formato: porcentagem, 2 casas. Distribuições (faixa etária, sexo, especialidade, município):
+// participação no número de registros do contexto selecionado.
+% dos registros =
+DIVIDE ( [Registros de AIH], CALCULATE ( [Registros de AIH], ALLSELECTED () ) )

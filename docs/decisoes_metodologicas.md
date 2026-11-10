@@ -211,6 +211,52 @@ ou de texto livre (`N_AIH`, `CEP`, `NASC`, `CPF_AUT`, `GESTOR_CPF`, `AUD_JUST`, 
 **Decisão:** documentação e relatórios usam "AIH tipo 1 (principal)" e "AIH tipo 5 (longa
 permanência)"; o rótulo histórico "continuidade" é citado apenas como referência histórica.
 
+## D-028 — Granularidade do fato: registro de AIH
+**Status:** Adotada (Fase 6)
+**Decisão:** `fato_registro_aih` tem 1 linha por registro do RD (73.046), chave técnica
+`registro_id` (posição no arquivo). `N_AIH` é substituído por `aih_id` (posto denso, determinístico)
+para contagens distintas. Não existem medidas de "internações" nem de "pacientes": a base não tem
+identificador de paciente e a longa permanência gera vários registros por AIH.
+**Alternativa descartada:** consolidar registros por AIH — perderia valores cobrados por período e
+exigiria regras de consolidação não documentadas pela fonte.
+
+## D-029 — Esquema estrela sem caminhos ambíguos
+**Status:** Adotada (Fase 6)
+**Decisão:** relações muitos-para-um, direção única. O município do **estabelecimento** é atributo
+de `dim_estabelecimento` (todos os atributos dependem do CNES: verificado), separado de
+`dim_municipio_residencia`. A segunda data (internação) é relação **inativa**, usada via
+`USERELATIONSHIP`. "Características do paciente" viram `dim_perfil_demografico` (perfil do
+registro), não uma dimensão de pacientes.
+
+## D-030 — Minimização: datas exportadas por mês
+**Status:** Adotada (Fase 6)
+**Contexto:** idade exata + sexo + município + datas por dia tornam 89,4% dos registros únicos.
+**Decisão:** exportar `mes_saida`/`mes_internacao` (1º dia do mês) e `dim_mes`; permanência exata
+em dias preservada. Registros únicos na combinação equivalente: 19,9%. Identificadores pessoais,
+CEP, textos livres e CNPJs não são exportados. Ver `docs/powerbi/privacidade.md`.
+
+## D-031 — Formato de exportação e esquema único
+**Status:** Adotada (Fase 6)
+**Decisão:** CSV UTF-8 (ponto decimal, datas ISO, nulo = vazio, booleanos 0/1) como formato
+principal; Parquet opcional (`--parquet`). Um único esquema em Python (`powerbi.TABLES`) gera a
+exportação, o dicionário de campos, as consultas Power Query com tipos explícitos e os testes;
+saídas determinísticas (SHA-256 em `reports/powerbi/export_summary.json`).
+
+## D-032 — Convenções das medidas DAX
+**Status:** Adotada (Fase 6)
+**Decisão:** razões retornam a fração e são **formatadas** como porcentagem (sem ×100); divisões
+com `DIVIDE`; concentração top 10% com `TOPN` desempatado por `registro_id` (exatamente k
+registros); permanência sempre interpretável por tipo de AIH. As medidas são verificadas por
+equivalentes em SQL sobre os CSV (a execução de DAX não é possível no ambiente de construção).
+
+## D-033 — Enriquecimento somente com fonte oficial verificada
+**Status:** Adotada (Fase 6) — enriquecimento **pendente**
+**Decisão:** nomes de municípios, estabelecimentos, procedimentos e diagnósticos só entram a partir
+de fontes oficiais verificadas (URL, versão/competência, licença, SHA-256), por junção de código
+exato, com testes de cobertura. Do ambiente de execução, todos os hosts oficiais candidatos foram
+recusados pela política de rede; as dimensões mantêm os códigos até a obtenção dos arquivos
+(`docs/powerbi/fontes_referencia.md`).
+
 ---
 
 ## Decisões pendentes
@@ -228,3 +274,5 @@ permanência)"; o rótulo histórico "continuidade" é citado apenas como refer�
 | P-009 | Confirmar o dicionário na fonte primária (Informe Técnico SIH/SUS) | **Bloqueada** neste ambiente: requer download pela autora |
 | P-010 | Códigos de `ESPEC` 10, 14 e 87 (364 registros) | Aberta: ausentes da fonte secundária |
 | P-011 | Grupos SIGTAP 02–05 (rótulos) | Conhecimento prévio; confirmar na Tabela SIGTAP |
+| P-012 | Enriquecimento oficial (IBGE, CNES, SIGTAP, CID-10) | **Bloqueada** neste ambiente; decisão A/B em `docs/powerbi/fontes_referencia.md` |
+| P-013 | Publicação do `.pbix` (incorpora dados) | Decisão da autora após avaliação de privacidade |

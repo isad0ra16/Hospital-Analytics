@@ -58,7 +58,8 @@ DATASUS (FTP) ─┐                    ┌─ make fetch-data: Release do GitHu
         data/processed/sih_rj_2024_01_tratado.parquet
                ├─ make audit       → reports/audit/
                ├─ make indicators  → reports/indicators/   (Pandas × DuckDB)
-               └─ make analysis    → reports/analysis/     (+ figuras)
+               ├─ make analysis    → reports/analysis/     (+ figuras)
+               └─ make powerbi     → data/powerbi/*.csv    (modelo estrela para Power BI)
 ```
 
 Módulos e princípios: [`docs/arquitetura.md`](docs/arquitetura.md). Pipeline e camadas:
@@ -116,7 +117,8 @@ recuperação: [`docs/recuperacao_dados.md`](docs/recuperacao_dados.md).
 [Indicadores](docs/indicadores.md) · [Qualidade](docs/qualidade_dados.md) · [Análises](docs/analises.md) ·
 [Arquitetura](docs/arquitetura.md) · [Pipeline](docs/pipeline_dados.md) ·
 [Recuperação](docs/recuperacao_dados.md) · [Diário de execução](docs/diario_execucao.md) ·
-[Convenções do projeto](CONTRIBUTING.md)
+[Convenções do projeto](CONTRIBUTING.md) ·
+[Modelo Power BI](docs/powerbi/README.md)
 
 ## Roteiro
 
@@ -125,7 +127,8 @@ recuperação: [`docs/recuperacao_dados.md`](docs/recuperacao_dados.md).
 - [x] Fase 3 — Auditoria e camada tratada *(revisão pendente)*
 - [x] Fase 4 — Reprodução e reconciliação dos indicadores *(revisão pendente)*
 - [x] Fase 5 — SQL (DuckDB) e análises exploratórias *(revisão pendente)*
-- [ ] Fase 6 — Notebook de apresentação, licença e publicação
+- [x] Fase 6 — Camada analítica para Power BI *(modelo e exportações prontos; dashboard `.pbix` não iniciado)*
+- [ ] Fase 7 — Dashboard Power BI, enriquecimento oficial, licença e publicação
 
 ## Autoria
 

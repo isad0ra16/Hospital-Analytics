@@ -102,3 +102,15 @@ e convenções em `CONTRIBUTING.md`.
 
 Pendente (decisão da autora): os 3 commits do `main` (`c1dd436`, `99b96c9`, `d50f9ad`) ainda contêm as
 linhas automáticas; o branch original segue preservado até a verificação do v2.
+
+## 2026-11-10 — Fase 6: camada analítica para Power BI ✅ implementada (dashboard não iniciado)
+
+Branch `work/powerbi-model` (a partir do `-v3`; `main` inalterado — substituição da M2 pendente).
+
+- Modelo estrela: `fato_registro_aih` (73.046) + 9 dimensões + 2 tabelas auxiliares; esquema único
+  em `powerbi.py`; SQL em `sql/powerbi/`; `make powerbi`.
+- Privacidade medida (k-anonimato): datas reduzidas a mês (registros únicos 89,4% → 19,9%).
+- Validação da exportação real: **64/64** verificações (chaves, 0 órfãos, join sem duplicação,
+  total R$ 125.440.636,13, medidas = indicadores validados). Testes: 175 ✅.
+- Enriquecimento oficial: todos os hosts candidatos recusados pela política de rede → pendente
+  (P-012), plano em `docs/powerbi/fontes_referencia.md`.

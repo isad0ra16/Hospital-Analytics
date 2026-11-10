@@ -37,6 +37,7 @@
 | `audit.py` | auditoria de qualidade | ambas as camadas | `reports/audit/` |
 | `indicators.py` | indicadores, duas engines, reconciliação | camada tratada | `reports/indicators/` |
 | `analysis.py` | análises exploratórias descritivas e gráficos (matplotlib) | camada tratada | `reports/analysis/` |
+| `powerbi.py` | modelo estrela para Power BI: exportação CSV/Parquet, dicionário, Power Query, validação | camada tratada + relatórios | `data/powerbi/`, `reports/powerbi/`, `docs/powerbi/` |
 | `cli.py` | comandos `hospital-analytics …` | — | — |
 
 ## Princípios de projeto

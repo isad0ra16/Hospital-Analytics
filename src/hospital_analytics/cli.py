@@ -15,6 +15,8 @@ import stat
 import sys
 from pathlib import Path
 
+from hospital_analytics.analysis import run_analysis
+from hospital_analytics.analysis import write_report as analysis_write
 from hospital_analytics.audit import run_audit
 from hospital_analytics.audit import write_report as audit_write
 from hospital_analytics.config import load_params, project_root, to_money
@@ -245,6 +247,14 @@ def cmd_indicators(args: argparse.Namespace) -> int:
     return 0 if report["engines_agree"] else 1
 
 
+def cmd_analysis(args: argparse.Namespace) -> int:
+    root = args.root
+    report = run_analysis(args.processed or _defaults(root)["processed"])
+    for path in analysis_write(report, root / "reports" / "analysis", "analysis"):
+        print(f"written: {_key(path, root)}")
+    return 0
+
+
 def cmd_verify(args: argparse.Namespace) -> int:
     """Check that every file in the manifest exists and matches its SHA-256 (read-only)."""
     root = args.root
@@ -321,6 +331,10 @@ def build_parser() -> argparse.ArgumentParser:
     )
     p.add_argument("--processed", type=Path)
     p.set_defaults(func=cmd_indicators)
+
+    p = sub.add_parser("analysis", help="descriptive exploratory analyses -> reports/analysis/")
+    p.add_argument("--processed", type=Path)
+    p.set_defaults(func=cmd_analysis)
 
     p = sub.add_parser("verify", help="check every manifest file exists and matches its SHA-256")
     p.set_defaults(func=cmd_verify)

@@ -1,0 +1,57 @@
+{
+  "derived": {
+    "data/raw/RDRJ2401.parquet": {
+      "columns": 113,
+      "content_fingerprint": "e9fcf1b88e2c15fe4b8bceb3fa8d161b113acbbc6d979f4f7272177669f60106",
+      "created_at": "2026-11-10T01:48:35+00:00",
+      "derived_from": "data/raw/RDRJ2401.dbc",
+      "encoding": "latin-1",
+      "intermediate_dbf": {
+        "header_records": 73046,
+        "language_driver": 2,
+        "last_update": "2025-02-08",
+        "sha256": "9e3c83bdaf9d086e445efcd8916548bd128f82d493cebbc3c1639d7f9a3934f5",
+        "size_bytes": 51281941,
+        "version": 3
+      },
+      "records": 73046,
+      "sha256": "9b123b4b02713a7e2359e5c6c70daf5b4d54c88ebc7647b8b62b03ee74180337",
+      "size_bytes": 3274547,
+      "source_sha256": "a3f0ea9a6ce75099fa8210d81b13736fc4da4ac1acf30e8245c7aa3a0d7dfc9c",
+      "step": "raw_conversion (.dbc -> .dbf -> Arrow -> Parquet, no treatment)",
+      "tool_versions": {
+        "dbfread": "2.0.7",
+        "hospital-analytics": "0.1.0",
+        "pandas": "3.1.1",
+        "pyarrow": "26.0.1",
+        "pyreaddbc": "2.0.4",
+        "python": "3.13.18"
+      }
+    }
+  },
+  "manifest_version": 1,
+  "sources": {
+    "data/raw/RDRJ2401.dbc": {
+      "archive": {
+        "asset": "RDRJ2401.dbc",
+        "repository": "isad0ra16/Hospital-Analytics",
+        "tag": "data-rdrj2401",
+        "type": "github_release"
+      },
+      "data_version": {
+        "competence": "2024-01",
+        "dbf_header_last_update": "2025-02-08",
+        "file_type": "RD",
+        "system": "SIH/SUS",
+        "uf": "RJ"
+      },
+      "notes": "Downloaded from the official DATASUS FTP by the author on a Brazilian connection (the cloud environment cannot reach DATASUS). Transferred via the GitHub Release asset. SHA-256 matched independently by the author, by GitHub (asset digest) and in this environment.",
+      "obtained_at": "2026-11-09 (time not recorded)",
+      "obtained_by": "Isadora Veiga",
+      "official_url": "ftp://ftp.datasus.gov.br/dissemin/publicos/SIHSUS/200801_/Dados/RDRJ2401.dbc",
+      "registered_at": "2026-11-10T01:48:20+00:00",
+      "sha256": "a3f0ea9a6ce75099fa8210d81b13736fc4da4ac1acf30e8245c7aa3a0d7dfc9c",
+      "size_bytes": 5632627
+    }
+  }
+}

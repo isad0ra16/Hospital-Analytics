@@ -1,7 +1,7 @@
 # Histórico recuperado
 
 Este documento registra **o que foi recuperado** do projeto original, perdido junto com o
-computador em que estava. A fonte são conversas anteriores com o ChatGPT. **Nenhum código-fonte
+computador em que estava. A fonte são registros de conversas anteriores. **Nenhum código-fonte
 original foi recuperado**: todo o código deste repositório é uma reconstrução e não deve ser
 apresentado como cópia dos scripts originais.
 

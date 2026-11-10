@@ -58,3 +58,15 @@ sem tipo no SQL; contagem incorreta em documento (corrigida após verificação 
 **Testes:** 145 ✅ · ruff ✅.
 
 **Bloqueios:** P-009 (fonte primária do dicionário) — requer download pela autora.
+
+## 2026-11-10 — Fase 5: análises exploratórias ✅ implementada
+
+`make analysis` → `reports/analysis/` (relatório + 4 figuras reproduzíveis byte a byte): perfil
+demográfico, hospitalar, mortalidade, financeiro, permanência, distribuição temporal. Descritivas,
+sem causalidade. Achado: os 241 registros com `VAL_TOT` = 0 são exatamente os de `ESPEC` = 87.
+
+**Defeitos encontrados e corrigidos:** coluna ausente na consulta de procedimentos; valor médio sem
+arredondamento; chaves `_cents` com valores em reais; pirâmide etária com eixo assimétrico e número
+da curva de Lorenz inconsistente com o indicador (ambos vistos ao inspecionar os gráficos).
+
+**Testes:** 150 ✅ · ruff ✅. Pipeline completo reproduzido em clone limpo sem alterações.

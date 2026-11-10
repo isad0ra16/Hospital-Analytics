@@ -14,7 +14,7 @@ consultas em `sql/audit/`). Nenhum registro foi removido ou corrigido.
 | Saída antes da internação · nascimento após internação | 0 · 0 | ✅ |
 | Internação ou saída após o fim da competência | 0 · 0 | ✅ |
 | `VAL_TOT` vazio / negativo / malformado | 0 / 0 / 0 | ✅ |
-| `VAL_TOT` = 0 | 241 registros | ℹ️ a investigar (Fase 5) |
+| `VAL_TOT` = 0 | 241 registros — **exatamente** os 241 com `ESPEC` = 87 | ℹ️ código 87 sem rótulo (P-010) |
 | Valor com precisão reduzida pela largura do campo | 1 (`VAL_UTI`) | ℹ️ documentado (D-022) |
 | `MORTE` × `COBRANCA` 4x (óbito) | coincidem nos 4.664 registros | ✅ consistência entre campos |
 | Colunas 100% vazias | `NUM_PROC`, `CPF_AUT`, `GESTOR_DT`, `INFEHOSP`, `DIAGSEC8`, `DIAGSEC9` | ℹ️ `DIAGSEC9`/`INFEHOSP` coincidem com o histórico |

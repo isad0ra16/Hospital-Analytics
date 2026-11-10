@@ -17,7 +17,7 @@
           │
           ├── make audit       (audit.py + sql/audit/*.sql)        → reports/audit/
           ├── make indicators  (indicators.py: Pandas × sql/indicators/*.sql) → reports/indicators/
-          └── make analysis    (Fase 5 — em implementação)          → reports/analysis/
+          └── make analysis    (analysis.py + sql/analysis/*.sql)  → reports/analysis/ (+ figuras)
 ```
 
 ## Módulos (`src/hospital_analytics/`)
@@ -36,7 +36,7 @@
 | `sql.py` | executor de SQL versionado (views `raw_rd`, `rd`) | Parquets | — |
 | `audit.py` | auditoria de qualidade | ambas as camadas | `reports/audit/` |
 | `indicators.py` | indicadores, duas engines, reconciliação | camada tratada | `reports/indicators/` |
-| `analysis.py` | análises exploratórias descritivas (Fase 5 — em implementação) | camada tratada | `reports/analysis/` |
+| `analysis.py` | análises exploratórias descritivas e gráficos (matplotlib) | camada tratada | `reports/analysis/` |
 | `cli.py` | comandos `hospital-analytics …` | — | — |
 
 ## Princípios de projeto

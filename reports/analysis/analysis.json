@@ -1,0 +1,1276 @@
+{
+  "source": "sih_rj_2024_01_tratado.parquet",
+  "unit_of_analysis": "registro de AIH (não paciente)",
+  "totals": {
+    "records": 73046,
+    "val_tot_brl": "125440636.13"
+  },
+  "age": [
+    {
+      "age_group": "< 1 ano",
+      "records": 3238,
+      "deaths": 86,
+      "dias_perm_sum": 29825,
+      "val_tot_cents": 972761191,
+      "share_records_pct": "4.43",
+      "share_value_pct": "7.75",
+      "mortality_per_100_records": "2.66",
+      "mean_los_days": "9.21",
+      "mean_value_brl": "3004.20"
+    },
+    {
+      "age_group": "1–4",
+      "records": 2350,
+      "deaths": 7,
+      "dias_perm_sum": 10562,
+      "val_tot_cents": 237360488,
+      "share_records_pct": "3.22",
+      "share_value_pct": "1.89",
+      "mortality_per_100_records": "0.30",
+      "mean_los_days": "4.49",
+      "mean_value_brl": "1010.04"
+    },
+    {
+      "age_group": "5–14",
+      "records": 3879,
+      "deaths": 10,
+      "dias_perm_sum": 14343,
+      "val_tot_cents": 344778839,
+      "share_records_pct": "5.31",
+      "share_value_pct": "2.75",
+      "mortality_per_100_records": "0.26",
+      "mean_los_days": "3.70",
+      "mean_value_brl": "888.83"
+    },
+    {
+      "age_group": "15–29",
+      "records": 14872,
+      "deaths": 106,
+      "dias_perm_sum": 58632,
+      "val_tot_cents": 1327596242,
+      "share_records_pct": "20.36",
+      "share_value_pct": "10.58",
+      "mortality_per_100_records": "0.71",
+      "mean_los_days": "3.94",
+      "mean_value_brl": "892.68"
+    },
+    {
+      "age_group": "30–44",
+      "records": 12732,
+      "deaths": 246,
+      "dias_perm_sum": 61468,
+      "val_tot_cents": 1472370590,
+      "share_records_pct": "17.43",
+      "share_value_pct": "11.74",
+      "mortality_per_100_records": "1.93",
+      "mean_los_days": "4.83",
+      "mean_value_brl": "1156.43"
+    },
+    {
+      "age_group": "45–59",
+      "records": 12066,
+      "deaths": 704,
+      "dias_perm_sum": 82490,
+      "val_tot_cents": 2470484618,
+      "share_records_pct": "16.52",
+      "share_value_pct": "19.69",
+      "mortality_per_100_records": "5.83",
+      "mean_los_days": "6.84",
+      "mean_value_brl": "2047.48"
+    },
+    {
+      "age_group": "60–74",
+      "records": 15635,
+      "deaths": 1699,
+      "dias_perm_sum": 119460,
+      "val_tot_cents": 3885473784,
+      "share_records_pct": "21.40",
+      "share_value_pct": "30.97",
+      "mortality_per_100_records": "10.87",
+      "mean_los_days": "7.64",
+      "mean_value_brl": "2485.11"
+    },
+    {
+      "age_group": "75+",
+      "records": 8274,
+      "deaths": 1806,
+      "dias_perm_sum": 70621,
+      "val_tot_cents": 1833237861,
+      "share_records_pct": "11.33",
+      "share_value_pct": "14.61",
+      "mortality_per_100_records": "21.83",
+      "mean_los_days": "8.54",
+      "mean_value_brl": "2215.66"
+    }
+  ],
+  "pyramid": [
+    {
+      "age_group": "< 1 ano",
+      "sex": "Masculino",
+      "records": 1717,
+      "deaths": 44
+    },
+    {
+      "age_group": "< 1 ano",
+      "sex": "Feminino",
+      "records": 1521,
+      "deaths": 42
+    },
+    {
+      "age_group": "1–4",
+      "sex": "Masculino",
+      "records": 1332,
+      "deaths": 1
+    },
+    {
+      "age_group": "1–4",
+      "sex": "Feminino",
+      "records": 1018,
+      "deaths": 6
+    },
+    {
+      "age_group": "5–14",
+      "sex": "Masculino",
+      "records": 2428,
+      "deaths": 9
+    },
+    {
+      "age_group": "5–14",
+      "sex": "Feminino",
+      "records": 1451,
+      "deaths": 1
+    },
+    {
+      "age_group": "15–29",
+      "sex": "Masculino",
+      "records": 3431,
+      "deaths": 60
+    },
+    {
+      "age_group": "15–29",
+      "sex": "Feminino",
+      "records": 11441,
+      "deaths": 46
+    },
+    {
+      "age_group": "30–44",
+      "sex": "Masculino",
+      "records": 4352,
+      "deaths": 127
+    },
+    {
+      "age_group": "30–44",
+      "sex": "Feminino",
+      "records": 8380,
+      "deaths": 119
+    },
+    {
+      "age_group": "45–59",
+      "sex": "Masculino",
+      "records": 6122,
+      "deaths": 377
+    },
+    {
+      "age_group": "45–59",
+      "sex": "Feminino",
+      "records": 5944,
+      "deaths": 327
+    },
+    {
+      "age_group": "60–74",
+      "sex": "Masculino",
+      "records": 8367,
+      "deaths": 945
+    },
+    {
+      "age_group": "60–74",
+      "sex": "Feminino",
+      "records": 7268,
+      "deaths": 754
+    },
+    {
+      "age_group": "75+",
+      "sex": "Masculino",
+      "records": 3752,
+      "deaths": 801
+    },
+    {
+      "age_group": "75+",
+      "sex": "Feminino",
+      "records": 4522,
+      "deaths": 1005
+    }
+  ],
+  "dimensions": {
+    "CAR_INT": [
+      {
+        "code": "01",
+        "records": 22240,
+        "deaths": 1075,
+        "dias_perm_sum": 124831,
+        "val_tot_cents": 5117717901,
+        "label": "Eletivo",
+        "share_records_pct": "30.45",
+        "share_value_pct": "40.80",
+        "mortality_per_100_records": "4.83",
+        "mean_los_days": "5.61",
+        "mean_value_brl": "2301.13"
+      },
+      {
+        "code": "02",
+        "records": 50601,
+        "deaths": 3585,
+        "dias_perm_sum": 321638,
+        "val_tot_cents": 7377583648,
+        "label": "Urgência",
+        "share_records_pct": "69.27",
+        "share_value_pct": "58.81",
+        "mortality_per_100_records": "7.08",
+        "mean_los_days": "6.36",
+        "mean_value_brl": "1457.99"
+      },
+      {
+        "code": "05",
+        "records": 101,
+        "deaths": 0,
+        "dias_perm_sum": 591,
+        "val_tot_cents": 26163451,
+        "label": "Outros tipos de acidente de trânsito",
+        "share_records_pct": "0.14",
+        "share_value_pct": "0.21",
+        "mortality_per_100_records": "0.00",
+        "mean_los_days": "5.85",
+        "mean_value_brl": "2590.44"
+      },
+      {
+        "code": "06",
+        "records": 104,
+        "deaths": 4,
+        "dias_perm_sum": 341,
+        "val_tot_cents": 22598613,
+        "label": "Outros tipos de lesões e envenenamentos por agentes químicos ou físicos",
+        "share_records_pct": "0.14",
+        "share_value_pct": "0.18",
+        "mortality_per_100_records": "3.85",
+        "mean_los_days": "3.28",
+        "mean_value_brl": "2172.94"
+      }
+    ],
+    "COMPLEX": [
+      {
+        "code": "02",
+        "records": 67133,
+        "deaths": 4476,
+        "dias_perm_sum": 413843,
+        "val_tot_cents": 8894422621,
+        "label": "Média complexidade",
+        "share_records_pct": "91.91",
+        "share_value_pct": "70.91",
+        "mortality_per_100_records": "6.67",
+        "mean_los_days": "6.16",
+        "mean_value_brl": "1324.90"
+      },
+      {
+        "code": "03",
+        "records": 5913,
+        "deaths": 188,
+        "dias_perm_sum": 33558,
+        "val_tot_cents": 3649640992,
+        "label": "Alta complexidade",
+        "share_records_pct": "8.09",
+        "share_value_pct": "29.09",
+        "mortality_per_100_records": "3.18",
+        "mean_los_days": "5.68",
+        "mean_value_brl": "6172.23"
+      }
+    ],
+    "ESPEC": [
+      {
+        "code": "01",
+        "records": 25935,
+        "deaths": 580,
+        "dias_perm_sum": 121937,
+        "val_tot_cents": 6211368757,
+        "label": "Cirúrgico",
+        "share_records_pct": "35.51",
+        "share_value_pct": "49.52",
+        "mortality_per_100_records": "2.24",
+        "mean_los_days": "4.70",
+        "mean_value_brl": "2394.98"
+      },
+      {
+        "code": "02",
+        "records": 11618,
+        "deaths": 2,
+        "dias_perm_sum": 35466,
+        "val_tot_cents": 725960491,
+        "label": "Obstétricos",
+        "share_records_pct": "15.91",
+        "share_value_pct": "5.79",
+        "mortality_per_100_records": "0.02",
+        "mean_los_days": "3.05",
+        "mean_value_brl": "624.86"
+      },
+      {
+        "code": "03",
+        "records": 25437,
+        "deaths": 3894,
+        "dias_perm_sum": 214171,
+        "val_tot_cents": 4043334834,
+        "label": "Clínicos",
+        "share_records_pct": "34.82",
+        "share_value_pct": "32.23",
+        "mortality_per_100_records": "15.31",
+        "mean_los_days": "8.42",
+        "mean_value_brl": "1589.55"
+      },
+      {
+        "code": "04",
+        "records": 713,
+        "deaths": 95,
+        "dias_perm_sum": 16527,
+        "val_tot_cents": 144960447,
+        "label": "Crônicos",
+        "share_records_pct": "0.98",
+        "share_value_pct": "1.16",
+        "mortality_per_100_records": "13.32",
+        "mean_los_days": "23.18",
+        "mean_value_brl": "2033.11"
+      },
+      {
+        "code": "05",
+        "records": 513,
+        "deaths": 1,
+        "dias_perm_sum": 7227,
+        "val_tot_cents": 42286630,
+        "label": "Psiquiatria",
+        "share_records_pct": "0.70",
+        "share_value_pct": "0.34",
+        "mortality_per_100_records": "0.19",
+        "mean_los_days": "14.09",
+        "mean_value_brl": "824.30"
+      },
+      {
+        "code": "06",
+        "records": 146,
+        "deaths": 8,
+        "dias_perm_sum": 2974,
+        "val_tot_cents": 25667872,
+        "label": "Pneumologia sanitária (tisiologia)",
+        "share_records_pct": "0.20",
+        "share_value_pct": "0.20",
+        "mortality_per_100_records": "5.48",
+        "mean_los_days": "20.37",
+        "mean_value_brl": "1758.07"
+      },
+      {
+        "code": "07",
+        "records": 6541,
+        "deaths": 83,
+        "dias_perm_sum": 43774,
+        "val_tot_cents": 1181315283,
+        "label": "Pediátricos",
+        "share_records_pct": "8.95",
+        "share_value_pct": "9.42",
+        "mortality_per_100_records": "1.27",
+        "mean_los_days": "6.69",
+        "mean_value_brl": "1806.02"
+      },
+      {
+        "code": "08",
+        "records": 9,
+        "deaths": 0,
+        "dias_perm_sum": 369,
+        "val_tot_cents": 1795856,
+        "label": "Reabilitação",
+        "share_records_pct": "0.01",
+        "share_value_pct": "0.01",
+        "mortality_per_100_records": "0.00",
+        "mean_los_days": "41.00",
+        "mean_value_brl": "1995.40"
+      },
+      {
+        "code": "09",
+        "records": 1770,
+        "deaths": 1,
+        "dias_perm_sum": 151,
+        "val_tot_cents": 164018896,
+        "label": "Leito dia / cirúrgicos",
+        "share_records_pct": "2.42",
+        "share_value_pct": "1.31",
+        "mortality_per_100_records": "0.06",
+        "mean_los_days": "0.09",
+        "mean_value_brl": "926.66"
+      },
+      {
+        "code": "10",
+        "records": 26,
+        "deaths": 0,
+        "dias_perm_sum": 779,
+        "val_tot_cents": 213395,
+        "label": "(sem rótulo)",
+        "share_records_pct": "0.04",
+        "share_value_pct": "0.00",
+        "mortality_per_100_records": "0.00",
+        "mean_los_days": "29.96",
+        "mean_value_brl": "82.08"
+      },
+      {
+        "code": "14",
+        "records": 97,
+        "deaths": 0,
+        "dias_perm_sum": 2615,
+        "val_tot_cents": 3141152,
+        "label": "(sem rótulo)",
+        "share_records_pct": "0.13",
+        "share_value_pct": "0.03",
+        "mortality_per_100_records": "0.00",
+        "mean_los_days": "26.96",
+        "mean_value_brl": "323.83"
+      },
+      {
+        "code": "87",
+        "records": 241,
+        "deaths": 0,
+        "dias_perm_sum": 1411,
+        "val_tot_cents": 0,
+        "label": "(sem rótulo)",
+        "share_records_pct": "0.33",
+        "share_value_pct": "0.00",
+        "mortality_per_100_records": "0.00",
+        "mean_los_days": "5.85",
+        "mean_value_brl": "0.00"
+      }
+    ],
+    "IDENT": [
+      {
+        "code": "1",
+        "records": 72383,
+        "deaths": 4656,
+        "dias_perm_sum": 428904,
+        "val_tot_cents": 12385847015,
+        "label": "Principal",
+        "share_records_pct": "99.09",
+        "share_value_pct": "98.74",
+        "mortality_per_100_records": "6.43",
+        "mean_los_days": "5.93",
+        "mean_value_brl": "1711.15"
+      },
+      {
+        "code": "5",
+        "records": 663,
+        "deaths": 8,
+        "dias_perm_sum": 18497,
+        "val_tot_cents": 158216598,
+        "label": "Longa permanência",
+        "share_records_pct": "0.91",
+        "share_value_pct": "1.26",
+        "mortality_per_100_records": "1.21",
+        "mean_los_days": "27.90",
+        "mean_value_brl": "2386.37"
+      }
+    ],
+    "PROC_REA_GROUP": [
+      {
+        "code": "02",
+        "records": 146,
+        "deaths": 1,
+        "dias_perm_sum": 373,
+        "val_tot_cents": 6142868,
+        "label": "Procedimentos com finalidade diagnóstica",
+        "share_records_pct": "0.20",
+        "share_value_pct": "0.05",
+        "mortality_per_100_records": "0.68",
+        "mean_los_days": "2.55",
+        "mean_value_brl": "420.74"
+      },
+      {
+        "code": "03",
+        "records": 39928,
+        "deaths": 4081,
+        "dias_perm_sum": 306793,
+        "val_tot_cents": 5654625829,
+        "label": "Procedimentos clínicos",
+        "share_records_pct": "54.66",
+        "share_value_pct": "45.08",
+        "mortality_per_100_records": "10.22",
+        "mean_los_days": "7.68",
+        "mean_value_brl": "1416.21"
+      },
+      {
+        "code": "04",
+        "records": 32553,
+        "deaths": 578,
+        "dias_perm_sum": 137886,
+        "val_tot_cents": 6386903106,
+        "label": "Procedimentos cirúrgicos",
+        "share_records_pct": "44.57",
+        "share_value_pct": "50.92",
+        "mortality_per_100_records": "1.78",
+        "mean_los_days": "4.24",
+        "mean_value_brl": "1962.00"
+      },
+      {
+        "code": "05",
+        "records": 419,
+        "deaths": 4,
+        "dias_perm_sum": 2349,
+        "val_tot_cents": 496391810,
+        "label": "Transplantes de órgãos, tecidos e células",
+        "share_records_pct": "0.57",
+        "share_value_pct": "3.96",
+        "mortality_per_100_records": "0.95",
+        "mean_los_days": "5.61",
+        "mean_value_brl": "11847.06"
+      }
+    ],
+    "RACA_COR": [
+      {
+        "code": "01",
+        "records": 19820,
+        "deaths": 1295,
+        "dias_perm_sum": 113278,
+        "val_tot_cents": 3689904438,
+        "label": "Branca",
+        "share_records_pct": "27.13",
+        "share_value_pct": "29.42",
+        "mortality_per_100_records": "6.53",
+        "mean_los_days": "5.72",
+        "mean_value_brl": "1861.71"
+      },
+      {
+        "code": "02",
+        "records": 10890,
+        "deaths": 864,
+        "dias_perm_sum": 72106,
+        "val_tot_cents": 2031713922,
+        "label": "Preta",
+        "share_records_pct": "14.91",
+        "share_value_pct": "16.20",
+        "mortality_per_100_records": "7.93",
+        "mean_los_days": "6.62",
+        "mean_value_brl": "1865.67"
+      },
+      {
+        "code": "03",
+        "records": 41539,
+        "deaths": 2457,
+        "dias_perm_sum": 254729,
+        "val_tot_cents": 6660760804,
+        "label": "Parda",
+        "share_records_pct": "56.87",
+        "share_value_pct": "53.10",
+        "mortality_per_100_records": "5.91",
+        "mean_los_days": "6.13",
+        "mean_value_brl": "1603.50"
+      },
+      {
+        "code": "04",
+        "records": 723,
+        "deaths": 48,
+        "dias_perm_sum": 5159,
+        "val_tot_cents": 148707348,
+        "label": "Amarela",
+        "share_records_pct": "0.99",
+        "share_value_pct": "1.19",
+        "mortality_per_100_records": "6.64",
+        "mean_los_days": "7.14",
+        "mean_value_brl": "2056.81"
+      },
+      {
+        "code": "05",
+        "records": 4,
+        "deaths": 0,
+        "dias_perm_sum": 10,
+        "val_tot_cents": 112721,
+        "label": "Indígena",
+        "share_records_pct": "0.01",
+        "share_value_pct": "0.00",
+        "mortality_per_100_records": "0.00",
+        "mean_los_days": "2.50",
+        "mean_value_brl": "281.80"
+      },
+      {
+        "code": "99",
+        "records": 70,
+        "deaths": 0,
+        "dias_perm_sum": 2119,
+        "val_tot_cents": 12864380,
+        "label": "Sem informação",
+        "share_records_pct": "0.10",
+        "share_value_pct": "0.10",
+        "mortality_per_100_records": "0.00",
+        "mean_los_days": "30.27",
+        "mean_value_brl": "1837.77"
+      }
+    ],
+    "SEXO": [
+      {
+        "code": "1",
+        "records": 31501,
+        "deaths": 2364,
+        "dias_perm_sum": 222852,
+        "val_tot_cents": 6498340839,
+        "label": "Masculino",
+        "share_records_pct": "43.12",
+        "share_value_pct": "51.80",
+        "mortality_per_100_records": "7.50",
+        "mean_los_days": "7.07",
+        "mean_value_brl": "2062.90"
+      },
+      {
+        "code": "3",
+        "records": 41545,
+        "deaths": 2300,
+        "dias_perm_sum": 224549,
+        "val_tot_cents": 6045722774,
+        "label": "Feminino",
+        "share_records_pct": "56.88",
+        "share_value_pct": "48.20",
+        "mortality_per_100_records": "5.54",
+        "mean_los_days": "5.40",
+        "mean_value_brl": "1455.22"
+      }
+    ]
+  },
+  "top_procedures": [
+    {
+      "procedure": "0310010039",
+      "records": 4250,
+      "deaths": 0,
+      "dias_perm_sum": 11247,
+      "val_tot_cents": 255684763,
+      "share_records_pct": "5.82",
+      "share_value_pct": "2.04",
+      "mortality_per_100_records": "0.00",
+      "mean_los_days": "2.65",
+      "mean_value_brl": "601.61"
+    },
+    {
+      "procedure": "0303010037",
+      "records": 3752,
+      "deaths": 1131,
+      "dias_perm_sum": 36288,
+      "val_tot_cents": 1044111556,
+      "share_records_pct": "5.14",
+      "share_value_pct": "8.32",
+      "mortality_per_100_records": "30.14",
+      "mean_los_days": "9.67",
+      "mean_value_brl": "2782.81"
+    },
+    {
+      "procedure": "0411010034",
+      "records": 3087,
+      "deaths": 1,
+      "dias_perm_sum": 9778,
+      "val_tot_cents": 239568841,
+      "share_records_pct": "4.23",
+      "share_value_pct": "1.91",
+      "mortality_per_100_records": "0.03",
+      "mean_los_days": "3.17",
+      "mean_value_brl": "776.06"
+    },
+    {
+      "procedure": "0415010012",
+      "records": 2689,
+      "deaths": 128,
+      "dias_perm_sum": 18946,
+      "val_tot_cents": 907795002,
+      "share_records_pct": "3.68",
+      "share_value_pct": "7.24",
+      "mortality_per_100_records": "4.76",
+      "mean_los_days": "7.05",
+      "mean_value_brl": "3375.96"
+    },
+    {
+      "procedure": "0303140151",
+      "records": 2494,
+      "deaths": 438,
+      "dias_perm_sum": 23032,
+      "val_tot_cents": 540461331,
+      "share_records_pct": "3.41",
+      "share_value_pct": "4.31",
+      "mortality_per_100_records": "17.56",
+      "mean_los_days": "9.23",
+      "mean_value_brl": "2167.05"
+    },
+    {
+      "procedure": "0303100044",
+      "records": 1642,
+      "deaths": 1,
+      "dias_perm_sum": 6663,
+      "val_tot_cents": 36690344,
+      "share_records_pct": "2.25",
+      "share_value_pct": "0.29",
+      "mortality_per_100_records": "0.06",
+      "mean_los_days": "4.06",
+      "mean_value_brl": "223.45"
+    },
+    {
+      "procedure": "0303040149",
+      "records": 1587,
+      "deaths": 287,
+      "dias_perm_sum": 12374,
+      "val_tot_cents": 289061206,
+      "share_records_pct": "2.17",
+      "share_value_pct": "2.30",
+      "mortality_per_100_records": "18.08",
+      "mean_los_days": "7.80",
+      "mean_value_brl": "1821.43"
+    },
+    {
+      "procedure": "0304100021",
+      "records": 1243,
+      "deaths": 303,
+      "dias_perm_sum": 13488,
+      "val_tot_cents": 155057529,
+      "share_records_pct": "1.70",
+      "share_value_pct": "1.24",
+      "mortality_per_100_records": "24.38",
+      "mean_los_days": "10.85",
+      "mean_value_brl": "1247.45"
+    },
+    {
+      "procedure": "0303150050",
+      "records": 1197,
+      "deaths": 103,
+      "dias_perm_sum": 8921,
+      "val_tot_cents": 92043648,
+      "share_records_pct": "1.64",
+      "share_value_pct": "0.73",
+      "mortality_per_100_records": "8.60",
+      "mean_los_days": "7.45",
+      "mean_value_brl": "768.95"
+    },
+    {
+      "procedure": "0411010042",
+      "records": 1179,
+      "deaths": 0,
+      "dias_perm_sum": 3659,
+      "val_tot_cents": 97039282,
+      "share_records_pct": "1.61",
+      "share_value_pct": "0.77",
+      "mortality_per_100_records": "0.00",
+      "mean_los_days": "3.10",
+      "mean_value_brl": "823.06"
+    },
+    {
+      "procedure": "0407030034",
+      "records": 1125,
+      "deaths": 0,
+      "dias_perm_sum": 2871,
+      "val_tot_cents": 130092890,
+      "share_records_pct": "1.54",
+      "share_value_pct": "1.04",
+      "mortality_per_100_records": "0.00",
+      "mean_los_days": "2.55",
+      "mean_value_brl": "1156.38"
+    },
+    {
+      "procedure": "0415030013",
+      "records": 1069,
+      "deaths": 34,
+      "dias_perm_sum": 7107,
+      "val_tot_cents": 344642377,
+      "share_records_pct": "1.46",
+      "share_value_pct": "2.75",
+      "mortality_per_100_records": "3.18",
+      "mean_los_days": "6.65",
+      "mean_value_brl": "3223.97"
+    },
+    {
+      "procedure": "0303060212",
+      "records": 1053,
+      "deaths": 192,
+      "dias_perm_sum": 11128,
+      "val_tot_cents": 288603905,
+      "share_records_pct": "1.44",
+      "share_value_pct": "2.30",
+      "mortality_per_100_records": "18.23",
+      "mean_los_days": "10.57",
+      "mean_value_brl": "2740.78"
+    },
+    {
+      "procedure": "0409060186",
+      "records": 985,
+      "deaths": 0,
+      "dias_perm_sum": 1485,
+      "val_tot_cents": 54118889,
+      "share_records_pct": "1.35",
+      "share_value_pct": "0.43",
+      "mortality_per_100_records": "0.00",
+      "mean_los_days": "1.51",
+      "mean_value_brl": "549.43"
+    },
+    {
+      "procedure": "0411020013",
+      "records": 924,
+      "deaths": 1,
+      "dias_perm_sum": 1946,
+      "val_tot_cents": 22782455,
+      "share_records_pct": "1.26",
+      "share_value_pct": "0.18",
+      "mortality_per_100_records": "0.11",
+      "mean_los_days": "2.11",
+      "mean_value_brl": "246.56"
+    }
+  ],
+  "value_distribution": [
+    {
+      "scope": "full",
+      "records": 73046,
+      "zero_value": 241,
+      "min_brl": "0.00",
+      "p25_brl": "396.18",
+      "p50_brl": "689.11",
+      "p75_brl": "1206.19",
+      "p90_brl": "3748.81",
+      "p99_brl": "20147.11",
+      "max_brl": "176534.37"
+    },
+    {
+      "scope": "ident_1",
+      "records": 72383,
+      "zero_value": 241,
+      "min_brl": "0.00",
+      "p25_brl": "393.59",
+      "p50_brl": "688.11",
+      "p75_brl": "1181.51",
+      "p90_brl": "3720.68",
+      "p99_brl": "20187.67",
+      "max_brl": "176534.37"
+    },
+    {
+      "scope": "ident_5",
+      "records": 663,
+      "zero_value": 0,
+      "min_brl": "49.70",
+      "p25_brl": "1540.74",
+      "p50_brl": "2379.41",
+      "p75_brl": "2996.36",
+      "p90_brl": "3820.91",
+      "p99_brl": "4000.62",
+      "max_brl": "4600.28"
+    }
+  ],
+  "lorenz": [
+    {
+      "records_pct": 0,
+      "value_pct": "0.00"
+    },
+    {
+      "records_pct": 5,
+      "value_pct": "0.24"
+    },
+    {
+      "records_pct": 10,
+      "value_pct": "0.77"
+    },
+    {
+      "records_pct": 15,
+      "value_pct": "1.45"
+    },
+    {
+      "records_pct": 20,
+      "value_pct": "2.31"
+    },
+    {
+      "records_pct": 25,
+      "value_pct": "3.36"
+    },
+    {
+      "records_pct": 30,
+      "value_pct": "4.63"
+    },
+    {
+      "records_pct": 35,
+      "value_pct": "6.08"
+    },
+    {
+      "records_pct": 40,
+      "value_pct": "7.69"
+    },
+    {
+      "records_pct": 45,
+      "value_pct": "9.45"
+    },
+    {
+      "records_pct": 50,
+      "value_pct": "11.37"
+    },
+    {
+      "records_pct": 55,
+      "value_pct": "13.46"
+    },
+    {
+      "records_pct": 60,
+      "value_pct": "15.72"
+    },
+    {
+      "records_pct": 65,
+      "value_pct": "18.24"
+    },
+    {
+      "records_pct": 70,
+      "value_pct": "21.10"
+    },
+    {
+      "records_pct": 75,
+      "value_pct": "24.38"
+    },
+    {
+      "records_pct": 80,
+      "value_pct": "28.35"
+    },
+    {
+      "records_pct": 85,
+      "value_pct": "33.88"
+    },
+    {
+      "records_pct": 90,
+      "value_pct": "42.25"
+    },
+    {
+      "records_pct": 95,
+      "value_pct": "56.82"
+    },
+    {
+      "records_pct": 100,
+      "value_pct": "100.00"
+    }
+  ],
+  "top10_share_value_pct": "57.74",
+  "hospitals": {
+    "hospitals": 240,
+    "top10_share_value_pct": "30.85",
+    "top10_share_records_pct": "18.25"
+  },
+  "los_distribution": [
+    {
+      "IDENT": "1",
+      "p25": 1,
+      "p50": 3,
+      "p75": 7,
+      "p90": 14,
+      "p99": 44,
+      "min_days": 0,
+      "max_days": 353,
+      "records": 72383,
+      "zero_days": 7367,
+      "upper_fence": "16.0",
+      "above_upper_fence": 5793
+    },
+    {
+      "IDENT": "5",
+      "p25": 31,
+      "p50": 31,
+      "p75": 31,
+      "p90": 31,
+      "p99": 31,
+      "min_days": 2,
+      "max_days": 31,
+      "records": 663,
+      "zero_days": 0,
+      "upper_fence": "31.0",
+      "above_upper_fence": 0
+    }
+  ],
+  "los_histogram_ident_1": [
+    {
+      "days": 0,
+      "records": 7367
+    },
+    {
+      "days": 1,
+      "records": 11471
+    },
+    {
+      "days": 2,
+      "records": 14075
+    },
+    {
+      "days": 3,
+      "records": 9054
+    },
+    {
+      "days": 4,
+      "records": 5066
+    },
+    {
+      "days": 5,
+      "records": 3565
+    },
+    {
+      "days": 6,
+      "records": 2910
+    },
+    {
+      "days": 7,
+      "records": 2732
+    },
+    {
+      "days": 8,
+      "records": 2140
+    },
+    {
+      "days": 9,
+      "records": 1655
+    },
+    {
+      "days": 10,
+      "records": 1376
+    },
+    {
+      "days": 11,
+      "records": 1218
+    },
+    {
+      "days": 12,
+      "records": 1076
+    },
+    {
+      "days": 13,
+      "records": 869
+    },
+    {
+      "days": 14,
+      "records": 784
+    },
+    {
+      "days": 15,
+      "records": 662
+    },
+    {
+      "days": 16,
+      "records": 570
+    },
+    {
+      "days": 17,
+      "records": 473
+    },
+    {
+      "days": 18,
+      "records": 404
+    },
+    {
+      "days": 19,
+      "records": 390
+    },
+    {
+      "days": 20,
+      "records": 321
+    },
+    {
+      "days": 21,
+      "records": 338
+    },
+    {
+      "days": 22,
+      "records": 277
+    },
+    {
+      "days": 23,
+      "records": 247
+    },
+    {
+      "days": 24,
+      "records": 210
+    },
+    {
+      "days": 25,
+      "records": 208
+    },
+    {
+      "days": 26,
+      "records": 155
+    },
+    {
+      "days": 27,
+      "records": 159
+    },
+    {
+      "days": 28,
+      "records": 145
+    },
+    {
+      "days": 29,
+      "records": 162
+    },
+    {
+      "days": 30,
+      "records": 531
+    },
+    {
+      "days": 31,
+      "records": 229
+    },
+    {
+      "days": 32,
+      "records": 111
+    },
+    {
+      "days": 33,
+      "records": 96
+    },
+    {
+      "days": 34,
+      "records": 85
+    },
+    {
+      "days": 35,
+      "records": 90
+    },
+    {
+      "days": 36,
+      "records": 74
+    },
+    {
+      "days": 37,
+      "records": 55
+    },
+    {
+      "days": 38,
+      "records": 70
+    },
+    {
+      "days": 39,
+      "records": 54
+    },
+    {
+      "days": 40,
+      "records": 53
+    },
+    {
+      "days": 41,
+      "records": 39
+    },
+    {
+      "days": 42,
+      "records": 45
+    },
+    {
+      "days": 43,
+      "records": 45
+    },
+    {
+      "days": 44,
+      "records": 49
+    },
+    {
+      "days": 45,
+      "records": 38
+    },
+    {
+      "days": 46,
+      "records": 28
+    },
+    {
+      "days": 47,
+      "records": 24
+    },
+    {
+      "days": 48,
+      "records": 33
+    },
+    {
+      "days": 49,
+      "records": 23
+    },
+    {
+      "days": 50,
+      "records": 27
+    },
+    {
+      "days": 51,
+      "records": 28
+    },
+    {
+      "days": 52,
+      "records": 24
+    },
+    {
+      "days": 53,
+      "records": 20
+    },
+    {
+      "days": 54,
+      "records": 13
+    },
+    {
+      "days": 55,
+      "records": 22
+    },
+    {
+      "days": 56,
+      "records": 17
+    },
+    {
+      "days": 57,
+      "records": 21
+    },
+    {
+      "days": 58,
+      "records": 23
+    },
+    {
+      "days": 59,
+      "records": 13
+    },
+    {
+      "days": 60,
+      "records": 324
+    }
+  ],
+  "discharge_month": [
+    {
+      "discharge_month": "2023-08",
+      "IDENT": "1",
+      "records": 36
+    },
+    {
+      "discharge_month": "2023-09",
+      "IDENT": "1",
+      "records": 66
+    },
+    {
+      "discharge_month": "2023-10",
+      "IDENT": "1",
+      "records": 4305
+    },
+    {
+      "discharge_month": "2023-10",
+      "IDENT": "5",
+      "records": 1
+    },
+    {
+      "discharge_month": "2023-11",
+      "IDENT": "1",
+      "records": 7248
+    },
+    {
+      "discharge_month": "2023-11",
+      "IDENT": "5",
+      "records": 13
+    },
+    {
+      "discharge_month": "2023-12",
+      "IDENT": "1",
+      "records": 17565
+    },
+    {
+      "discharge_month": "2023-12",
+      "IDENT": "5",
+      "records": 45
+    },
+    {
+      "discharge_month": "2024-01",
+      "IDENT": "1",
+      "records": 43163
+    },
+    {
+      "discharge_month": "2024-01",
+      "IDENT": "5",
+      "records": 604
+    }
+  ]
+}

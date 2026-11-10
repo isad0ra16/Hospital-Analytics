@@ -1,7 +1,7 @@
 # Reconciliação dos indicadores
 
 Comparação entre os valores históricos (`config/params.yaml` → `historical_reference`) e os
-valores reproduzidos. Preenchida a partir da Fase 2.
+valores reproduzidos (Fases 2–4).
 
 Status: ⏳ pendente · ✅ reproduzido · 🟡 reproduzido com critério identificado ·
 🟠 divergente com explicação · 🔴 divergente sem explicação.
@@ -11,32 +11,36 @@ iguais com **2 casas decimais**.
 
 | # | Indicador | Base | Histórico | Reproduzido | Critério usado | Status |
 |---|---|---|---:|---:|---|---|
-| 1 | Registros | completa | 73.046 | 73.046 | Linhas do Parquet bruto = registros do cabeçalho DBF | ✅ |
-| 2 | Colunas | completa | 113 | 113 | Campos do DBF | ✅ |
-| 3 | Soma `VAL_TOT` | completa | R$ 125.440.636,13 | R$ 125.440.636,13 | Soma exata em `Decimal` do texto original; 0 vazios, 0 malformados; confirmada também no DuckDB (`DECIMAL(18,2)`) | ✅ |
-| 4 | Saídas em 2023 | completa | 29.279 | | | ⏳ |
-| 5 | Saídas em 2024 | completa | 43.767 | | | ⏳ |
-| 6 | Permanência média | completa | 6,12 | | | ⏳ |
-| 7 | Idade média | completa | 43,96 | | | ⏳ |
-| 8 | Valor médio | completa | R$ 1.717,28 | | | ⏳ |
-| 9 | Óbitos | completa | 4.664 | | | ⏳ |
-| 10 | Mortalidade bruta | completa | 6,38% | | | ⏳ |
-| 11 | Registros | `IDENT` 1 | 72.383 | | | ⏳ |
-| 12 | Soma `VAL_TOT` | `IDENT` 1 | R$ 123.858.470,15 | | | ⏳ |
-| 13 | Valor médio | `IDENT` 1 | R$ 1.711,15 | | | ⏳ |
-| 14 | Permanência média | `IDENT` 1 | 5,93 | | | ⏳ |
-| 15 | Óbitos | `IDENT` 1 | 4.656 | | | ⏳ |
-| 16 | Registros | `IDENT` 5 | 663 | | | ⏳ |
-| 17 | Soma `VAL_TOT` | `IDENT` 5 | R$ 1.582.165,98 | | | ⏳ |
-| 18 | Valor médio | `IDENT` 5 | R$ 2.386,37 | | | ⏳ |
-| 19 | Permanência média | `IDENT` 5 | 27,90 | | | ⏳ |
-| 20 | Óbitos | `IDENT` 5 | 8 | | | ⏳ |
-| 21 | AIHs repetidas (ocorrências) | completa | 56 | | | ⏳ |
-| 22 | AIHs repetidas (números distintos) | completa | 50 | | | ⏳ |
-| 23 | Concentração top 10% | ? | 58,20% | | | ⏳ |
-| 24 | Cirúrgicos | ? | 51,57% | | | ⏳ |
-| 25 | Clínicos | ? | 44,38% | | | ⏳ |
-| 26 | Grupos com diferenças (preservação) | — | 0 | | | ⏳ |
+| 1 | Registros | completa | 73.046 | 73.046 | linhas = registros do cabeçalho DBF | ✅ |
+| 2 | Colunas | completa | 113 | 113 | campos do DBF | ✅ |
+| 3 | Soma `VAL_TOT` | completa | R$ 125.440.636,13 | R$ 125.440.636,13 | soma exata (Pandas = DuckDB) | ✅ |
+| 4 | Saídas em 2023 | completa | 29.279 | 29.279 | ano de `DT_SAIDA` | ✅ |
+| 5 | Saídas em 2024 | completa | 43.767 | 43.767 | ano de `DT_SAIDA` | ✅ |
+| 6 | Permanência média | completa | 6,12 | 6,12 (6,1249) | média de `DIAS_PERM` | 🟡 |
+| 7 | Idade média | completa | 43,96 | 43,96 (43,9613) | média de `IDADE` **sem** `COD_IDADE` — critério incorreto; corrigida: 43,85 | 🟡 ⚠️ |
+| 8 | Valor médio | completa | R$ 1.717,28 | R$ 1.717,28 | `VAL_TOT` / registros | ✅ |
+| 9 | Óbitos | completa | 4.664 | 4.664 | `MORTE` = 1 | 🟡 |
+| 10 | Mortalidade bruta | completa | 6,38% | 6,39% (6,3850) | óbitos / registros; só truncamento dá 6,38 | 🟠 |
+| 11 | Registros | AIH tipo 1 | 72.383 | 72.383 | `IDENT` = 1 | ✅ |
+| 12 | Soma `VAL_TOT` | AIH tipo 1 | R$ 123.858.470,15 | R$ 123.858.470,15 | | ✅ |
+| 13 | Valor médio | AIH tipo 1 | R$ 1.711,15 | R$ 1.711,15 | | ✅ |
+| 14 | Permanência média | AIH tipo 1 | 5,93 | 5,93 (5,9255) | `DIAS_PERM` | 🟡 |
+| 15 | Óbitos | AIH tipo 1 | 4.656 | 4.656 | `MORTE` = 1 | 🟡 |
+| 16 | Registros | AIH tipo 5 | 663 | 663 | `IDENT` = 5 | ✅ |
+| 17 | Soma `VAL_TOT` | AIH tipo 5 | R$ 1.582.165,98 | R$ 1.582.165,98 | | ✅ |
+| 18 | Valor médio | AIH tipo 5 | R$ 2.386,37 | R$ 2.386,37 | | ✅ |
+| 19 | Permanência média | AIH tipo 5 | 27,90 | 27,90 (27,8989) | `DIAS_PERM` | 🟡 |
+| 20 | Óbitos | AIH tipo 5 | 8 | 8 | `MORTE` = 1 | 🟡 |
+| 21 | AIHs repetidas (ocorrências) | completa | 56 | 56 | registros excedentes | 🟡 |
+| 22 | AIHs repetidas (números distintos) | completa | 50 | 50 | | ✅ |
+| 23 | Concentração top 10% | ? | 58,20% | 57,74% (completa) · 58,27% (tipo 1) | critério não recuperado | 🔴 |
+| 24 | Cirúrgicos | AIH tipo 1 | 51,57% | 51,57% | participação no **valor**, grupo SIGTAP 04 | 🟡 |
+| 25 | Clínicos | AIH tipo 1 | 44,38% | 44,38% | participação no **valor**, grupo SIGTAP 03 | 🟡 |
+| 26 | Grupos com diferenças (preservação) | — | 0 | 0 | redefinido: impressão digital das colunas originais idêntica em bruto e tratado | 🟡 |
+
+Tabela gerada com valores exatos e definições completas:
+[`reports/indicators/reconciliation.md`](../reports/indicators/reconciliation.md). Detalhes em
+[`indicadores.md`](indicadores.md).
 
 ## Observações da Fase 2
 

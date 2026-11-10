@@ -4,11 +4,9 @@ Análise reproduzível de dados públicos de internações hospitalares do Siste
 (SUS), a partir do **SIH/SUS — Sistema de Informações Hospitalares**, disponibilizado pelo
 DATASUS, para o estado do **Rio de Janeiro**, competência **janeiro de 2024**.
 
-> **Status:** projeto em **reconstrução**. Fases 1 e 2 concluídas tecnicamente (branch
-> `work/hospital-analytics-reconstruction`, aguardando revisão para merge); próxima: Fase 3 (auditoria).
-> O projeto original foi perdido junto com o computador em que estava; esta versão está sendo
-> reconstruída a partir da documentação e dos indicadores recuperados, com cada resultado
-> reconciliado contra os valores históricos. Ver [`docs/historico_recuperado.md`](docs/historico_recuperado.md).
+> **Status:** projeto em **reconstrução** no branch `work/hospital-analytics-reconstruction`.
+> Fases 1–2 concluídas; Fases 3–4 (auditoria, camada tratada, indicadores) implementadas e
+> pendentes de revisão; Fase 5 (análises) em andamento.
 
 ## Objetivo
 
@@ -76,8 +74,8 @@ Detalhes em [`docs/pipeline_dados.md`](docs/pipeline_dados.md) e
 
 - [x] Fase 1 — Estrutura, ambiente e documentação base
 - [x] Fase 2 — Recuperação dos dados (download oficial, checksum, Parquet)
-- [ ] Fase 3 — Auditoria e tratamento
-- [ ] Fase 4 — Reprodução e reconciliação dos indicadores
+- [x] Fase 3 — Auditoria e tratamento (implementada; revisão pendente)
+- [x] Fase 4 — Reprodução e reconciliação dos indicadores (implementada; revisão pendente)
 - [ ] Fase 5 — SQL (DuckDB) e análises
 - [ ] Fase 6 — Documentação final e portfólio
 

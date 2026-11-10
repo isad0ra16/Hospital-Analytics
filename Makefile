@@ -1,4 +1,4 @@
-.PHONY: help install install-notebook test lint format check fetch-data verify convert validate processed audit indicators pipeline
+.PHONY: help install install-notebook test lint format check fetch-data verify convert validate processed audit indicators analysis pipeline
 
 help:  ## List available targets
 	@grep -E '^[a-zA-Z_-]+:.*?## ' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "  %-18s %s\n", $$1, $$2}'
@@ -43,4 +43,7 @@ audit:  ## Read-only data audit -> reports/audit/
 indicators:  ## Historical indicators, pandas x DuckDB -> reports/indicators/
 	uv run hospital-analytics indicators
 
-pipeline: convert validate processed audit indicators  ## Everything after fetch-data
+analysis:  ## Descriptive exploratory analyses -> reports/analysis/
+	uv run hospital-analytics analysis
+
+pipeline: convert validate processed audit indicators analysis  ## Everything after fetch-data

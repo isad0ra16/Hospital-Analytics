@@ -1,0 +1,54 @@
+# ---------------------------------------------------------------------------
+# Data: never versioned. Every file under data/ is reproduced by the pipeline
+# from the official DATASUS source. Allow-list approach: ignore everything,
+# then re-include only directory placeholders and documentation.
+# ---------------------------------------------------------------------------
+data/**
+!data/**/
+!data/**/.gitkeep
+!data/README.md
+!data/MANIFEST.json
+
+# Raw/large data formats anywhere in the repository (defense in depth)
+*.dbc
+*.DBC
+*.dbf
+*.DBF
+*.parquet
+*.zip
+*.duckdb
+*.duckdb.wal
+
+# ---------------------------------------------------------------------------
+# Python
+# ---------------------------------------------------------------------------
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+*.egg-info/
+build/
+dist/
+.pytest_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+
+# ---------------------------------------------------------------------------
+# Jupyter
+# ---------------------------------------------------------------------------
+.ipynb_checkpoints/
+
+# ---------------------------------------------------------------------------
+# Secrets and local configuration
+# ---------------------------------------------------------------------------
+.env
+.env.*
+
+# ---------------------------------------------------------------------------
+# OS / editors
+# ---------------------------------------------------------------------------
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/

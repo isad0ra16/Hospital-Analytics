@@ -4,7 +4,8 @@ Análise reproduzível de dados públicos de internações hospitalares do Siste
 (SUS), a partir do **SIH/SUS — Sistema de Informações Hospitalares**, disponibilizado pelo
 DATASUS, para o estado do **Rio de Janeiro**, competência **janeiro de 2024**.
 
-> **Status:** projeto em **reconstrução** — Fase 1 de 6 concluída (estrutura e ambiente); próxima: Fase 2 (dados).
+> **Status:** projeto em **reconstrução** — Fase 2 de 6 (dados): base bruta recuperada e validada;
+> aguardando revisão.
 > O projeto original foi perdido junto com o computador em que estava; esta versão está sendo
 > reconstruída a partir da documentação e dos indicadores recuperados, com cada resultado
 > reconciliado contra os valores históricos. Ver [`docs/historico_recuperado.md`](docs/historico_recuperado.md).
@@ -34,7 +35,8 @@ versionados neste repositório: são baixados da fonte oficial e regenerados pel
 
 ```text
 ├── config/params.yaml        # parâmetros da fonte e referências históricas de reconciliação
-├── data/                     # NÃO versionado: raw/ (imutável) e processed/
+├── data/                     # dados NÃO versionados; só MANIFEST.json e README
+├── scripts/                  # recuperação dos dados (fetch_source.sh)
 ├── docs/                     # histórico recuperado, decisões, dicionário, reconciliação
 ├── notebooks/                # apresentação dos resultados (lógica fica em src/)
 ├── reports/                  # saídas finais
@@ -52,7 +54,16 @@ make install   # cria .venv com as versões exatas do uv.lock
 make check     # lint + testes
 ```
 
-As etapas de coleta e processamento dos dados serão adicionadas a partir da Fase 2.
+Dados (não versionados; recuperados da Release `data-rdrj2401` e conferidos pelo SHA-256):
+
+```bash
+make fetch-data   # baixa o RDRJ2401.dbc original e verifica a integridade
+make convert      # converte para Parquet sem tratamento (camada bruta)
+make validate     # 73.046 registros · 113 colunas · VAL_TOT R$ 125.440.636,13
+```
+
+Detalhes em [`docs/pipeline_dados.md`](docs/pipeline_dados.md) e
+[`docs/recuperacao_dados.md`](docs/recuperacao_dados.md).
 
 ## Princípios
 
@@ -76,6 +87,8 @@ As etapas de coleta e processamento dos dados serão adicionadas a partir da Fas
 - [Decisões metodológicas](docs/decisoes_metodologicas.md)
 - [Dicionário de variáveis](docs/dicionario_variaveis.md)
 - [Reconciliação dos indicadores](docs/reconciliacao.md)
+- [Pipeline de dados](docs/pipeline_dados.md)
+- [Recuperação dos dados](docs/recuperacao_dados.md)
 
 ## Autoria
 

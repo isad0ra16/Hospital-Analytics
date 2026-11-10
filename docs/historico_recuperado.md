@@ -22,6 +22,9 @@ Legenda: ✅ informação histórica registrada · ❓ hipótese ou critério a 
 
 Os campos `ANO_CMPT`, `MES_CMPT`, `DT_INTER` e `DT_SAIDA` eram tratados separadamente. ✅
 
+> **Fase 2:** registros, colunas e soma de `VAL_TOT` foram reproduzidos exatamente a partir do
+> arquivo baixado novamente em 2026-11-09. Ver [`reconciliacao.md`](reconciliacao.md).
+
 ## 2. Estrutura anterior (mínima conhecida)
 
 ```text

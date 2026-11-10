@@ -74,6 +74,63 @@ testadas; o notebook importa e apresenta resultados.
 **Decisão:** `user.name`/`user.email` configurados **apenas neste repositório** (`git config` local),
 com endereço noreply do GitHub, sem expor e-mail pessoal no histórico público.
 
+## D-011 — Obtenção do arquivo original fora do ambiente de execução
+**Status:** Adotada (Fase 2)
+**Contexto:** o ambiente em nuvem não alcança o DATASUS: mesmo com o host liberado no proxy, o
+servidor não responde nas portas 21 (FTP), 80 e 443 a partir da infraestrutura de saída.
+**Decisão:** a autora baixou o `.dbc` do FTP oficial em conexão brasileira, publicou-o sem
+modificação como asset da Release `data-rdrj2401` e o ambiente o obteve pela API REST do GitHub.
+**Evidência de integridade:** SHA-256 idêntico calculado de forma independente pela autora, pelo
+GitHub (digest do asset) e neste ambiente.
+
+## D-012 — Camada bruta 100% texto, sem inferência de tipos
+**Status:** Adotada (Fase 2)
+**Decisão:** todas as 113 colunas são gravadas como `string` não anulável, com o valor exatamente
+como no DBF, apenas sem os espaços de preenchimento da largura fixa. Campos vazios são `""`.
+O tipo DBF original de cada campo é preservado nos metadados do Parquet.
+**Motivo:** inferir tipos apagaria zeros à esquerda de códigos e introduziria `float` em valores
+monetários; interpretar campos é tratamento e depende do dicionário oficial (Fase 3).
+
+## D-013 — Arrow como etapa "DataFrame" da conversão
+**Status:** Adotada (Fase 2)
+**Decisão:** a tabela em memória é construída diretamente em Apache Arrow com esquema explícito,
+em lotes de 10.000 registros; o pandas é usado para leitura (`read_raw_dataframe`).
+**Motivo:** o pandas infere tipos ao construir DataFrames; o Arrow permite declarar o esquema.
+
+## D-014 — Verificação independente de cada ferramenta de baixo nível
+**Status:** Adotada (Fase 2)
+**Contexto:** a leitura do código-fonte mostrou que `pyreaddbc.dbc2dbf` apenas imprime erros
+(pode deixar `.dbf` vazio ou truncado) e que o `dbfread` pula em silêncio registros com marcador
+desconhecido.
+**Decisão:** tamanho exato do `.dbf` conferido com o cabeçalho; ativos + excluídos conferidos com a
+contagem declarada; Parquet relido e comparado pela impressão digital do conteúdo.
+
+## D-015 — Impressão digital do conteúdo como prova de preservação
+**Status:** Adotada (Fase 2)
+**Decisão:** SHA-256 sobre colunas e valores (com prefixo de comprimento), calculado durante a
+leitura do DBF e recalculado sobre o Parquet; ambos registrados e comparados.
+**Motivo:** o SHA-256 do arquivo Parquet depende da biblioteca e da compressão; a impressão
+digital depende apenas dos dados.
+
+## D-016 — Imutabilidade e escrita segura
+**Status:** Adotada (Fase 2)
+**Decisão:** arquivos nunca são sobrescritos (o pipeline recusa destinos existentes); saídas são
+escritas em `.partial` e renomeadas atomicamente após verificação; fonte e Parquet ficam com
+permissão somente leitura; uma fonte registrada no manifesto não pode ser substituída por outro
+conteúdo com o mesmo caminho.
+
+## D-017 — Registros marcados como excluídos interrompem a conversão
+**Status:** Adotada (Fase 2)
+**Decisão:** se o DBF tiver registros com marcador `*`, a conversão para e exige decisão explícita.
+**Situação real:** `RDRJ2401` tem 0 registros excluídos (73.046 ativos = 73.046 declarados).
+
+## D-018 — Manifesto e recuperação dos dados
+**Status:** Adotada (Fase 2)
+**Decisão:** `data/MANIFEST.json` (versionado) registra fonte, cópia arquivada, datas, tamanhos,
+SHA-256, versão dos dados (data de atualização do cabeçalho DBF: 2025-02-08), ferramentas e
+impressões digitais. Recuperação: `make fetch-data` (Release → verificação). Ver
+[`recuperacao_dados.md`](recuperacao_dados.md).
+
 ---
 
 ## Decisões pendentes
@@ -85,5 +142,6 @@ com endereço noreply do GitHub, sem expor e-mail pessoal no histórico público
 | P-003 | Conversão de idade (`COD_IDADE`) | P-001 + testes na Fase 4 |
 | P-004 | Critério de concentração de gastos (top 10%) | Fase 4 |
 | P-005 | Campo de classificação clínico/cirúrgico | Fase 4 |
-| P-006 | Papel de cada arquivo Parquet (`raw` / `processed` / `_tratado`) | Fase 2–3 |
+| P-006 | Papel de cada arquivo Parquet. **Parcial:** `data/raw/RDRJ2401.parquet` = conversão direta sem tratamento (D-012). Pendentes: `processed/sih_rj_2024_01*.parquet` | Fase 3 |
 | P-007 | Licença do projeto | Antes da Fase 6 |
+| P-008 | **Encoding: Latin-1 ou CP850.** O cabeçalho DBF declara *language driver* `0x02` = CP850. Em `AUD_JUST`, 23 valores têm bytes `0x90`/`0xA0`: em CP850 viram `É`/`á` (plausível); em Latin-1, caracteres de controle. Nenhum outro campo tem bytes não ASCII. Ambos os encodings são reversíveis (nenhum byte foi perdido), mas a exibição atual desses 23 valores está incorreta. **Recomendação:** adotar CP850, conforme declarado no arquivo, e regenerar a camada bruta. Não afeta contagens nem `VAL_TOT` | Aprovação da autora |

@@ -11,9 +11,20 @@ source:
   # Official DATASUS FTP directory. To be re-verified at the start of Phase 2.
   url_dir: ftp://ftp.datasus.gov.br/dissemin/publicos/SIHSUS/200801_/Dados/
 
+  # Archived copy of the exact file used (GitHub Release asset, outside git history).
+  archive_release_tag: data-rdrj2401
+
 paths:                     # relative to the project root
   raw: data/raw
   processed: data/processed
+  manifest: data/MANIFEST.json
+
+raw_conversion:
+  # Latin-1 maps every byte to one character: decoding never fails and is reversible.
+  encoding: latin-1
+  # Direct, untreated conversion of the .dbc (same name as in the original project).
+  parquet_filename: RDRJ2401.parquet
+  money_column: VAL_TOT
 
 # ---------------------------------------------------------------------------
 # Historical reference values

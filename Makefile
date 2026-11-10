@@ -1,0 +1,23 @@
+.PHONY: help install install-notebook test lint format check
+
+help:  ## List available targets
+	@grep -E '^[a-zA-Z_-]+:.*?## ' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "  %-18s %s\n", $$1, $$2}'
+
+install:  ## Create .venv with the exact locked dependencies (runtime + dev)
+	uv sync --locked
+
+install-notebook:  ## Also install Jupyter
+	uv sync --locked --group notebook
+
+test:  ## Run the test suite
+	uv run pytest
+
+lint:  ## Static checks (no changes)
+	uv run ruff check .
+	uv run ruff format --check .
+
+format:  ## Auto-format code
+	uv run ruff format .
+	uv run ruff check --fix .
+
+check: lint test  ## Everything that must pass before a commit

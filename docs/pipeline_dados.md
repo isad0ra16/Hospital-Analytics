@@ -38,7 +38,7 @@ make verify       # confere todos os arquivos do manifesto
 | Valores | Texto de largura fixa | Mesmo texto, sem espaços de preenchimento | Preenchimento é formato, não dado |
 | Tipos | `C` (caractere) e `N` (numérico) | **Todas** as colunas `string` | Nenhuma inferência de tipo; zeros à esquerda e casas decimais preservados. O tipo DBF original de cada campo fica nos metadados do Parquet |
 | Nulos | Não existem: campo vazio = espaços | Campo vazio = `""`; colunas declaradas não anuláveis | Converter vazio em nulo é tratamento (Fase 3) |
-| Encoding | Bytes | Decodificados como Latin-1 (reversível) | Ver pendência P-008 sobre CP850 |
+| Encoding | Bytes (cabeçalho declara CP850, *language driver* `0x02`) | Decodificados em **CP850** (reversível para os 256 bytes) | D-019; conversão recusa encoding que contradiga o cabeçalho |
 | Ordem | Ordem física dos registros | Mesma ordem | A impressão digital do conteúdo depende da ordem |
 | Registros excluídos (`*`) | Podem existir | Conversão é **interrompida** se houver | Exige decisão explícita; RDRJ2401 tem 0 |
 
@@ -63,6 +63,10 @@ As ferramentas de baixo nível não sinalizam alguns erros, então cada etapa te
 - **Impressão digital do conteúdo** (`ContentFingerprint`): SHA-256 sobre nomes de colunas e valores,
   na ordem, com prefixo de comprimento em cada valor. Prova que o Parquet contém exatamente os
   valores do DBF. Não depende de compressão nem da versão da biblioteca que escreveu o Parquet.
+- **Impressão digital dos bytes brutos**: o mesmo cálculo sobre os bytes de cada campo (sem
+  preenchimento), antes de decodificar. Não depende do encoding; é recalculável a partir do
+  Parquet recodificando o texto (`parquet_fingerprint(..., encode_with="cp850")`), porque o
+  espaço é o único byte que decodifica para `" "`. Prova que reinterpretar texto nunca altera dados.
 
 ## Testes com dados sintéticos
 

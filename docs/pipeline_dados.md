@@ -75,3 +75,55 @@ com valores fictícios. Nenhum resultado sintético representa o Hospital Analyt
 `.dbc` sintéticos, foi implementado um compressor mínimo PKWare DCL (apenas literais), derivado
 do decodificador `blast.c` usado pela `pyreaddbc`; o teste `test_roundtrip_is_byte_identical`
 comprova que o `dbc2dbf` real reconstrói o DBF original byte a byte.
+
+---
+
+# Camada tratada (Fase 3)
+
+Arquivo: `data/processed/sih_rj_2024_01_tratado.parquet` · Código: `processed.py` ·
+Comando: `make processed` · Decisões: D-020 a D-024.
+
+**Convenção:** colunas em `MAIÚSCULAS` são os 113 campos originais, copiados sem nenhuma alteração
+(a impressão digital dessas colunas é verificada e registrada no manifesto: idêntica à da camada
+bruta). Colunas em `minúsculas` são derivadas. Nenhum registro é removido, filtrado ou reordenado.
+Nomes derivados não podem coincidir com originais **ignorando maiúsculas** (o DuckDB resolve nomes
+sem distinguir caixa), o que é verificado no build.
+
+## Conversões de formato (reversíveis, verificadas linha a linha)
+
+| Coluna | Tipo | Origem | Regra |
+|---|---|---|---|
+| `<campo>_cents` | int64 | cada campo DBF `N` com 2 decimais (ex.: `VAL_TOT` → `val_tot_cents`) | texto → centavos inteiros; reconversão deve reproduzir o texto |
+| `<campo>_int` | int64 | cada campo DBF `N` sem decimais (ex.: `DIAS_PERM` → `dias_perm_int`, `IDADE` → `idade_int`) | texto → inteiro; reconversão deve reproduzir o texto |
+| `competence` | string | `ANO_CMPT`, `MES_CMPT` | `AAAA-MM` |
+| `admission_date` | date | `DT_INTER` | `AAAAMMDD` → data; inválida → nula e contada |
+| `discharge_date` | date | `DT_SAIDA` | idem |
+| `birth_date` | date | `NASC` | idem |
+| `discharge_year` | int16 | `DT_SAIDA` | ano de `discharge_date` |
+
+**Precisão reduzida pela largura do campo:** em `VAL_UTI` (`N8.2`), o valor `166200.00` não cabe em 8
+caracteres e o sistema de origem gravou `166200.0`. Esse caso é aceito **somente** quando a forma
+completa excede a largura e difere apenas por zeros finais; é contado no manifesto
+(`reduced_precision_values`). Qualquer outro formato interrompe o build.
+
+## Colunas estruturais (sem interpretação de códigos)
+
+| Coluna | Tipo | Origem | Regra |
+|---|---|---|---|
+| `los_days_from_dates` | int32 | `DT_INTER`, `DT_SAIDA` | `discharge_date − admission_date` em dias |
+| `proc_rea_group` | string | `PROC_REA` | 2 primeiros caracteres (grupo SIGTAP) |
+| `aih_occurrences` | int32 | `N_AIH` | nº de registros com o mesmo número de AIH |
+| `aih_repeated` | bool | `N_AIH` | `aih_occurrences > 1` — **apenas sinaliza; nada é removido** |
+
+## Interpretações de códigos (dependem do dicionário — `dictionary.py`)
+
+| Coluna | Tipo | Origem | Regra | Fonte |
+|---|---|---|---|---|
+| `age_unit` | string | `COD_IDADE` | rótulo do código | secundária |
+| `age_years` | float64 | `COD_IDADE`, `IDADE` | 2: `IDADE/365,25` · 3: `IDADE/12` · 4: `IDADE` · 5: `100 + IDADE` · outros: nulo | secundária |
+| `died` | bool | `MORTE` | `MORTE = '1'` | secundária |
+| `ident_label` | string | `IDENT` | rótulo do código | secundária |
+| `proc_rea_group_label` | string | `PROC_REA` | rótulo do grupo SIGTAP | conhecimento prévio |
+
+"Secundária" = pacote `microdatasus`; a fonte primária (Informe Técnico SIH/SUS) não pôde ser
+consultada deste ambiente. Ver [`dicionario_variaveis.md`](dicionario_variaveis.md).

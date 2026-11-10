@@ -5,11 +5,12 @@ import json
 import pyarrow as pa
 import pyarrow.parquet as pq
 import pytest
-from synthetic_data import SYNTHETIC_FIELDS, build_dbc, build_dbf, write
+from synthetic_data import SYNTHETIC_FIELDS, FieldSpec, build_dbc, build_dbf, write
 
 from hospital_analytics.convert import (
     METADATA_KEY,
     DeletedRecordsError,
+    EncodingMismatchError,
     IntegrityError,
     convert_dbc_to_parquet,
     parquet_fingerprint,
@@ -92,3 +93,28 @@ def test_deleted_records_stop_conversion(tmp_path, rows):
         convert_dbc_to_parquet(src, out)
     assert not out.exists()
     assert not (tmp_path / "d.parquet.partial").exists()
+
+
+def test_encoding_contradicting_the_header_is_refused(tmp_path, rows):
+    dbf = build_dbf(SYNTHETIC_FIELDS, rows, language_driver=0x02)  # declares CP850
+    src = write(tmp_path / "e.dbc", build_dbc(dbf))
+    out = tmp_path / "e.parquet"
+    with pytest.raises(EncodingMismatchError, match="cp850"):
+        convert_dbc_to_parquet(src, out, encoding="latin-1")
+    assert not out.exists()
+    assert convert_dbc_to_parquet(src, out, encoding="cp850").dbf_declared_encoding == "cp850"
+
+
+def test_byte_fingerprint_does_not_depend_on_encoding(tmp_path):
+    """Re-interpreting text changes the text fingerprint, never the raw-bytes fingerprint."""
+    fields = [FieldSpec("AUD_JUST", "C", 10)]
+    dbf = build_dbf(fields, [["MÉDICA"], ["SEM ACENTO"]], encoding="cp850")
+    src = write(tmp_path / "s.dbc", build_dbc(dbf))
+    as_latin1 = convert_dbc_to_parquet(src, tmp_path / "l.parquet", encoding="latin-1")
+    as_cp850 = convert_dbc_to_parquet(src, tmp_path / "c.parquet", encoding="cp850")
+    assert as_latin1.raw_bytes_fingerprint == as_cp850.raw_bytes_fingerprint
+    assert as_latin1.content_fingerprint != as_cp850.content_fingerprint
+    assert pq.read_table(tmp_path / "c.parquet").column(0).to_pylist()[0] == "MÉDICA"
+    assert parquet_fingerprint(tmp_path / "l.parquet", encode_with="latin-1").hexdigest() == (
+        as_cp850.raw_bytes_fingerprint
+    )

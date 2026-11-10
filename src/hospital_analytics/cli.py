@@ -15,6 +15,7 @@ from pathlib import Path
 from hospital_analytics.config import load_params, project_root, to_money
 from hospital_analytics.convert import (
     DeletedRecordsError,
+    EncodingMismatchError,
     IntegrityError,
     convert_dbc_to_parquet,
 )
@@ -115,7 +116,9 @@ def cmd_convert(args: argparse.Namespace) -> int:
         encoding=load_params()["raw_conversion"]["encoding"],
         expected_source_sha256=entry["sha256"],
     )
-    record_derived(manifest, _key(destination, root), source_key, report)
+    record_derived(
+        manifest, _key(destination, root), source_key, report, supersede_reason=args.supersede
+    )
     destination.chmod(READ_ONLY)
     save_manifest(manifest, manifest_path)
 
@@ -126,6 +129,9 @@ def cmd_convert(args: argparse.Namespace) -> int:
         "dbf_header_records": report.dbf_header_records,
         "dbf_last_update": report.dbf_last_update,
         "content_fingerprint": report.content_fingerprint,
+        "raw_bytes_fingerprint": report.raw_bytes_fingerprint,
+        "encoding": report.encoding,
+        "dbf_declared_encoding": report.dbf_declared_encoding,
         "columns_with_non_ascii_bytes": {k: v for k, v in report.non_ascii_counts.items() if v},
         "columns_entirely_blank": [
             k for k, v in report.blank_counts.items() if v == report.records
@@ -208,6 +214,11 @@ def build_parser() -> argparse.ArgumentParser:
     p = sub.add_parser("convert", help="untreated .dbc -> Parquet conversion (raw layer)")
     p.add_argument("--source", type=Path)
     p.add_argument("--destination", type=Path)
+    p.add_argument(
+        "--supersede",
+        metavar="REASON",
+        help="replace a manifest entry with different content; the old entry is kept in history",
+    )
     p.set_defaults(func=cmd_convert)
 
     p = sub.add_parser("validate", help="validate the raw Parquet (exit code 1 on divergence)")
@@ -231,6 +242,7 @@ def main(argv: list[str] | None = None) -> int:
         ManifestError,
         IntegrityError,
         DeletedRecordsError,
+        EncodingMismatchError,
         DbcError,
         DbfError,
         FileExistsError,

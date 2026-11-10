@@ -40,7 +40,7 @@ def test_all_checks_pass_on_matching_targets(setup):
     out, targets, derived = setup
     report = validate_raw_parquet(out, targets, derived_entry=derived)
     assert report.passed, report.format_table()
-    assert len(report.checks) == 10  # 2 shape + 2 type + 3 money + 3 preservation
+    assert len(report.checks) == 11  # 2 shape + 2 type + 3 money + 4 preservation
 
 
 @pytest.mark.parametrize(
@@ -73,6 +73,7 @@ def test_tampered_parquet_fails_preservation(tmp_path, setup):
     assert failed(report) == {
         "parquet SHA-256 == manifest",
         "content fingerprint == manifest (DBF values preserved)",
+        "raw bytes fingerprint == manifest (original bytes preserved)",
     }
 
 

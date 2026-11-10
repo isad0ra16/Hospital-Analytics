@@ -73,12 +73,16 @@ def build_dbf(
     encoding: str = "latin-1",
     eof_marker: bool = True,
     declared_records: int | None = None,
+    language_driver: int = 0x00,
 ) -> bytes:
     """Build a dBase III file in memory. ``deleted`` holds row indexes flagged with '*'."""
     headerlen = 32 + 32 * len(fields) + 1
     recordlen = 1 + sum(f.length for f in fields)
     n = len(rows) if declared_records is None else declared_records
-    header = struct.pack("<BBBBIHH20x", 0x03, 125, 2, 8, n, headerlen, recordlen)
+    # 20 reserved bytes; the "language driver" (code page) is byte 29 of the header.
+    header = struct.pack(
+        "<BBBBIHH17xB2x", 0x03, 125, 2, 8, n, headerlen, recordlen, language_driver
+    )
     for f in fields:
         header += struct.pack(
             "<11sc4xBB14x",

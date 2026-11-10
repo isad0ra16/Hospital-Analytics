@@ -2,8 +2,9 @@
 
 Values are returned exactly as stored, decoded as text:
 
-* bytes are decoded with Latin-1 by default. Latin-1 maps every byte 0-255 to exactly one
-  character, so decoding never fails and is fully reversible (no information is lost);
+* bytes are decoded with the code page declared in the DBF header ("language driver" byte).
+  DATASUS files declare 0x02 = CP850 (MS-DOS Latin-1). CP850, like Latin-1, maps every byte
+  0-255 to exactly one character: decoding never fails and is fully reversible;
 * only the fixed-width padding (ASCII spaces at both ends) is removed. DBF has no NULL:
   a blank field becomes the empty string ``""``. Interpreting blanks as missing values is a
   treatment and belongs to a later phase.
@@ -23,8 +24,15 @@ from dbfread import DBF
 
 from hospital_analytics.dbc import check_dbf_size, read_dbf_header
 
-DEFAULT_ENCODING = "latin-1"
-PADDING = " "
+# dBase "language driver" byte (header offset 29) -> Python codec.
+LANGUAGE_DRIVER_ENCODINGS = {0x01: "cp437", 0x02: "cp850", 0x03: "cp1252"}
+DEFAULT_ENCODING = "cp850"  # declared by DATASUS SIH/SUS files (language driver 0x02)
+PADDING = b" "
+
+
+def declared_encoding(language_driver: int) -> str | None:
+    """Encoding declared by the DBF header, or None if the header does not declare one."""
+    return LANGUAGE_DRIVER_ENCODINGS.get(language_driver)
 
 
 class DbfError(Exception):
@@ -104,6 +112,16 @@ def iter_raw_rows(path: Path, encoding: str = DEFAULT_ENCODING) -> Iterator[list
         yield list(record.values())
 
 
+def strip_padding(raw: bytes) -> bytes:
+    """Remove fixed-width space padding (byte 0x20 at both ends), nothing else."""
+    return raw.strip(PADDING)
+
+
 def decode_value(raw: bytes, encoding: str = DEFAULT_ENCODING) -> str:
-    """Decode one raw field and remove fixed-width space padding (nothing else)."""
-    return raw.decode(encoding).strip(PADDING)
+    """Decode one raw field without its padding.
+
+    Byte 0x20 is the only byte that decodes to " " in the supported code pages, so
+    ``decode_value(raw).encode(encoding) == strip_padding(raw)``: the stored text can always
+    be turned back into the original bytes.
+    """
+    return strip_padding(raw).decode(encoding)

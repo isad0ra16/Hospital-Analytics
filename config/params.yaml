@@ -1,0 +1,80 @@
+# Project parameters.
+# Monetary values are stored as STRINGS on purpose: YAML floats cannot represent
+# cents exactly. Code must parse them with decimal.Decimal.
+
+source:
+  system: SIH/SUS
+  file_type: RD            # AIH Reduzida (approved hospital admission records)
+  uf: RJ
+  competence: "2024-01"    # processing month; NOT admission or discharge month
+  filename: RDRJ2401.dbc
+  # Official DATASUS FTP directory. To be re-verified at the start of Phase 2.
+  url_dir: ftp://ftp.datasus.gov.br/dissemin/publicos/SIHSUS/200801_/Dados/
+
+paths:                     # relative to the project root
+  raw: data/raw
+  processed: data/processed
+
+# ---------------------------------------------------------------------------
+# Historical reference values
+# Provenance: recovered from previous ChatGPT conversations; the original code
+# and data were lost. These are RECONCILIATION TARGETS, not ground truth:
+# results must never be adjusted to match them.
+#
+# status:
+#   recorded            value recorded in the history; criterion believed known
+#   needs_verification  value recorded but an inconsistency was found
+#   criterion_unknown   value recorded but its calculation criterion is unknown
+# ---------------------------------------------------------------------------
+historical_reference:
+  full_base:
+    records: {value: 73046, status: recorded}
+    columns: {value: 113, status: recorded}
+    val_tot_sum: {value: "125440636.13", status: recorded}
+    mean_length_of_stay_days: {value: 6.12, status: criterion_unknown,
+                               note: "Field not recorded (DIAS_PERM, QT_DIARIAS or date difference)."}
+    mean_age_years: {value: 43.96, status: criterion_unknown,
+                     note: "COD_IDADE handling not recorded."}
+    mean_val_tot: {value: "1717.28", status: recorded}
+    deaths: {value: 4664, status: recorded}
+    crude_mortality_pct: {value: 6.38, status: needs_verification,
+                          note: "4664/73046 = 6.3850% rounds to 6.39%, not 6.38%."}
+
+  # Records by AIH type (IDENT field). Labels are the historical ones;
+  # official naming to be confirmed against DATASUS documentation (Phase 3).
+  by_ident:
+    "1":
+      label_historical: normal
+      records: {value: 72383, status: recorded}
+      val_tot_sum: {value: "123858470.15", status: recorded}
+      mean_val_tot: {value: "1711.15", status: recorded}
+      mean_length_of_stay_days: {value: 5.93, status: criterion_unknown}
+      deaths: {value: 4656, status: recorded}
+    "5":
+      label_historical: continuidade
+      records: {value: 663, status: recorded}
+      val_tot_sum: {value: "1582165.98", status: recorded}
+      mean_val_tot: {value: "2386.37", status: recorded}
+      mean_length_of_stay_days: {value: 27.90, status: criterion_unknown}
+      deaths: {value: 8, status: recorded}
+
+  discharge_year:          # year of DT_SAIDA
+    "2023": {value: 29279, status: recorded}
+    "2024": {value: 43767, status: recorded}
+
+  repeated_aih_numbers:
+    occurrences: {value: 56, status: criterion_unknown,
+                  note: "Hypothesis: excess rows (duplicated keep='first'), since 50 repeated numbers need >= 100 rows."}
+    distinct_numbers: {value: 50, status: recorded}
+
+  spending_concentration_top10_pct: {value: 58.20, status: criterion_unknown,
+                                     note: "Unknown: top-10% cutoff rounding, ties, base (full/IDENT 1), value field."}
+
+  admission_nature_pct:
+    surgical: {value: 51.57, status: criterion_unknown}
+    clinical: {value: 44.38, status: criterion_unknown}
+    note: "Field, denominator and filters unknown. Sum = 95.95%; 4.05% in other categories."
+
+  field_preservation:
+    groups_with_differences: {value: 0, status: criterion_unknown,
+                              note: "Groups compared were not recorded; check will be redefined."}

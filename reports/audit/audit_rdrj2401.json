@@ -1,0 +1,3142 @@
+{
+  "source": "RDRJ2401.parquet",
+  "records": 73046,
+  "columns": 113,
+  "entirely_blank_columns": [
+    "NUM_PROC",
+    "CPF_AUT",
+    "GESTOR_DT",
+    "INFEHOSP",
+    "DIAGSEC8",
+    "DIAGSEC9"
+  ],
+  "profiles": [
+    {
+      "name": "UF_ZI",
+      "dbf_type": "C",
+      "dbf_length": 6,
+      "dbf_decimals": 0,
+      "blank": 0,
+      "blank_pct": 0.0,
+      "distinct": 81,
+      "min_length": 6,
+      "max_length": 6,
+      "top_values": [
+        [
+          "330455",
+          22616
+        ],
+        [
+          "330000",
+          11278
+        ],
+        [
+          "330170",
+          4473
+        ],
+        [
+          "330100",
+          3109
+        ],
+        [
+          "330350",
+          2391
+        ]
+      ],
+      "codes_outside_codebook": null
+    },
+    {
+      "name": "ANO_CMPT",
+      "dbf_type": "C",
+      "dbf_length": 4,
+      "dbf_decimals": 0,
+      "blank": 0,
+      "blank_pct": 0.0,
+      "distinct": 1,
+      "min_length": 4,
+      "max_length": 4,
+      "top_values": [
+        [
+          "2024",
+          73046
+        ]
+      ],
+      "codes_outside_codebook": null
+    },
+    {
+      "name": "MES_CMPT",
+      "dbf_type": "C",
+      "dbf_length": 2,
+      "dbf_decimals": 0,
+      "blank": 0,
+      "blank_pct": 0.0,
+      "distinct": 1,
+      "min_length": 2,
+      "max_length": 2,
+      "top_values": [
+        [
+          "01",
+          73046
+        ]
+      ],
+      "codes_outside_codebook": null
+    },
+    {
+      "name": "ESPEC",
+      "dbf_type": "C",
+      "dbf_length": 2,
+      "dbf_decimals": 0,
+      "blank": 0,
+      "blank_pct": 0.0,
+      "distinct": 12,
+      "min_length": 2,
+      "max_length": 2,
+      "top_values": [
+        [
+          "01",
+          25935
+        ],
+        [
+          "03",
+          25437
+        ],
+        [
+          "02",
+          11618
+        ],
+        [
+          "07",
+          6541
+        ],
+        [
+          "09",
+          1770
+        ]
+      ],
+      "codes_outside_codebook": [
+        "10",
+        "14",
+        "87"
+      ]
+    },
+    {
+      "name": "CGC_HOSP",
+      "dbf_type": "C",
+      "dbf_length": 14,
+      "dbf_decimals": 0,
+      "blank": 22115,
+      "blank_pct": 30.2754,
+      "distinct": 158,
+      "min_length": 0,
+      "max_length": 14,
+      "top_values": [
+        [
+          "",
+          22115
+        ],
+        [
+          "29138278003208",
+          2371
+        ],
+        [
+          "29468055009673",
+          1910
+        ],
+        [
+          "33540014001714",
+          1637
+        ],
+        [
+          "28683712000171",
+          1521
+        ]
+      ],
+      "codes_outside_codebook": null
+    },
+    {
+      "name": "N_AIH",
+      "dbf_type": "C",
+      "dbf_length": 13,
+      "dbf_decimals": 0,
+      "blank": 0,
+      "blank_pct": 0.0,
+      "distinct": 72990,
+      "min_length": 13,
+      "max_length": 13,
+      "top_values": null,
+      "codes_outside_codebook": null
+    },
+    {
+      "name": "IDENT",
+      "dbf_type": "C",
+      "dbf_length": 1,
+      "dbf_decimals": 0,
+      "blank": 0,
+      "blank_pct": 0.0,
+      "distinct": 2,
+      "min_length": 1,
+      "max_length": 1,
+      "top_values": [
+        [
+          "1",
+          72383
+        ],
+        [
+          "5",
+          663
+        ]
+      ],
+      "codes_outside_codebook": []
+    },
+    {
+      "name": "CEP",
+      "dbf_type": "C",
+      "dbf_length": 8,
+      "dbf_decimals": 0,
+      "blank": 0,
+      "blank_pct": 0.0,
+      "distinct": 25855,
+      "min_length": 8,
+      "max_length": 8,
+      "top_values": null,
+      "codes_outside_codebook": null
+    },
+    {
+      "name": "MUNIC_RES",
+      "dbf_type": "C",
+      "dbf_length": 6,
+      "dbf_decimals": 0,
+      "blank": 0,
+      "blank_pct": 0.0,
+      "distinct": 262,
+      "min_length": 6,
+      "max_length": 6,
+      "top_values": [
+        [
+          "330455",
+          23000
+        ],
+        [
+          "330170",
+          4161
+        ],
+        [
+          "330490",
+          3846
+        ],
+        [
+          "330350",
+          3149
+        ],
+        [
+          "330100",
+          2889
+        ]
+      ],
+      "codes_outside_codebook": null
+    },
+    {
+      "name": "NASC",
+      "dbf_type": "C",
+      "dbf_length": 8,
+      "dbf_decimals": 0,
+      "blank": 0,
+      "blank_pct": 0.0,
+      "distinct": 27489,
+      "min_length": 8,
+      "max_length": 8,
+      "top_values": null,
+      "codes_outside_codebook": null
+    },
+    {
+      "name": "SEXO",
+      "dbf_type": "C",
+      "dbf_length": 1,
+      "dbf_decimals": 0,
+      "blank": 0,
+      "blank_pct": 0.0,
+      "distinct": 2,
+      "min_length": 1,
+      "max_length": 1,
+      "top_values": [
+        [
+          "3",
+          41545
+        ],
+        [
+          "1",
+          31501
+        ]
+      ],
+      "codes_outside_codebook": []
+    },
+    {
+      "name": "UTI_MES_IN",
+      "dbf_type": "N",
+      "dbf_length": 2,
+      "dbf_decimals": 0,
+      "blank": 0,
+      "blank_pct": 0.0,
+      "distinct": 1,
+      "min_length": 1,
+      "max_length": 1,
+      "top_values": [
+        [
+          "0",
+          73046
+        ]
+      ],
+      "codes_outside_codebook": null
+    },
+    {
+      "name": "UTI_MES_AN",
+      "dbf_type": "N",
+      "dbf_length": 2,
+      "dbf_decimals": 0,
+      "blank": 0,
+      "blank_pct": 0.0,
+      "distinct": 1,
+      "min_length": 1,
+      "max_length": 1,
+      "top_values": [
+        [
+          "0",
+          73046
+        ]
+      ],
+      "codes_outside_codebook": null
+    },
+    {
+      "name": "UTI_MES_AL",
+      "dbf_type": "N",
+      "dbf_length": 2,
+      "dbf_decimals": 0,
+      "blank": 0,
+      "blank_pct": 0.0,
+      "distinct": 1,
+      "min_length": 1,
+      "max_length": 1,
+      "top_values": [
+        [
+          "0",
+          73046
+        ]
+      ],
+      "codes_outside_codebook": null
+    },
+    {
+      "name": "UTI_MES_TO",
+      "dbf_type": "N",
+      "dbf_length": 3,
+      "dbf_decimals": 0,
+      "blank": 0,
+      "blank_pct": 0.0,
+      "distinct": 82,
+      "min_length": 1,
+      "max_length": 3,
+      "top_values": [
+        [
+          "0",
+          65883
+        ],
+        [
+          "1",
+          1224
+        ],
+        [
+          "2",
+          1103
+        ],
+        [
+          "3",
+          793
+        ],
+        [
+          "4",
+          591
+        ]
+      ],
+      "codes_outside_codebook": null
+    },
+    {
+      "name": "MARCA_UTI",
+      "dbf_type": "C",
+      "dbf_length": 2,
+      "dbf_decimals": 0,
+      "blank": 0,
+      "blank_pct": 0.0,
+      "distinct": 15,
+      "min_length": 2,
+      "max_length": 2,
+      "top_values": [
+        [
+          "00",
+          65883
+        ],
+        [
+          "75",
+          4946
+        ],
+        [
+          "81",
+          673
+        ],
+        [
+          "76",
+          595
+        ],
+        [
+          "74",
+          336
+        ]
+      ],
+      "codes_outside_codebook": null
+    },
+    {
+      "name": "UTI_INT_IN",
+      "dbf_type": "N",
+      "dbf_length": 2,
+      "dbf_decimals": 0,
+      "blank": 0,
+      "blank_pct": 0.0,
+      "distinct": 1,
+      "min_length": 1,
+      "max_length": 1,
+      "top_values": [
+        [
+          "0",
+          73046
+        ]
+      ],
+      "codes_outside_codebook": null
+    },
+    {
+      "name": "UTI_INT_AN",
+      "dbf_type": "N",
+      "dbf_length": 2,
+      "dbf_decimals": 0,
+      "blank": 0,
+      "blank_pct": 0.0,
+      "distinct": 1,
+      "min_length": 1,
+      "max_length": 1,
+      "top_values": [
+        [
+          "0",
+          73046
+        ]
+      ],
+      "codes_outside_codebook": null
+    },
+    {
+      "name": "UTI_INT_AL",
+      "dbf_type": "N",
+      "dbf_length": 2,
+      "dbf_decimals": 0,
+      "blank": 0,
+      "blank_pct": 0.0,
+      "distinct": 1,
+      "min_length": 1,
+      "max_length": 1,
+      "top_values": [
+        [
+          "0",
+          73046
+        ]
+      ],
+      "codes_outside_codebook": null
+    },
+    {
+      "name": "UTI_INT_TO",
+      "dbf_type": "N",
+      "dbf_length": 3,
+      "dbf_decimals": 0,
+      "blank": 0,
+      "blank_pct": 0.0,
+      "distinct": 43,
+      "min_length": 1,
+      "max_length": 2,
+      "top_values": [
+        [
+          "0",
+          72504
+        ],
+        [
+          "3",
+          60
+        ],
+        [
+          "2",
+          60
+        ],
+        [
+          "4",
+          43
+        ],
+        [
+          "5",
+          39
+        ]
+      ],
+      "codes_outside_codebook": null
+    },
+    {
+      "name": "DIAR_ACOM",
+      "dbf_type": "N",
+      "dbf_length": 3,
+      "dbf_decimals": 0,
+      "blank": 0,
+      "blank_pct": 0.0,
+      "distinct": 93,
+      "min_length": 1,
+      "max_length": 3,
+      "top_values": [
+        [
+          "0",
+          42887
+        ],
+        [
+          "2",
+          7069
+        ],
+        [
+          "1",
+          6536
+        ],
+        [
+          "3",
+          5046
+        ],
+        [
+          "4",
+          2399
+        ]
+      ],
+      "codes_outside_codebook": null
+    },
+    {
+      "name": "QT_DIARIAS",
+      "dbf_type": "N",
+      "dbf_length": 3,
+      "dbf_decimals": 0,
+      "blank": 0,
+      "blank_pct": 0.0,
+      "distinct": 115,
+      "min_length": 1,
+      "max_length": 3,
+      "top_values": [
+        [
+          "1",
+          16553
+        ],
+        [
+          "2",
+          14545
+        ],
+        [
+          "3",
+          9344
+        ],
+        [
+          "4",
+          5092
+        ],
+        [
+          "0",
+          4048
+        ]
+      ],
+      "codes_outside_codebook": null
+    },
+    {
+      "name": "PROC_SOLIC",
+      "dbf_type": "C",
+      "dbf_length": 10,
+      "dbf_decimals": 0,
+      "blank": 0,
+      "blank_pct": 0.0,
+      "distinct": 1128,
+      "min_length": 10,
+      "max_length": 10,
+      "top_values": [
+        [
+          "0310010039",
+          4234
+        ],
+        [
+          "0303010037",
+          3601
+        ],
+        [
+          "0411010034",
+          2938
+        ],
+        [
+          "0303140151",
+          2438
+        ],
+        [
+          "0415010012",
+          2275
+        ]
+      ],
+      "codes_outside_codebook": null
+    },
+    {
+      "name": "PROC_REA",
+      "dbf_type": "C",
+      "dbf_length": 10,
+      "dbf_decimals": 0,
+      "blank": 0,
+      "blank_pct": 0.0,
+      "distinct": 1094,
+      "min_length": 10,
+      "max_length": 10,
+      "top_values": [
+        [
+          "0310010039",
+          4250
+        ],
+        [
+          "0303010037",
+          3752
+        ],
+        [
+          "0411010034",
+          3087
+        ],
+        [
+          "0415010012",
+          2689
+        ],
+        [
+          "0303140151",
+          2494
+        ]
+      ],
+      "codes_outside_codebook": null
+    },
+    {
+      "name": "VAL_SH",
+      "dbf_type": "N",
+      "dbf_length": 13,
+      "dbf_decimals": 2,
+      "blank": 0,
+      "blank_pct": 0.0,
+      "distinct": 33261,
+      "min_length": 4,
+      "max_length": 9,
+      "top_values": [
+        [
+          "642.96",
+          635
+        ],
+        [
+          "817.69",
+          543
+        ],
+        [
+          "33.34",
+          459
+        ],
+        [
+          "97.72",
+          383
+        ],
+        [
+          "286.47",
+          370
+        ]
+      ],
+      "codes_outside_codebook": null
+    },
+    {
+      "name": "VAL_SP",
+      "dbf_type": "N",
+      "dbf_length": 13,
+      "dbf_decimals": 2,
+      "blank": 0,
+      "blank_pct": 0.0,
+      "distinct": 11727,
+      "min_length": 4,
+      "max_length": 8,
+      "top_values": [
+        [
+          "72.22",
+          2364
+        ],
+        [
+          "276.43",
+          2287
+        ],
+        [
+          "241.00",
+          1505
+        ],
+        [
+          "23.99",
+          1286
+        ],
+        [
+          "78.35",
+          1215
+        ]
+      ],
+      "codes_outside_codebook": null
+    },
+    {
+      "name": "VAL_SADT",
+      "dbf_type": "N",
+      "dbf_length": 13,
+      "dbf_decimals": 2,
+      "blank": 0,
+      "blank_pct": 0.0,
+      "distinct": 1,
+      "min_length": 4,
+      "max_length": 4,
+      "top_values": [
+        [
+          "0.00",
+          73046
+        ]
+      ],
+      "codes_outside_codebook": null
+    },
+    {
+      "name": "VAL_RN",
+      "dbf_type": "N",
+      "dbf_length": 13,
+      "dbf_decimals": 2,
+      "blank": 0,
+      "blank_pct": 0.0,
+      "distinct": 1,
+      "min_length": 4,
+      "max_length": 4,
+      "top_values": [
+        [
+          "0.00",
+          73046
+        ]
+      ],
+      "codes_outside_codebook": null
+    },
+    {
+      "name": "VAL_ACOMP",
+      "dbf_type": "N",
+      "dbf_length": 13,
+      "dbf_decimals": 2,
+      "blank": 0,
+      "blank_pct": 0.0,
+      "distinct": 1,
+      "min_length": 4,
+      "max_length": 4,
+      "top_values": [
+        [
+          "0.00",
+          73046
+        ]
+      ],
+      "codes_outside_codebook": null
+    },
+    {
+      "name": "VAL_ORTP",
+      "dbf_type": "N",
+      "dbf_length": 13,
+      "dbf_decimals": 2,
+      "blank": 0,
+      "blank_pct": 0.0,
+      "distinct": 1,
+      "min_length": 4,
+      "max_length": 4,
+      "top_values": [
+        [
+          "0.00",
+          73046
+        ]
+      ],
+      "codes_outside_codebook": null
+    },
+    {
+      "name": "VAL_SANGUE",
+      "dbf_type": "N",
+      "dbf_length": 13,
+      "dbf_decimals": 2,
+      "blank": 0,
+      "blank_pct": 0.0,
+      "distinct": 1,
+      "min_length": 4,
+      "max_length": 4,
+      "top_values": [
+        [
+          "0.00",
+          73046
+        ]
+      ],
+      "codes_outside_codebook": null
+    },
+    {
+      "name": "VAL_SADTSR",
+      "dbf_type": "N",
+      "dbf_length": 11,
+      "dbf_decimals": 2,
+      "blank": 0,
+      "blank_pct": 0.0,
+      "distinct": 1,
+      "min_length": 4,
+      "max_length": 4,
+      "top_values": [
+        [
+          "0.00",
+          73046
+        ]
+      ],
+      "codes_outside_codebook": null
+    },
+    {
+      "name": "VAL_TRANSP",
+      "dbf_type": "N",
+      "dbf_length": 13,
+      "dbf_decimals": 2,
+      "blank": 0,
+      "blank_pct": 0.0,
+      "distinct": 1,
+      "min_length": 4,
+      "max_length": 4,
+      "top_values": [
+        [
+          "0.00",
+          73046
+        ]
+      ],
+      "codes_outside_codebook": null
+    },
+    {
+      "name": "VAL_OBSANG",
+      "dbf_type": "N",
+      "dbf_length": 11,
+      "dbf_decimals": 2,
+      "blank": 0,
+      "blank_pct": 0.0,
+      "distinct": 1,
+      "min_length": 4,
+      "max_length": 4,
+      "top_values": [
+        [
+          "0.00",
+          73046
+        ]
+      ],
+      "codes_outside_codebook": null
+    },
+    {
+      "name": "VAL_PED1AC",
+      "dbf_type": "N",
+      "dbf_length": 11,
+      "dbf_decimals": 2,
+      "blank": 0,
+      "blank_pct": 0.0,
+      "distinct": 1,
+      "min_length": 4,
+      "max_length": 4,
+      "top_values": [
+        [
+          "0.00",
+          73046
+        ]
+      ],
+      "codes_outside_codebook": null
+    },
+    {
+      "name": "VAL_TOT",
+      "dbf_type": "N",
+      "dbf_length": 14,
+      "dbf_decimals": 2,
+      "blank": 0,
+      "blank_pct": 0.0,
+      "distinct": 34389,
+      "min_length": 4,
+      "max_length": 9,
+      "top_values": [
+        [
+          "771.60",
+          616
+        ],
+        [
+          "889.91",
+          542
+        ],
+        [
+          "44.22",
+          456
+        ],
+        [
+          "219.12",
+          382
+        ],
+        [
+          "485.48",
+          339
+        ]
+      ],
+      "codes_outside_codebook": null
+    },
+    {
+      "name": "VAL_UTI",
+      "dbf_type": "N",
+      "dbf_length": 8,
+      "dbf_decimals": 2,
+      "blank": 0,
+      "blank_pct": 0.0,
+      "distinct": 254,
+      "min_length": 4,
+      "max_length": 8,
+      "top_values": [
+        [
+          "0.00",
+          65883
+        ],
+        [
+          "600.00",
+          874
+        ],
+        [
+          "1200.00",
+          855
+        ],
+        [
+          "1800.00",
+          670
+        ],
+        [
+          "2400.00",
+          441
+        ]
+      ],
+      "codes_outside_codebook": null
+    },
+    {
+      "name": "US_TOT",
+      "dbf_type": "N",
+      "dbf_length": 10,
+      "dbf_decimals": 2,
+      "blank": 0,
+      "blank_pct": 0.0,
+      "distinct": 27764,
+      "min_length": 4,
+      "max_length": 8,
+      "top_values": [
+        [
+          "155.87",
+          637
+        ],
+        [
+          "179.77",
+          543
+        ],
+        [
+          "8.93",
+          456
+        ],
+        [
+          "44.26",
+          391
+        ],
+        [
+          "98.07",
+          366
+        ]
+      ],
+      "codes_outside_codebook": null
+    },
+    {
+      "name": "DT_INTER",
+      "dbf_type": "C",
+      "dbf_length": 8,
+      "dbf_decimals": 0,
+      "blank": 0,
+      "blank_pct": 0.0,
+      "distinct": 494,
+      "min_length": 8,
+      "max_length": 8,
+      "top_values": [
+        [
+          "20240102",
+          1829
+        ],
+        [
+          "20240103",
+          1771
+        ],
+        [
+          "20240109",
+          1737
+        ],
+        [
+          "20240108",
+          1729
+        ],
+        [
+          "20240101",
+          1679
+        ]
+      ],
+      "codes_outside_codebook": null
+    },
+    {
+      "name": "DT_SAIDA",
+      "dbf_type": "C",
+      "dbf_length": 8,
+      "dbf_decimals": 0,
+      "blank": 0,
+      "blank_pct": 0.0,
+      "distinct": 171,
+      "min_length": 8,
+      "max_length": 8,
+      "top_values": [
+        [
+          "20240131",
+          2111
+        ],
+        [
+          "20240112",
+          1854
+        ],
+        [
+          "20240110",
+          1794
+        ],
+        [
+          "20240111",
+          1779
+        ],
+        [
+          "20240109",
+          1774
+        ]
+      ],
+      "codes_outside_codebook": null
+    },
+    {
+      "name": "DIAG_PRINC",
+      "dbf_type": "C",
+      "dbf_length": 4,
+      "dbf_decimals": 0,
+      "blank": 0,
+      "blank_pct": 0.0,
+      "distinct": 3759,
+      "min_length": 3,
+      "max_length": 4,
+      "top_values": [
+        [
+          "O800",
+          3854
+        ],
+        [
+          "Z302",
+          2352
+        ],
+        [
+          "J189",
+          1481
+        ],
+        [
+          "I64",
+          1344
+        ],
+        [
+          "N390",
+          1141
+        ]
+      ],
+      "codes_outside_codebook": null
+    },
+    {
+      "name": "DIAG_SECUN",
+      "dbf_type": "C",
+      "dbf_length": 4,
+      "dbf_decimals": 0,
+      "blank": 0,
+      "blank_pct": 0.0,
+      "distinct": 1,
+      "min_length": 4,
+      "max_length": 4,
+      "top_values": [
+        [
+          "0000",
+          73046
+        ]
+      ],
+      "codes_outside_codebook": null
+    },
+    {
+      "name": "COBRANCA",
+      "dbf_type": "C",
+      "dbf_length": 2,
+      "dbf_decimals": 0,
+      "blank": 0,
+      "blank_pct": 0.0,
+      "distinct": 24,
+      "min_length": 2,
+      "max_length": 2,
+      "top_values": [
+        [
+          "12",
+          32258
+        ],
+        [
+          "15",
+          15565
+        ],
+        [
+          "61",
+          8210
+        ],
+        [
+          "41",
+          4396
+        ],
+        [
+          "31",
+          3575
+        ]
+      ],
+      "codes_outside_codebook": null
+    },
+    {
+      "name": "NATUREZA",
+      "dbf_type": "C",
+      "dbf_length": 2,
+      "dbf_decimals": 0,
+      "blank": 0,
+      "blank_pct": 0.0,
+      "distinct": 1,
+      "min_length": 2,
+      "max_length": 2,
+      "top_values": [
+        [
+          "00",
+          73046
+        ]
+      ],
+      "codes_outside_codebook": null
+    },
+    {
+      "name": "NAT_JUR",
+      "dbf_type": "C",
+      "dbf_length": 4,
+      "dbf_decimals": 0,
+      "blank": 0,
+      "blank_pct": 0.0,
+      "distinct": 16,
+      "min_length": 4,
+      "max_length": 4,
+      "top_values": [
+        [
+          "1031",
+          18881
+        ],
+        [
+          "1244",
+          17288
+        ],
+        [
+          "3999",
+          10482
+        ],
+        [
+          "1023",
+          7588
+        ],
+        [
+          "1015",
+          4615
+        ]
+      ],
+      "codes_outside_codebook": null
+    },
+    {
+      "name": "GESTAO",
+      "dbf_type": "C",
+      "dbf_length": 1,
+      "dbf_decimals": 0,
+      "blank": 0,
+      "blank_pct": 0.0,
+      "distinct": 2,
+      "min_length": 1,
+      "max_length": 1,
+      "top_values": [
+        [
+          "1",
+          61768
+        ],
+        [
+          "2",
+          11278
+        ]
+      ],
+      "codes_outside_codebook": null
+    },
+    {
+      "name": "RUBRICA",
+      "dbf_type": "N",
+      "dbf_length": 5,
+      "dbf_decimals": 0,
+      "blank": 0,
+      "blank_pct": 0.0,
+      "distinct": 1,
+      "min_length": 1,
+      "max_length": 1,
+      "top_values": [
+        [
+          "0",
+          73046
+        ]
+      ],
+      "codes_outside_codebook": null
+    },
+    {
+      "name": "IND_VDRL",
+      "dbf_type": "C",
+      "dbf_length": 1,
+      "dbf_decimals": 0,
+      "blank": 0,
+      "blank_pct": 0.0,
+      "distinct": 2,
+      "min_length": 1,
+      "max_length": 1,
+      "top_values": [
+        [
+          "0",
+          66511
+        ],
+        [
+          "1",
+          6535
+        ]
+      ],
+      "codes_outside_codebook": null
+    },
+    {
+      "name": "MUNIC_MOV",
+      "dbf_type": "C",
+      "dbf_length": 6,
+      "dbf_decimals": 0,
+      "blank": 0,
+      "blank_pct": 0.0,
+      "distinct": 82,
+      "min_length": 6,
+      "max_length": 6,
+      "top_values": [
+        [
+          "330455",
+          28190
+        ],
+        [
+          "330170",
+          4473
+        ],
+        [
+          "330100",
+          3109
+        ],
+        [
+          "330330",
+          2950
+        ],
+        [
+          "330490",
+          2866
+        ]
+      ],
+      "codes_outside_codebook": null
+    },
+    {
+      "name": "COD_IDADE",
+      "dbf_type": "C",
+      "dbf_length": 1,
+      "dbf_decimals": 0,
+      "blank": 0,
+      "blank_pct": 0.0,
+      "distinct": 4,
+      "min_length": 1,
+      "max_length": 1,
+      "top_values": [
+        [
+          "4",
+          69776
+        ],
+        [
+          "2",
+          2126
+        ],
+        [
+          "3",
+          1112
+        ],
+        [
+          "5",
+          32
+        ]
+      ],
+      "codes_outside_codebook": []
+    },
+    {
+      "name": "IDADE",
+      "dbf_type": "N",
+      "dbf_length": 2,
+      "dbf_decimals": 0,
+      "blank": 0,
+      "blank_pct": 0.0,
+      "distinct": 100,
+      "min_length": 1,
+      "max_length": 2,
+      "top_values": [
+        [
+          "23",
+          1277
+        ],
+        [
+          "25",
+          1259
+        ],
+        [
+          "26",
+          1244
+        ],
+        [
+          "28",
+          1230
+        ],
+        [
+          "27",
+          1227
+        ]
+      ],
+      "codes_outside_codebook": null
+    },
+    {
+      "name": "DIAS_PERM",
+      "dbf_type": "N",
+      "dbf_length": 5,
+      "dbf_decimals": 0,
+      "blank": 0,
+      "blank_pct": 0.0,
+      "distinct": 124,
+      "min_length": 1,
+      "max_length": 3,
+      "top_values": [
+        [
+          "2",
+          14082
+        ],
+        [
+          "1",
+          11471
+        ],
+        [
+          "3",
+          9060
+        ],
+        [
+          "0",
+          7367
+        ],
+        [
+          "4",
+          5076
+        ]
+      ],
+      "codes_outside_codebook": null
+    },
+    {
+      "name": "MORTE",
+      "dbf_type": "N",
+      "dbf_length": 1,
+      "dbf_decimals": 0,
+      "blank": 0,
+      "blank_pct": 0.0,
+      "distinct": 2,
+      "min_length": 1,
+      "max_length": 1,
+      "top_values": [
+        [
+          "0",
+          68382
+        ],
+        [
+          "1",
+          4664
+        ]
+      ],
+      "codes_outside_codebook": []
+    },
+    {
+      "name": "NACIONAL",
+      "dbf_type": "C",
+      "dbf_length": 3,
+      "dbf_decimals": 0,
+      "blank": 0,
+      "blank_pct": 0.0,
+      "distinct": 26,
+      "min_length": 3,
+      "max_length": 3,
+      "top_values": [
+        [
+          "010",
+          72946
+        ],
+        [
+          "045",
+          28
+        ],
+        [
+          "021",
+          18
+        ],
+        [
+          "103",
+          11
+        ],
+        [
+          "020",
+          8
+        ]
+      ],
+      "codes_outside_codebook": null
+    },
+    {
+      "name": "NUM_PROC",
+      "dbf_type": "C",
+      "dbf_length": 4,
+      "dbf_decimals": 0,
+      "blank": 73046,
+      "blank_pct": 100.0,
+      "distinct": 1,
+      "min_length": 0,
+      "max_length": 0,
+      "top_values": [
+        [
+          "",
+          73046
+        ]
+      ],
+      "codes_outside_codebook": null
+    },
+    {
+      "name": "CAR_INT",
+      "dbf_type": "C",
+      "dbf_length": 2,
+      "dbf_decimals": 0,
+      "blank": 0,
+      "blank_pct": 0.0,
+      "distinct": 4,
+      "min_length": 2,
+      "max_length": 2,
+      "top_values": [
+        [
+          "02",
+          50601
+        ],
+        [
+          "01",
+          22240
+        ],
+        [
+          "06",
+          104
+        ],
+        [
+          "05",
+          101
+        ]
+      ],
+      "codes_outside_codebook": []
+    },
+    {
+      "name": "TOT_PT_SP",
+      "dbf_type": "N",
+      "dbf_length": 6,
+      "dbf_decimals": 0,
+      "blank": 0,
+      "blank_pct": 0.0,
+      "distinct": 1,
+      "min_length": 1,
+      "max_length": 1,
+      "top_values": [
+        [
+          "0",
+          73046
+        ]
+      ],
+      "codes_outside_codebook": null
+    },
+    {
+      "name": "CPF_AUT",
+      "dbf_type": "C",
+      "dbf_length": 11,
+      "dbf_decimals": 0,
+      "blank": 73046,
+      "blank_pct": 100.0,
+      "distinct": 1,
+      "min_length": 0,
+      "max_length": 0,
+      "top_values": null,
+      "codes_outside_codebook": null
+    },
+    {
+      "name": "HOMONIMO",
+      "dbf_type": "C",
+      "dbf_length": 1,
+      "dbf_decimals": 0,
+      "blank": 0,
+      "blank_pct": 0.0,
+      "distinct": 2,
+      "min_length": 1,
+      "max_length": 1,
+      "top_values": [
+        [
+          "0",
+          72841
+        ],
+        [
+          "2",
+          205
+        ]
+      ],
+      "codes_outside_codebook": null
+    },
+    {
+      "name": "NUM_FILHOS",
+      "dbf_type": "N",
+      "dbf_length": 2,
+      "dbf_decimals": 0,
+      "blank": 0,
+      "blank_pct": 0.0,
+      "distinct": 15,
+      "min_length": 1,
+      "max_length": 2,
+      "top_values": [
+        [
+          "0",
+          70090
+        ],
+        [
+          "2",
+          1219
+        ],
+        [
+          "1",
+          765
+        ],
+        [
+          "3",
+          566
+        ],
+        [
+          "4",
+          239
+        ]
+      ],
+      "codes_outside_codebook": null
+    },
+    {
+      "name": "INSTRU",
+      "dbf_type": "C",
+      "dbf_length": 1,
+      "dbf_decimals": 0,
+      "blank": 0,
+      "blank_pct": 0.0,
+      "distinct": 5,
+      "min_length": 1,
+      "max_length": 1,
+      "top_values": [
+        [
+          "0",
+          70064
+        ],
+        [
+          "3",
+          1514
+        ],
+        [
+          "2",
+          1292
+        ],
+        [
+          "1",
+          98
+        ],
+        [
+          "4",
+          78
+        ]
+      ],
+      "codes_outside_codebook": null
+    },
+    {
+      "name": "CID_NOTIF",
+      "dbf_type": "C",
+      "dbf_length": 4,
+      "dbf_decimals": 0,
+      "blank": 70064,
+      "blank_pct": 95.9176,
+      "distinct": 7,
+      "min_length": 0,
+      "max_length": 4,
+      "top_values": [
+        [
+          "",
+          70064
+        ],
+        [
+          "Z302",
+          2972
+        ],
+        [
+          "O244",
+          4
+        ],
+        [
+          "O13",
+          2
+        ],
+        [
+          "O100",
+          2
+        ]
+      ],
+      "codes_outside_codebook": null
+    },
+    {
+      "name": "CONTRACEP1",
+      "dbf_type": "C",
+      "dbf_length": 2,
+      "dbf_decimals": 0,
+      "blank": 0,
+      "blank_pct": 0.0,
+      "distinct": 11,
+      "min_length": 2,
+      "max_length": 2,
+      "top_values": [
+        [
+          "00",
+          70064
+        ],
+        [
+          "08",
+          2177
+        ],
+        [
+          "10",
+          460
+        ],
+        [
+          "12",
+          138
+        ],
+        [
+          "06",
+          99
+        ]
+      ],
+      "codes_outside_codebook": null
+    },
+    {
+      "name": "CONTRACEP2",
+      "dbf_type": "C",
+      "dbf_length": 2,
+      "dbf_decimals": 0,
+      "blank": 0,
+      "blank_pct": 0.0,
+      "distinct": 11,
+      "min_length": 2,
+      "max_length": 2,
+      "top_values": [
+        [
+          "00",
+          70938
+        ],
+        [
+          "08",
+          1364
+        ],
+        [
+          "10",
+          437
+        ],
+        [
+          "12",
+          219
+        ],
+        [
+          "01",
+          34
+        ]
+      ],
+      "codes_outside_codebook": null
+    },
+    {
+      "name": "GESTRISCO",
+      "dbf_type": "C",
+      "dbf_length": 1,
+      "dbf_decimals": 0,
+      "blank": 0,
+      "blank_pct": 0.0,
+      "distinct": 2,
+      "min_length": 1,
+      "max_length": 1,
+      "top_values": [
+        [
+          "1",
+          72636
+        ],
+        [
+          "0",
+          410
+        ]
+      ],
+      "codes_outside_codebook": null
+    },
+    {
+      "name": "INSC_PN",
+      "dbf_type": "C",
+      "dbf_length": 12,
+      "dbf_decimals": 0,
+      "blank": 0,
+      "blank_pct": 0.0,
+      "distinct": 374,
+      "min_length": 12,
+      "max_length": 12,
+      "top_values": null,
+      "codes_outside_codebook": null
+    },
+    {
+      "name": "SEQ_AIH5",
+      "dbf_type": "C",
+      "dbf_length": 3,
+      "dbf_decimals": 0,
+      "blank": 0,
+      "blank_pct": 0.0,
+      "distinct": 11,
+      "min_length": 3,
+      "max_length": 3,
+      "top_values": [
+        [
+          "000",
+          73036
+        ],
+        [
+          "025",
+          1
+        ],
+        [
+          "024",
+          1
+        ],
+        [
+          "019",
+          1
+        ],
+        [
+          "018",
+          1
+        ]
+      ],
+      "codes_outside_codebook": null
+    },
+    {
+      "name": "CBOR",
+      "dbf_type": "C",
+      "dbf_length": 6,
+      "dbf_decimals": 0,
+      "blank": 0,
+      "blank_pct": 0.0,
+      "distinct": 2,
+      "min_length": 6,
+      "max_length": 6,
+      "top_values": [
+        [
+          "000000",
+          73035
+        ],
+        [
+          "225125",
+          11
+        ]
+      ],
+      "codes_outside_codebook": null
+    },
+    {
+      "name": "CNAER",
+      "dbf_type": "C",
+      "dbf_length": 3,
+      "dbf_decimals": 0,
+      "blank": 0,
+      "blank_pct": 0.0,
+      "distinct": 2,
+      "min_length": 3,
+      "max_length": 3,
+      "top_values": [
+        [
+          "000",
+          73035
+        ],
+        [
+          "702",
+          11
+        ]
+      ],
+      "codes_outside_codebook": null
+    },
+    {
+      "name": "VINCPREV",
+      "dbf_type": "C",
+      "dbf_length": 1,
+      "dbf_decimals": 0,
+      "blank": 0,
+      "blank_pct": 0.0,
+      "distinct": 2,
+      "min_length": 1,
+      "max_length": 1,
+      "top_values": [
+        [
+          "0",
+          73035
+        ],
+        [
+          "3",
+          11
+        ]
+      ],
+      "codes_outside_codebook": null
+    },
+    {
+      "name": "GESTOR_COD",
+      "dbf_type": "C",
+      "dbf_length": 5,
+      "dbf_decimals": 0,
+      "blank": 0,
+      "blank_pct": 0.0,
+      "distinct": 19,
+      "min_length": 5,
+      "max_length": 5,
+      "top_values": [
+        [
+          "00000",
+          66163
+        ],
+        [
+          "00007",
+          3177
+        ],
+        [
+          "00014",
+          2434
+        ],
+        [
+          "00134",
+          676
+        ],
+        [
+          "00010",
+          179
+        ]
+      ],
+      "codes_outside_codebook": null
+    },
+    {
+      "name": "GESTOR_TP",
+      "dbf_type": "C",
+      "dbf_length": 1,
+      "dbf_decimals": 0,
+      "blank": 0,
+      "blank_pct": 0.0,
+      "distinct": 2,
+      "min_length": 1,
+      "max_length": 1,
+      "top_values": [
+        [
+          "0",
+          58313
+        ],
+        [
+          "1",
+          14733
+        ]
+      ],
+      "codes_outside_codebook": null
+    },
+    {
+      "name": "GESTOR_CPF",
+      "dbf_type": "C",
+      "dbf_length": 15,
+      "dbf_decimals": 0,
+      "blank": 0,
+      "blank_pct": 0.0,
+      "distinct": 91,
+      "min_length": 15,
+      "max_length": 15,
+      "top_values": null,
+      "codes_outside_codebook": null
+    },
+    {
+      "name": "GESTOR_DT",
+      "dbf_type": "C",
+      "dbf_length": 8,
+      "dbf_decimals": 0,
+      "blank": 73046,
+      "blank_pct": 100.0,
+      "distinct": 1,
+      "min_length": 0,
+      "max_length": 0,
+      "top_values": [
+        [
+          "",
+          73046
+        ]
+      ],
+      "codes_outside_codebook": null
+    },
+    {
+      "name": "CNES",
+      "dbf_type": "C",
+      "dbf_length": 7,
+      "dbf_decimals": 0,
+      "blank": 0,
+      "blank_pct": 0.0,
+      "distinct": 240,
+      "min_length": 7,
+      "max_length": 7,
+      "top_values": [
+        [
+          "2798662",
+          2371
+        ],
+        [
+          "5717256",
+          1910
+        ],
+        [
+          "2290227",
+          1869
+        ],
+        [
+          "2269783",
+          1637
+        ],
+        [
+          "6007317",
+          1617
+        ]
+      ],
+      "codes_outside_codebook": null
+    },
+    {
+      "name": "CNPJ_MANT",
+      "dbf_type": "C",
+      "dbf_length": 14,
+      "dbf_decimals": 0,
+      "blank": 19001,
+      "blank_pct": 26.0124,
+      "distinct": 72,
+      "min_length": 0,
+      "max_length": 14,
+      "top_values": [
+        [
+          "",
+          19001
+        ],
+        [
+          "29468055000102",
+          15011
+        ],
+        [
+          "42498717000155",
+          8489
+        ],
+        [
+          "29138328000150",
+          4406
+        ],
+        [
+          "29138278000705",
+          2371
+        ]
+      ],
+      "codes_outside_codebook": null
+    },
+    {
+      "name": "INFEHOSP",
+      "dbf_type": "C",
+      "dbf_length": 1,
+      "dbf_decimals": 0,
+      "blank": 73046,
+      "blank_pct": 100.0,
+      "distinct": 1,
+      "min_length": 0,
+      "max_length": 0,
+      "top_values": [
+        [
+          "",
+          73046
+        ]
+      ],
+      "codes_outside_codebook": null
+    },
+    {
+      "name": "CID_ASSO",
+      "dbf_type": "C",
+      "dbf_length": 4,
+      "dbf_decimals": 0,
+      "blank": 0,
+      "blank_pct": 0.0,
+      "distinct": 1,
+      "min_length": 4,
+      "max_length": 4,
+      "top_values": [
+        [
+          "0000",
+          73046
+        ]
+      ],
+      "codes_outside_codebook": null
+    },
+    {
+      "name": "CID_MORTE",
+      "dbf_type": "C",
+      "dbf_length": 4,
+      "dbf_decimals": 0,
+      "blank": 0,
+      "blank_pct": 0.0,
+      "distinct": 1,
+      "min_length": 4,
+      "max_length": 4,
+      "top_values": [
+        [
+          "0000",
+          73046
+        ]
+      ],
+      "codes_outside_codebook": null
+    },
+    {
+      "name": "COMPLEX",
+      "dbf_type": "C",
+      "dbf_length": 2,
+      "dbf_decimals": 0,
+      "blank": 0,
+      "blank_pct": 0.0,
+      "distinct": 2,
+      "min_length": 2,
+      "max_length": 2,
+      "top_values": [
+        [
+          "02",
+          67133
+        ],
+        [
+          "03",
+          5913
+        ]
+      ],
+      "codes_outside_codebook": []
+    },
+    {
+      "name": "FINANC",
+      "dbf_type": "C",
+      "dbf_length": 2,
+      "dbf_decimals": 0,
+      "blank": 0,
+      "blank_pct": 0.0,
+      "distinct": 2,
+      "min_length": 2,
+      "max_length": 2,
+      "top_values": [
+        [
+          "06",
+          66375
+        ],
+        [
+          "04",
+          6671
+        ]
+      ],
+      "codes_outside_codebook": null
+    },
+    {
+      "name": "FAEC_TP",
+      "dbf_type": "C",
+      "dbf_length": 6,
+      "dbf_decimals": 0,
+      "blank": 66375,
+      "blank_pct": 90.8674,
+      "distinct": 12,
+      "min_length": 0,
+      "max_length": 6,
+      "top_values": [
+        [
+          "",
+          66375
+        ],
+        [
+          "040080",
+          5707
+        ],
+        [
+          "040032",
+          421
+        ],
+        [
+          "040082",
+          276
+        ],
+        [
+          "040024",
+          162
+        ]
+      ],
+      "codes_outside_codebook": null
+    },
+    {
+      "name": "REGCT",
+      "dbf_type": "C",
+      "dbf_length": 4,
+      "dbf_decimals": 0,
+      "blank": 0,
+      "blank_pct": 0.0,
+      "distinct": 5,
+      "min_length": 4,
+      "max_length": 4,
+      "top_values": [
+        [
+          "0000",
+          65924
+        ],
+        [
+          "7110",
+          4527
+        ],
+        [
+          "7109",
+          1877
+        ],
+        [
+          "7104",
+          361
+        ],
+        [
+          "7102",
+          357
+        ]
+      ],
+      "codes_outside_codebook": null
+    },
+    {
+      "name": "RACA_COR",
+      "dbf_type": "C",
+      "dbf_length": 2,
+      "dbf_decimals": 0,
+      "blank": 0,
+      "blank_pct": 0.0,
+      "distinct": 6,
+      "min_length": 2,
+      "max_length": 2,
+      "top_values": [
+        [
+          "03",
+          41539
+        ],
+        [
+          "01",
+          19820
+        ],
+        [
+          "02",
+          10890
+        ],
+        [
+          "04",
+          723
+        ],
+        [
+          "99",
+          70
+        ]
+      ],
+      "codes_outside_codebook": []
+    },
+    {
+      "name": "ETNIA",
+      "dbf_type": "C",
+      "dbf_length": 4,
+      "dbf_decimals": 0,
+      "blank": 0,
+      "blank_pct": 0.0,
+      "distinct": 3,
+      "min_length": 4,
+      "max_length": 4,
+      "top_values": [
+        [
+          "0000",
+          73042
+        ],
+        [
+          "0059",
+          3
+        ],
+        [
+          "0035",
+          1
+        ]
+      ],
+      "codes_outside_codebook": null
+    },
+    {
+      "name": "SEQUENCIA",
+      "dbf_type": "N",
+      "dbf_length": 9,
+      "dbf_decimals": 0,
+      "blank": 0,
+      "blank_pct": 0.0,
+      "distinct": 24434,
+      "min_length": 1,
+      "max_length": 5,
+      "top_values": [
+        [
+          "11",
+          77
+        ],
+        [
+          "5",
+          76
+        ],
+        [
+          "6",
+          76
+        ],
+        [
+          "12",
+          76
+        ],
+        [
+          "8",
+          75
+        ]
+      ],
+      "codes_outside_codebook": null
+    },
+    {
+      "name": "REMESSA",
+      "dbf_type": "C",
+      "dbf_length": 21,
+      "dbf_decimals": 0,
+      "blank": 0,
+      "blank_pct": 0.0,
+      "distinct": 81,
+      "min_length": 21,
+      "max_length": 21,
+      "top_values": [
+        [
+          "HM33045501N202401.DTS",
+          22616
+        ],
+        [
+          "HE33000001N202401.DTS",
+          11278
+        ],
+        [
+          "HM33017001N202401.DTS",
+          4473
+        ],
+        [
+          "HM33010001N202401.DTS",
+          3109
+        ],
+        [
+          "HM33035001N202401.DTS",
+          2391
+        ]
+      ],
+      "codes_outside_codebook": null
+    },
+    {
+      "name": "AUD_JUST",
+      "dbf_type": "C",
+      "dbf_length": 50,
+      "dbf_decimals": 0,
+      "blank": 72227,
+      "blank_pct": 98.8788,
+      "distinct": 25,
+      "min_length": 0,
+      "max_length": 39,
+      "top_values": null,
+      "codes_outside_codebook": null
+    },
+    {
+      "name": "SIS_JUST",
+      "dbf_type": "C",
+      "dbf_length": 50,
+      "dbf_decimals": 0,
+      "blank": 72227,
+      "blank_pct": 98.8788,
+      "distinct": 55,
+      "min_length": 0,
+      "max_length": 48,
+      "top_values": null,
+      "codes_outside_codebook": null
+    },
+    {
+      "name": "VAL_SH_FED",
+      "dbf_type": "N",
+      "dbf_length": 10,
+      "dbf_decimals": 2,
+      "blank": 0,
+      "blank_pct": 0.0,
+      "distinct": 67,
+      "min_length": 4,
+      "max_length": 8,
+      "top_values": [
+        [
+          "0.00",
+          72704
+        ],
+        [
+          "190.92",
+          45
+        ],
+        [
+          "286.47",
+          41
+        ],
+        [
+          "427.52",
+          32
+        ],
+        [
+          "746.46",
+          30
+        ]
+      ],
+      "codes_outside_codebook": null
+    },
+    {
+      "name": "VAL_SP_FED",
+      "dbf_type": "N",
+      "dbf_length": 10,
+      "dbf_decimals": 2,
+      "blank": 0,
+      "blank_pct": 0.0,
+      "distinct": 70,
+      "min_length": 4,
+      "max_length": 7,
+      "top_values": [
+        [
+          "0.00",
+          72704
+        ],
+        [
+          "247.95",
+          45
+        ],
+        [
+          "199.01",
+          35
+        ],
+        [
+          "210.45",
+          32
+        ],
+        [
+          "245.99",
+          30
+        ]
+      ],
+      "codes_outside_codebook": null
+    },
+    {
+      "name": "VAL_SH_GES",
+      "dbf_type": "N",
+      "dbf_length": 10,
+      "dbf_decimals": 2,
+      "blank": 0,
+      "blank_pct": 0.0,
+      "distinct": 1,
+      "min_length": 4,
+      "max_length": 4,
+      "top_values": [
+        [
+          "0.00",
+          73046
+        ]
+      ],
+      "codes_outside_codebook": null
+    },
+    {
+      "name": "VAL_SP_GES",
+      "dbf_type": "N",
+      "dbf_length": 10,
+      "dbf_decimals": 2,
+      "blank": 0,
+      "blank_pct": 0.0,
+      "distinct": 1,
+      "min_length": 4,
+      "max_length": 4,
+      "top_values": [
+        [
+          "0.00",
+          73046
+        ]
+      ],
+      "codes_outside_codebook": null
+    },
+    {
+      "name": "VAL_UCI",
+      "dbf_type": "N",
+      "dbf_length": 10,
+      "dbf_decimals": 2,
+      "blank": 0,
+      "blank_pct": 0.0,
+      "distinct": 106,
+      "min_length": 4,
+      "max_length": 8,
+      "top_values": [
+        [
+          "0.00",
+          72504
+        ],
+        [
+          "540.00",
+          55
+        ],
+        [
+          "360.00",
+          49
+        ],
+        [
+          "720.00",
+          37
+        ],
+        [
+          "900.00",
+          33
+        ]
+      ],
+      "codes_outside_codebook": null
+    },
+    {
+      "name": "MARCA_UCI",
+      "dbf_type": "C",
+      "dbf_length": 2,
+      "dbf_decimals": 0,
+      "blank": 0,
+      "blank_pct": 0.0,
+      "distinct": 4,
+      "min_length": 2,
+      "max_length": 2,
+      "top_values": [
+        [
+          "00",
+          72504
+        ],
+        [
+          "01",
+          459
+        ],
+        [
+          "02",
+          68
+        ],
+        [
+          "03",
+          15
+        ]
+      ],
+      "codes_outside_codebook": null
+    },
+    {
+      "name": "DIAGSEC1",
+      "dbf_type": "C",
+      "dbf_length": 4,
+      "dbf_decimals": 0,
+      "blank": 57859,
+      "blank_pct": 79.209,
+      "distinct": 1584,
+      "min_length": 0,
+      "max_length": 4,
+      "top_values": [
+        [
+          "",
+          57859
+        ],
+        [
+          "W999",
+          3006
+        ],
+        [
+          "W199",
+          1119
+        ],
+        [
+          "I10",
+          608
+        ],
+        [
+          "Y349",
+          521
+        ]
+      ],
+      "codes_outside_codebook": null
+    },
+    {
+      "name": "DIAGSEC2",
+      "dbf_type": "C",
+      "dbf_length": 4,
+      "dbf_decimals": 0,
+      "blank": 70567,
+      "blank_pct": 96.6062,
+      "distinct": 671,
+      "min_length": 0,
+      "max_length": 4,
+      "top_values": [
+        [
+          "",
+          70567
+        ],
+        [
+          "I10",
+          287
+        ],
+        [
+          "N390",
+          70
+        ],
+        [
+          "E149",
+          66
+        ],
+        [
+          "J189",
+          59
+        ]
+      ],
+      "codes_outside_codebook": null
+    },
+    {
+      "name": "DIAGSEC3",
+      "dbf_type": "C",
+      "dbf_length": 4,
+      "dbf_decimals": 0,
+      "blank": 71961,
+      "blank_pct": 98.5146,
+      "distinct": 382,
+      "min_length": 0,
+      "max_length": 4,
+      "top_values": [
+        [
+          "",
+          71961
+        ],
+        [
+          "I10",
+          72
+        ],
+        [
+          "I159",
+          36
+        ],
+        [
+          "Z358",
+          31
+        ],
+        [
+          "E149",
+          30
+        ]
+      ],
+      "codes_outside_codebook": null
+    },
+    {
+      "name": "DIAGSEC4",
+      "dbf_type": "C",
+      "dbf_length": 4,
+      "dbf_decimals": 0,
+      "blank": 72567,
+      "blank_pct": 99.3442,
+      "distinct": 212,
+      "min_length": 0,
+      "max_length": 4,
+      "top_values": [
+        [
+          "",
+          72567
+        ],
+        [
+          "I10",
+          28
+        ],
+        [
+          "Z370",
+          24
+        ],
+        [
+          "E149",
+          16
+        ],
+        [
+          "Z720",
+          14
+        ]
+      ],
+      "codes_outside_codebook": null
+    },
+    {
+      "name": "DIAGSEC5",
+      "dbf_type": "C",
+      "dbf_length": 4,
+      "dbf_decimals": 0,
+      "blank": 72903,
+      "blank_pct": 99.8042,
+      "distinct": 87,
+      "min_length": 0,
+      "max_length": 4,
+      "top_values": [
+        [
+          "",
+          72903
+        ],
+        [
+          "Z370",
+          9
+        ],
+        [
+          "I10",
+          6
+        ],
+        [
+          "Z358",
+          6
+        ],
+        [
+          "Z721",
+          5
+        ]
+      ],
+      "codes_outside_codebook": null
+    },
+    {
+      "name": "DIAGSEC6",
+      "dbf_type": "C",
+      "dbf_length": 4,
+      "dbf_decimals": 0,
+      "blank": 72987,
+      "blank_pct": 99.9192,
+      "distinct": 50,
+      "min_length": 0,
+      "max_length": 4,
+      "top_values": [
+        [
+          "",
+          72987
+        ],
+        [
+          "Z370",
+          3
+        ],
+        [
+          "Z372",
+          3
+        ],
+        [
+          "Z720",
+          2
+        ],
+        [
+          "E46",
+          2
+        ]
+      ],
+      "codes_outside_codebook": null
+    },
+    {
+      "name": "DIAGSEC7",
+      "dbf_type": "C",
+      "dbf_length": 4,
+      "dbf_decimals": 0,
+      "blank": 73024,
+      "blank_pct": 99.9699,
+      "distinct": 22,
+      "min_length": 0,
+      "max_length": 4,
+      "top_values": [
+        [
+          "",
+          73024
+        ],
+        [
+          "Z302",
+          2
+        ],
+        [
+          "J81",
+          1
+        ],
+        [
+          "B206",
+          1
+        ],
+        [
+          "J159",
+          1
+        ]
+      ],
+      "codes_outside_codebook": null
+    },
+    {
+      "name": "DIAGSEC8",
+      "dbf_type": "C",
+      "dbf_length": 4,
+      "dbf_decimals": 0,
+      "blank": 73046,
+      "blank_pct": 100.0,
+      "distinct": 1,
+      "min_length": 0,
+      "max_length": 0,
+      "top_values": [
+        [
+          "",
+          73046
+        ]
+      ],
+      "codes_outside_codebook": null
+    },
+    {
+      "name": "DIAGSEC9",
+      "dbf_type": "C",
+      "dbf_length": 1,
+      "dbf_decimals": 0,
+      "blank": 73046,
+      "blank_pct": 100.0,
+      "distinct": 1,
+      "min_length": 0,
+      "max_length": 0,
+      "top_values": [
+        [
+          "",
+          73046
+        ]
+      ],
+      "codes_outside_codebook": null
+    },
+    {
+      "name": "TPDISEC1",
+      "dbf_type": "C",
+      "dbf_length": 1,
+      "dbf_decimals": 0,
+      "blank": 0,
+      "blank_pct": 0.0,
+      "distinct": 3,
+      "min_length": 1,
+      "max_length": 1,
+      "top_values": [
+        [
+          "0",
+          57859
+        ],
+        [
+          "1",
+          8549
+        ],
+        [
+          "2",
+          6638
+        ]
+      ],
+      "codes_outside_codebook": null
+    },
+    {
+      "name": "TPDISEC2",
+      "dbf_type": "C",
+      "dbf_length": 1,
+      "dbf_decimals": 0,
+      "blank": 0,
+      "blank_pct": 0.0,
+      "distinct": 3,
+      "min_length": 1,
+      "max_length": 1,
+      "top_values": [
+        [
+          "0",
+          70567
+        ],
+        [
+          "1",
+          2320
+        ],
+        [
+          "2",
+          159
+        ]
+      ],
+      "codes_outside_codebook": null
+    },
+    {
+      "name": "TPDISEC3",
+      "dbf_type": "C",
+      "dbf_length": 1,
+      "dbf_decimals": 0,
+      "blank": 0,
+      "blank_pct": 0.0,
+      "distinct": 3,
+      "min_length": 1,
+      "max_length": 1,
+      "top_values": [
+        [
+          "0",
+          71961
+        ],
+        [
+          "1",
+          1026
+        ],
+        [
+          "2",
+          59
+        ]
+      ],
+      "codes_outside_codebook": null
+    },
+    {
+      "name": "TPDISEC4",
+      "dbf_type": "C",
+      "dbf_length": 1,
+      "dbf_decimals": 0,
+      "blank": 0,
+      "blank_pct": 0.0,
+      "distinct": 3,
+      "min_length": 1,
+      "max_length": 1,
+      "top_values": [
+        [
+          "0",
+          72567
+        ],
+        [
+          "1",
+          431
+        ],
+        [
+          "2",
+          48
+        ]
+      ],
+      "codes_outside_codebook": null
+    },
+    {
+      "name": "TPDISEC5",
+      "dbf_type": "C",
+      "dbf_length": 1,
+      "dbf_decimals": 0,
+      "blank": 0,
+      "blank_pct": 0.0,
+      "distinct": 3,
+      "min_length": 1,
+      "max_length": 1,
+      "top_values": [
+        [
+          "0",
+          72903
+        ],
+        [
+          "1",
+          123
+        ],
+        [
+          "2",
+          20
+        ]
+      ],
+      "codes_outside_codebook": null
+    },
+    {
+      "name": "TPDISEC6",
+      "dbf_type": "C",
+      "dbf_length": 1,
+      "dbf_decimals": 0,
+      "blank": 0,
+      "blank_pct": 0.0,
+      "distinct": 3,
+      "min_length": 1,
+      "max_length": 1,
+      "top_values": [
+        [
+          "0",
+          72987
+        ],
+        [
+          "1",
+          47
+        ],
+        [
+          "2",
+          12
+        ]
+      ],
+      "codes_outside_codebook": null
+    },
+    {
+      "name": "TPDISEC7",
+      "dbf_type": "C",
+      "dbf_length": 1,
+      "dbf_decimals": 0,
+      "blank": 0,
+      "blank_pct": 0.0,
+      "distinct": 3,
+      "min_length": 1,
+      "max_length": 1,
+      "top_values": [
+        [
+          "0",
+          73024
+        ],
+        [
+          "1",
+          20
+        ],
+        [
+          "2",
+          2
+        ]
+      ],
+      "codes_outside_codebook": null
+    },
+    {
+      "name": "TPDISEC8",
+      "dbf_type": "C",
+      "dbf_length": 1,
+      "dbf_decimals": 0,
+      "blank": 0,
+      "blank_pct": 0.0,
+      "distinct": 1,
+      "min_length": 1,
+      "max_length": 1,
+      "top_values": [
+        [
+          "0",
+          73046
+        ]
+      ],
+      "codes_outside_codebook": null
+    },
+    {
+      "name": "TPDISEC9",
+      "dbf_type": "C",
+      "dbf_length": 1,
+      "dbf_decimals": 0,
+      "blank": 0,
+      "blank_pct": 0.0,
+      "distinct": 1,
+      "min_length": 1,
+      "max_length": 1,
+      "top_values": [
+        [
+          "0",
+          73046
+        ]
+      ],
+      "codes_outside_codebook": null
+    }
+  ],
+  "checks": {
+    "discharge_year": [
+      {
+        "discharge_year": 2023,
+        "records": 29279
+      },
+      {
+        "discharge_year": 2024,
+        "records": 43767
+      }
+    ],
+    "date_consistency": [
+      {
+        "records": 73046,
+        "invalid_dt_inter": 0,
+        "invalid_dt_saida": 0,
+        "invalid_dt_nasc": 0,
+        "discharge_before_admission": 0,
+        "birth_after_admission": 0,
+        "discharge_after_competence": 0,
+        "admission_after_competence": 0,
+        "los_differs_from_dates": 660,
+        "los_differs_ident_1": 0,
+        "los_differs_ident_5": 660,
+        "min_dt_inter": "2012-01-02",
+        "max_dt_inter": "2024-01-31",
+        "min_dt_saida": "2023-08-01",
+        "max_dt_saida": "2024-01-31"
+      }
+    ],
+    "discharge_month_offset": [
+      {
+        "months_before_competence": 0,
+        "IDENT": "1",
+        "records": 43163
+      },
+      {
+        "months_before_competence": 0,
+        "IDENT": "5",
+        "records": 604
+      },
+      {
+        "months_before_competence": 1,
+        "IDENT": "1",
+        "records": 17565
+      },
+      {
+        "months_before_competence": 1,
+        "IDENT": "5",
+        "records": 45
+      },
+      {
+        "months_before_competence": 2,
+        "IDENT": "1",
+        "records": 7248
+      },
+      {
+        "months_before_competence": 2,
+        "IDENT": "5",
+        "records": 13
+      },
+      {
+        "months_before_competence": 3,
+        "IDENT": "1",
+        "records": 4305
+      },
+      {
+        "months_before_competence": 3,
+        "IDENT": "5",
+        "records": 1
+      },
+      {
+        "months_before_competence": 4,
+        "IDENT": "1",
+        "records": 66
+      },
+      {
+        "months_before_competence": 5,
+        "IDENT": "1",
+        "records": 36
+      }
+    ],
+    "repeated_aih": [
+      {
+        "excess_records": 56,
+        "distinct_numbers": 50,
+        "records_involved": 106,
+        "numbers_twice": 45,
+        "numbers_three_times": 4,
+        "numbers_four_or_more": 1,
+        "numbers_only_ident_5": 4,
+        "numbers_only_ident_1": 0,
+        "numbers_ident_1_and_5": 46
+      }
+    ],
+    "death_consistency": [
+      {
+        "MORTE": "0",
+        "cobranca_group": "1",
+        "records": 50643
+      },
+      {
+        "MORTE": "0",
+        "cobranca_group": "2",
+        "records": 4734
+      },
+      {
+        "MORTE": "0",
+        "cobranca_group": "3",
+        "records": 3588
+      },
+      {
+        "MORTE": "0",
+        "cobranca_group": "5",
+        "records": 608
+      },
+      {
+        "MORTE": "0",
+        "cobranca_group": "6",
+        "records": 8809
+      },
+      {
+        "MORTE": "1",
+        "cobranca_group": "4",
+        "records": 4664
+      }
+    ],
+    "money_consistency": [
+      {
+        "val_tot_blank": 0,
+        "val_tot_zero": 241,
+        "val_tot_negative": 0,
+        "val_tot_min_cents": 0,
+        "val_tot_max_cents": 17653437,
+        "val_tot_sum_cents": 12544063613,
+        "val_tot_equals_components": 72704,
+        "val_tot_equals_sh_plus_sp": 72704
+      }
+    ],
+    "age_units": [
+      {
+        "COD_IDADE": "2",
+        "age_unit": "Dias",
+        "records": 2126,
+        "min_idade": 0,
+        "max_idade": 30
+      },
+      {
+        "COD_IDADE": "3",
+        "age_unit": "Meses",
+        "records": 1112,
+        "min_idade": 1,
+        "max_idade": 11
+      },
+      {
+        "COD_IDADE": "4",
+        "age_unit": "Anos",
+        "records": 69776,
+        "min_idade": 1,
+        "max_idade": 99
+      },
+      {
+        "COD_IDADE": "5",
+        "age_unit": "Centena de anos (idade = 100 + IDADE)",
+        "records": 32,
+        "min_idade": 0,
+        "max_idade": 23
+      }
+    ],
+    "full_row_duplicates": [
+      {
+        "records": 73046,
+        "identical_duplicate_records": 0
+      }
+    ]
+  },
+  "repeated_aih_varying_columns": {
+    "DT_SAIDA": 50,
+    "SEQUENCIA": 50,
+    "VAL_SH": 49,
+    "VAL_TOT": 49,
+    "US_TOT": 49,
+    "IDENT": 46,
+    "QT_DIARIAS": 46,
+    "VAL_SP": 46,
+    "COBRANCA": 45,
+    "DIAS_PERM": 45,
+    "DIAR_ACOM": 4,
+    "MORTE": 3,
+    "IDADE": 2,
+    "GESTOR_TP": 1,
+    "GESTOR_CPF": 1
+  }
+}

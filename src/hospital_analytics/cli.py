@@ -1,4 +1,6 @@
-"""Command line interface: ``hospital-analytics {register-source,convert,validate,verify}``.
+"""Command line interface: ``hospital-analytics <command>``.
+
+Commands: register-source, convert, validate, build-processed, verify, audit, indicators.
 
 Each step is explicit and verifiable. Any divergence returns exit code 1.
 Paths default to ``config/params.yaml``; ``--root`` changes the project root (used in tests).
@@ -8,10 +10,13 @@ from __future__ import annotations
 
 import argparse
 import json
+import logging
 import stat
 import sys
 from pathlib import Path
 
+from hospital_analytics.audit import run_audit
+from hospital_analytics.audit import write_report as audit_write
 from hospital_analytics.config import load_params, project_root, to_money
 from hospital_analytics.convert import (
     DeletedRecordsError,
@@ -21,14 +26,18 @@ from hospital_analytics.convert import (
 )
 from hospital_analytics.dbc import DbcError, read_dbf_header
 from hospital_analytics.dbf import DbfError
+from hospital_analytics.indicators import run_indicators
+from hospital_analytics.indicators import write_report as indicators_write
 from hospital_analytics.manifest import (
     ManifestError,
     load_manifest,
     record_derived,
+    record_processed,
     register_source,
     save_manifest,
     verify_file,
 )
+from hospital_analytics.processed import TransformError, build_processed
 from hospital_analytics.validate import ReferenceTargets, validate_raw_parquet
 
 READ_ONLY = stat.S_IRUSR | stat.S_IRGRP | stat.S_IROTH  # 0o444
@@ -45,6 +54,7 @@ def _defaults(root: Path) -> dict[str, Path]:
     return {
         "source": raw / params["source"]["filename"],
         "parquet": raw / params["raw_conversion"]["parquet_filename"],
+        "processed": root / params["paths"]["processed"] / params["processing"]["filename"],
         "manifest": root / params["paths"]["manifest"],
     }
 
@@ -168,6 +178,73 @@ def cmd_validate(args: argparse.Namespace) -> int:
     return 0 if report.passed else 1
 
 
+def cmd_build_processed(args: argparse.Namespace) -> int:
+    root = args.root
+    defaults = _defaults(root)
+    raw = args.parquet or defaults["parquet"]
+    destination = args.destination or defaults["processed"]
+    manifest_path = args.manifest or defaults["manifest"]
+
+    manifest = load_manifest(manifest_path)
+    raw_key = _key(raw, root)
+    raw_entry = manifest["derived"].get(raw_key)
+    if raw_entry is None:
+        print(f"ERROR: {raw_key} is not recorded; run convert first.", file=sys.stderr)
+        return 1
+    ok, observed = verify_file(raw_entry, raw)
+    if not ok:
+        print(f"ERROR: {raw_key} SHA-256 {observed} != manifest", file=sys.stderr)
+        return 1
+
+    report = build_processed(raw, destination)
+    record_processed(
+        manifest, _key(destination, root), raw_key, report, supersede_reason=args.supersede
+    )
+    destination.chmod(READ_ONLY)
+    save_manifest(manifest, manifest_path)
+    print(
+        json.dumps(
+            {
+                "processed": _key(destination, root),
+                "records": report.records,
+                "original_columns": report.original_columns,
+                "derived_columns": len(report.derived_columns),
+                "original_columns_fingerprint": report.original_columns_fingerprint,
+                "invalid_dates": report.invalid_dates,
+                "reduced_precision_values": report.reduced_precision_values,
+            },
+            indent=2,
+        )
+    )
+    return 0
+
+
+def cmd_audit(args: argparse.Namespace) -> int:
+    root = args.root
+    defaults = _defaults(root)
+    report = run_audit(args.parquet or defaults["parquet"], args.processed or defaults["processed"])
+    json_path, md_path = audit_write(report, root / "reports" / "audit", "audit_rdrj2401")
+    print(f"records={report.records} columns={report.columns}")
+    print(f"entirely blank: {report.entirely_blank}")
+    print(f"written: {_key(json_path, root)}, {_key(md_path, root)}")
+    return 0
+
+
+def cmd_indicators(args: argparse.Namespace) -> int:
+    root = args.root
+    processed = args.processed or _defaults(root)["processed"]
+    report = run_indicators(processed)
+    json_path, md_path = indicators_write(report, root / "reports" / "indicators", "reconciliation")
+    for r in report["indicators"]:
+        shown = r["rounded"] or r["reproduced"]
+        print(f"{r['status']:<28} {r['id']:<32} hist={r['historical']} rep={shown}")
+    print(f"pandas x duckdb agree: {report['engines_agree']}")
+    for problem in report["disagreements"]:
+        print(f"  DISAGREEMENT {problem}")
+    print(f"written: {_key(json_path, root)}, {_key(md_path, root)}")
+    return 0 if report["engines_agree"] else 1
+
+
 def cmd_verify(args: argparse.Namespace) -> int:
     """Check that every file in the manifest exists and matches its SHA-256 (read-only)."""
     root = args.root
@@ -228,12 +305,30 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument("--expect-val-tot", help="exact decimal string, e.g. 123.45")
     p.set_defaults(func=cmd_validate)
 
+    p = sub.add_parser("build-processed", help="build the processed layer from the raw Parquet")
+    p.add_argument("--parquet", type=Path, help="raw-layer Parquet (input)")
+    p.add_argument("--destination", type=Path)
+    p.add_argument("--supersede", metavar="REASON")
+    p.set_defaults(func=cmd_build_processed)
+
+    p = sub.add_parser("audit", help="read-only data audit; writes reports/audit/")
+    p.add_argument("--parquet", type=Path, help="raw-layer Parquet")
+    p.add_argument("--processed", type=Path)
+    p.set_defaults(func=cmd_audit)
+
+    p = sub.add_parser(
+        "indicators", help="historical indicators (pandas x DuckDB); reports/indicators/"
+    )
+    p.add_argument("--processed", type=Path)
+    p.set_defaults(func=cmd_indicators)
+
     p = sub.add_parser("verify", help="check every manifest file exists and matches its SHA-256")
     p.set_defaults(func=cmd_verify)
     return parser
 
 
 def main(argv: list[str] | None = None) -> int:
+    logging.basicConfig(level=logging.INFO, format="%(levelname)s %(name)s: %(message)s")
     args = build_parser().parse_args(argv)
     args.root = (args.root or project_root()).resolve()
     try:
@@ -243,6 +338,7 @@ def main(argv: list[str] | None = None) -> int:
         IntegrityError,
         DeletedRecordsError,
         EncodingMismatchError,
+        TransformError,
         DbcError,
         DbfError,
         FileExistsError,

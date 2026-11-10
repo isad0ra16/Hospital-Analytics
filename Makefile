@@ -1,4 +1,4 @@
-.PHONY: help install install-notebook test lint format check fetch-data verify convert validate
+.PHONY: help install install-notebook test lint format check fetch-data verify convert validate processed audit indicators pipeline
 
 help:  ## List available targets
 	@grep -E '^[a-zA-Z_-]+:.*?## ' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "  %-18s %s\n", $$1, $$2}'
@@ -33,3 +33,14 @@ fetch-data:  ## Recover the original .dbc from the GitHub Release and verify it 
 
 verify:  ## Check every file listed in data/MANIFEST.json (exists + SHA-256)
 	uv run hospital-analytics verify
+
+processed:  ## Build the processed layer (original fields + derived columns)
+	uv run hospital-analytics build-processed
+
+audit:  ## Read-only data audit -> reports/audit/
+	uv run hospital-analytics audit
+
+indicators:  ## Historical indicators, pandas x DuckDB -> reports/indicators/
+	uv run hospital-analytics indicators
+
+pipeline: convert validate processed audit indicators  ## Everything after fetch-data

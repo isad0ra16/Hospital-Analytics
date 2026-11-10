@@ -138,3 +138,88 @@ def build_dbc(dbf: bytes) -> bytes:
 def write(path: Path, content: bytes) -> Path:
     path.write_bytes(content)
     return path
+
+
+# ---------------------------------------------------------------------------
+# SIH-like SYNTHETIC layout (subset of RD fields used by processed/audit/indicators).
+# ---------------------------------------------------------------------------
+MONEY_COMPONENTS = (
+    ("VAL_SH", 13), ("VAL_SP", 13), ("VAL_SADT", 13), ("VAL_RN", 13), ("VAL_ACOMP", 13),
+    ("VAL_ORTP", 13), ("VAL_SANGUE", 13), ("VAL_SADTSR", 11), ("VAL_TRANSP", 13),
+    ("VAL_OBSANG", 11), ("VAL_PED1AC", 11),
+)  # fmt: skip
+
+SIH_FIELDS = (
+    FieldSpec("ANO_CMPT", "C", 4),
+    FieldSpec("MES_CMPT", "C", 2),
+    FieldSpec("N_AIH", "C", 13),
+    FieldSpec("IDENT", "C", 1),
+    FieldSpec("NASC", "C", 8),
+    FieldSpec("DT_INTER", "C", 8),
+    FieldSpec("DT_SAIDA", "C", 8),
+    FieldSpec("COD_IDADE", "C", 1),
+    FieldSpec("IDADE", "N", 2),
+    FieldSpec("DIAS_PERM", "N", 5),
+    FieldSpec("MORTE", "N", 1),
+    FieldSpec("COBRANCA", "C", 2),
+    FieldSpec("PROC_REA", "C", 10),
+    FieldSpec("SEQUENCIA", "N", 9),
+    *(FieldSpec(name, "N", length, 2) for name, length in MONEY_COMPONENTS),
+    FieldSpec("VAL_TOT", "N", 14, 2),
+    FieldSpec("VAL_UTI", "N", 8, 2),
+)
+
+
+@dataclass(frozen=True)
+class SihRecord:
+    """One fictitious admission; ``row()`` renders it in SIH_FIELDS order."""
+
+    n_aih: str
+    ident: str
+    dt_inter: str
+    dt_saida: str
+    cod_idade: str
+    idade: int
+    dias_perm: int
+    morte: int
+    proc_rea: str
+    sh: str
+    sp: str
+    seq: int
+    val_uti: str = "0.00"
+    nasc: str = "19800101"
+
+    @property
+    def val_tot(self) -> str:
+        from decimal import Decimal
+
+        return str(Decimal(self.sh) + Decimal(self.sp))
+
+    def row(self) -> list[str]:
+        cobranca = "41" if self.morte else "12"
+        money = [self.sh, self.sp] + ["0.00"] * (len(MONEY_COMPONENTS) - 2)
+        return [
+            "2024", "01", self.n_aih, self.ident, self.nasc, self.dt_inter, self.dt_saida,
+            self.cod_idade, str(self.idade), str(self.dias_perm), str(self.morte), cobranca,
+            self.proc_rea, str(self.seq), *money, self.val_tot, self.val_uti,
+        ]  # fmt: skip
+
+
+SIH_RECORDS = (
+    SihRecord("3324100000001", "1", "20240102", "20240105", "4", 40, 3, 0, "0303010010", "800.00", "200.00", 1),
+    SihRecord("3324100000002", "1", "20231220", "20231228", "4", 70, 8, 1, "0415010010", "4000.00", "1000.50", 2),
+    SihRecord("3324100000003", "1", "20240110", "20240111", "2", 15, 1, 0, "0303150010", "300.00", "0.00", 3),
+    SihRecord("3324100000004", "1", "20240103", "20240110", "3", 6, 7, 0, "0303150010", "600.00", "50.00", 4),
+    SihRecord("3324100000005", "1", "20240105", "20240106", "5", 2, 1, 1, "0303060010", "900.00", "100.00", 5),
+    SihRecord("3324100000006", "1", "20231101", "20231130", "4", 55, 29, 0, "0415020010", "9000.00", "3000.00", 6,
+              val_uti="166200.0"),
+    SihRecord("3324100000007", "5", "20230101", "20240131", "4", 80, 31, 0, "0303170010", "1500.00", "0.00", 7),
+    SihRecord("3324100000007", "1", "20230101", "20231231", "4", 80, 30, 0, "0303170010", "1500.00", "0.00", 8),
+    SihRecord("3324100000008", "1", "20240115", "20240120", "4", 33, 5, 0, "0201010010", "120.00", "0.00", 9),
+    SihRecord("3324100000009", "1", "20240112", "20240114", "4", 28, 2, 0, "0411010010", "1000.00", "0.00", 10),
+    SihRecord("3324100000010", "1", "20240112", "20240114", "4", 28, 2, 0, "0411010010", "1000.00", "0.00", 11),
+)  # fmt: skip
+
+
+def sih_rows() -> list[list[str]]:
+    return [r.row() for r in SIH_RECORDS]

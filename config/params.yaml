@@ -27,6 +27,10 @@ raw_conversion:
   parquet_filename: RDRJ2401.parquet
   money_column: VAL_TOT
 
+processing:
+  # Processed layer: original fields untouched + derived columns (decision D-021).
+  filename: sih_rj_2024_01_tratado.parquet
+
 # ---------------------------------------------------------------------------
 # Historical reference values
 # Provenance: recovered from previous ChatGPT conversations; the original code

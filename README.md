@@ -83,8 +83,10 @@ make fetch-data   # RDRJ2401.dbc da Release data-rdrj2401, conferido pelo SHA-25
 make pipeline     # convert → validate → processed → audit → indicators → analysis
 ```
 ```bash
-make check        # lint + 150 testes (somente dados sintéticos)
+make check        # lint + testes (somente dados sintéticos)
 ```
+
+Para contribuir: [`CONTRIBUTING.md`](CONTRIBUTING.md) (convenções de commit; `make hooks` ativa a verificação).
 
 Um clone limpo reproduz **bit a bit** os relatórios versionados (verificado). Estratégia de
 recuperação: [`docs/recuperacao_dados.md`](docs/recuperacao_dados.md).
@@ -113,7 +115,8 @@ recuperação: [`docs/recuperacao_dados.md`](docs/recuperacao_dados.md).
 [Dicionário](docs/dicionario_variaveis.md) · [Reconciliação](docs/reconciliacao.md) ·
 [Indicadores](docs/indicadores.md) · [Qualidade](docs/qualidade_dados.md) · [Análises](docs/analises.md) ·
 [Arquitetura](docs/arquitetura.md) · [Pipeline](docs/pipeline_dados.md) ·
-[Recuperação](docs/recuperacao_dados.md) · [Diário de execução](docs/diario_execucao.md)
+[Recuperação](docs/recuperacao_dados.md) · [Diário de execução](docs/diario_execucao.md) ·
+[Convenções do projeto](CONTRIBUTING.md)
 
 ## Roteiro
 

@@ -1,158 +1,138 @@
 # Plano operacional de enriquecimento — fontes oficiais de referência
 
-> **Status:** plano para aprovação. Nada foi baixado, integrado ou publicado. O modelo, os dados e
-> o pipeline permanecem intactos. Este arquivo ainda **não** foi versionado.
+> **Status:** plano para aprovação (revisão 2). Nada foi integrado ao modelo. Dados originais,
+> camadas, fato, identificadores técnicos e testes permanecem intactos.
 
-## Como os endereços foram classificados
-
-O ambiente de execução não alcança nenhum site oficial (403 na política de rede; FTP do DATASUS
-sem resposta). Nenhum endereço pôde ser aberto daqui. Classificação usada:
+## Classes de evidência
 
 | Classe | Significado |
 |---|---|
-| **V — verificado por uso** | o projeto já baixou um arquivo oficial deste endereço, com SHA-256 conferido |
-| **C2 — corroborado (2 fontes)** | aparece no código-fonte de duas ferramentas públicas independentes que baixam dados do DATASUS (`microdatasus` 7109ec2; `PySUS` 2.11.7) |
-| **C1 — corroborado (1 fonte)** | aparece no código de uma dessas ferramentas |
-| **K — candidato** | conhecimento prévio, sem corroboração; **não usar sem confirmação no site** |
+| **A — acessado diretamente** | o projeto obteve um arquivo oficial deste endereço e conferiu o SHA-256 |
+| **B — corroborado por automação pública ativa** | código público que baixa deste endereço **em execução recorrente com sucesso** (commits automáticos verificados em 2026-11-10) |
+| **C — corroborado por código público** | o endereço/nome aparece no código-fonte de ferramentas públicas que usam a fonte oficial |
+| **D — indexado por busca** | página oficial encontrada por mecanismo de busca, **não aberta** por este projeto |
+| **E — não confirmado** | nome exato ou existência ainda desconhecidos → confirmar por listagem/página oficial |
 
-Ferramentas de terceiros servem só para localizar endereços oficiais — **nenhum dado delas é usado**.
+**Limitação do ambiente:** nenhum site oficial abre daqui. O contêiner e a ferramenta de leitura web
+seguem a mesma política de rede (falha de resolução de nome para `www2.datasus.gov.br`,
+`wiki.datasus.gov.br`, `servicodados.ibge.gov.br`, `opendatasus.saude.gov.br`,
+`www.saude.rj.gov.br`; 403 para os demais testados). Ferramentas de terceiros foram usadas **apenas
+para localizar endereços e formatos** — nenhum dado delas é incorporado.
 
-**Regra para nomes de arquivos:** onde o nome exato não está corroborado, o passo é **listar o
-diretório oficial** e enviar a listagem; os nomes reais saem dessa listagem, não deste documento.
+**Achado relevante:** dois repositórios públicos baixam diariamente do FTP do DATASUS a partir do
+GitHub Actions (último sucesso: 2026-11-10 16:21 UTC). O DATASUS **não** bloqueia acesso a partir do
+exterior; o bloqueio é do ambiente de execução deste projeto (revisa a hipótese da D-011).
 
-## Fontes
+## 1. Dicionário oficial SIH/SUS e auxiliares do TabWin — prioridade 1
 
-### 1. Dicionário SIH/SUS e tabelas auxiliares do TabWin (prioridade 1)
+| Item | Evidência | Classe |
+|---|---|---|
+| Pasta de dados `ftp://ftp.datasus.gov.br/dissemin/publicos/SIHSUS/200801_/Dados/` | download do `RDRJ2401.dbc` (SHA-256 conferido) | **A** |
+| Pacote auxiliar `ftp://ftp.datasus.gov.br/dissemin/publicos/SIHSUS/200801_/Auxiliar/TAB_SIH.zip` | citado em página da SES-RJ ("Versão do Aplicativo TabWin SIHSUS") e em fórum (dadosabertos.social); descrito como atualizado mensalmente; não aparece em código | **D** |
+| Página "Manuais do SIH" `http://www2.datasus.gov.br/SIHD/manuais` (Dicionário de Dados, layout da AIH Reduzida, Informes Técnicos) | resultado de busca | **D** |
+| Página "Reduzida do AIH" `http://www2.datasus.gov.br/SIHD/reduzida` | resultado de busca | **D** |
+| Nomes exatos dos documentos (PDF) | — | **E** |
 
-| Item | Detalhe |
-|---|---|
-| Necessário | (a) documentação oficial do layout do RD (Informe Técnico); (b) tabelas de conversão do TabWin para o SIH (arquivos de conversão que o DATASUS usa para decodificar os campos do RD) |
-| Endereço | raiz dos dados do SIH: `ftp://ftp.datasus.gov.br/dissemin/publicos/SIHSUS/200801_/` — **V** (pasta `Dados/`). Subpastas de auxiliares e de documentação ao lado de `Dados/`: **K** (o padrão `…/200801_/Auxiliar/TAB_xxx.zip` é **C1** para o SIA e o CNES, mas **não** para o SIH) |
-| Versão | o pacote vigente na data do download; registrar data e SHA-256. Para o layout, a versão que cubra a competência 2024-01 |
-| Relacionamento | campos de código do RD (`ESPEC`, `CAR_INT`, `COBRANCA`, `NAT_JUR`, `GESTAO`, `IDENT`, `COD_IDADE`, `MARCA_UTI`, `MUNIC_RES`/`MUNIC_MOV`, `PROC_REA`, `DIAG_PRINC`) ↔ código das tabelas de conversão |
-| Uso | confirmar ou corrigir o dicionário secundário (P-001, P-009), rotular `ESPEC` 10/14/87 (P-010), `NAT_JUR` e `GESTAO` |
-| Riscos | tabelas de conversão podem agrupar códigos ou ter rótulos abreviados; formato próprio do TabWin (a ser lido sem tratamento e documentado); versão do pacote pode não corresponder exatamente a jan/2024 |
+- **Versão:** `TAB_SIH.zip` vigente no download (registrar data e SHA-256); documentação cuja
+  vigência cubra a competência 2024-01.
+- **Relacionamento:** códigos do RD (`ESPEC`, `CAR_INT`, `COBRANCA`, `NAT_JUR`, `GESTAO`, `IDENT`,
+  `COD_IDADE`, `MARCA_UTI`, `MUNIC_RES`/`MUNIC_MOV`, `PROC_REA`, `DIAG_PRINC`) ↔ tabelas de conversão.
+- **Uso:** confirmar/corrigir o dicionário secundário (P-001, P-009), rotular `ESPEC` 10/14/87
+  (P-010), `NAT_JUR` e `GESTAO`.
+- **Riscos:** formato próprio do TabWin (`.cnv`/`.def`, a documentar após o download); rótulos
+  abreviados ou agrupados; pacote atualizado mensalmente (o conteúdo de hoje pode diferir do de
+  jan/2024 — registrar a data).
 
-### 2. CNES — estabelecimentos (prioridade 2)
+## 2. IBGE — municípios e UF — prioridade 2
 
-| Item | Detalhe |
-|---|---|
-| Necessário | cadastro de estabelecimentos do RJ na competência 2024-01 e, se o arquivo de dados não trouxer nomes, o pacote auxiliar do CNES |
-| Endereço | `ftp://ftp.datasus.gov.br/dissemin/publicos/CNES/200508_/Dados/` — **C2**; grupo `ST` = "Estabelecimentos" — **C1** (PySUS). Subpasta e nome do arquivo do RJ 2024-01: **K** → listar. Pacote auxiliar: `ftp://ftp.datasus.gov.br/dissemin/publicos/CNES/200508_/Auxiliar/TAB_CNES.zip` — **C1** |
-| Alternativa | portal OpenDataSUS `https://dadosabertos.saude.gov.br` — **C2** como portal; conjunto específico do CNES: **K** |
-| Versão | **competência 2024-01**, UF RJ (a mesma do RD) |
-| Relacionamento | `dim_estabelecimento.cnes` (7 dígitos, texto) ↔ campo de código CNES do cadastro |
-| Riscos | o arquivo `ST` pode **não conter nome** do estabelecimento (verificar colunas após o download); estabelecimentos desativados ou renomeados entre competências; possível mais de uma linha por CNES (checar unicidade); CNES presente no RD e ausente no cadastro do mês |
+| Item | Evidência | Classe |
+|---|---|---|
+| Documentação `https://servicodados.ibge.gov.br/api/docs/localidades` | resultado de busca (página oficial) | **D** |
+| `https://servicodados.ibge.gov.br/api/v1/localidades/municipios` (todos) e `…/api/v1/localidades/estados/{UF}/municipios` | código do pacote PyPI `ibge` 0.0.5 + documentação indexada | **C** |
+| Identificador do município com 7 dígitos | conhecimento prévio | **E** (verificar no JSON) |
 
-### 3. SIGTAP — procedimentos (prioridade 3)
+- **Versão:** a API não é versionada por data — registrar a data da consulta. Alternativa
+  versionada (DTB anual do IBGE): **E**, endereço não corroborado.
+- **Relacionamento:** `dim_municipio_residencia.municipio_residencia_cod` e
+  `dim_estabelecimento.municipio_estabelecimento_cod` (6 dígitos) ↔ 6 primeiros dígitos do `id`
+  do IBGE; `uf_*_cod` ↔ `id` da UF.
+- **Riscos:** o prefixo de 6 dígitos precisa ser **único** (teste); códigos do RD fora da lista
+  (municípios de outras UFs ou códigos especiais) → cobertura reportada; termos de uso **não
+  verificados**. Comparar com a tabela de municípios do `TAB_SIH.zip`, se existir.
 
-| Item | Detalhe |
-|---|---|
-| Necessário | Tabela Unificada de procedimentos (código, nome, grupo, subgrupo, forma de organização) |
-| Endereço | portal SIGTAP do DATASUS — **K** (não corroborado); a área de downloads do portal indica os arquivos por competência |
-| Versão | **competência 2024-01** |
-| Relacionamento | `dim_procedimento.procedimento_cod` (10 dígitos, texto) ↔ código do procedimento; `grupo_cod` ↔ código do grupo (confirma P-011) |
-| Riscos | procedimentos de AIHs de longa permanência iniciadas antes de 2024 podem não existir na tabela de 2024-01 (procedimento extinto) → cobertura < 100%, buscar competência anterior **documentada**; arquivo da competência é um pacote com várias tabelas (layout no próprio pacote) |
+## 3. CNES — estabelecimentos, competência 2024-01 — prioridade 3
 
-### 4. CID-10 — diagnósticos (prioridade 4)
+| Item | Evidência | Classe |
+|---|---|---|
+| `ftp://ftp.datasus.gov.br/dissemin/publicos/CNES/200508_/Dados/` | código do `microdatasus` e do `PySUS` | **C** |
+| Grupo `ST` = "Estabelecimentos" (nome do arquivo por grupo + UF + ano + mês) | código do `PySUS` | **C** |
+| Subpasta e nome exato do arquivo RJ 2024-01 | — | **E** (listar) |
+| `ftp://ftp.datasus.gov.br/dissemin/publicos/CNES/200508_/Auxiliar/TAB_CNES.zip` | código do `microdatasus` | **C** |
+| Extração por competência `http://cnes.datasus.gov.br/pages/estabelecimentos/extracao.jsp` | resultado de busca | **D** |
+| OpenDataSUS `https://opendatasus.saude.gov.br/dataset/cnes-cadastro-nacional-de-estabelecimentos-de-saude` | resultado de busca (indica atualização diária — provavelmente **não** é a fotografia de jan/2024) | **D** |
 
-| Item | Detalhe |
-|---|---|
-| Necessário | tabelas de categorias (3 caracteres) e subcategorias (4 caracteres) com descrição em português |
-| Endereço | publicação da CID-10 pelo DATASUS — **K** (não corroborado) |
-| Versão | a versão publicada pelo DATASUS vigente em 2024 (registrar a indicada no site) |
-| Relacionamento | `fato.diagnostico_principal_cod` (3–4 caracteres, sem ponto) ↔ subcategoria (4) ou categoria (3); cria a futura `dim_diagnostico` (3.759 códigos no RD) |
-| Riscos | códigos do RD sem ponto vs. tabela com ponto (normalizar só o ponto, documentado); códigos de 3 caracteres no RD (sem subcategoria); códigos não pertencentes à CID-10 padrão; atualizações da tabela ao longo do tempo |
+- **Versão:** competência **2024-01**, UF RJ.
+- **Relacionamento:** `dim_estabelecimento.cnes` (7 dígitos, texto) ↔ código CNES.
+- **Riscos:** o arquivo `ST` pode não conter o **nome** do estabelecimento (verificar colunas);
+  nesse caso, o nome viria do `TAB_CNES.zip` ou da extração por competência; renomeações e
+  desativações; unicidade por CNES a testar.
 
-### 5. IBGE — municípios e UF (prioridade 5)
+## 4. SIGTAP — procedimentos, competência 2024-01 — prioridade 4
 
-| Item | Detalhe |
-|---|---|
-| Necessário | lista de municípios com código IBGE de 7 dígitos, nome e UF |
-| Endereço | site do IBGE `https://www.ibge.gov.br/` — **C1** como site; produto específico (API de Localidades ou Divisão Territorial Brasileira — DTB): **K** |
-| Versão | DTB de referência que cubra jan/2024 (registrar o ano da DTB) |
-| Relacionamento | `dim_municipio_residencia.municipio_residencia_cod` e `dim_estabelecimento.municipio_estabelecimento_cod` (6 dígitos) ↔ **6 primeiros dígitos** do código IBGE (o 7º é dígito verificador — **confirmar na documentação da DTB**); `uf_*_cod` ↔ código de UF |
-| Riscos | o prefixo de 6 dígitos precisa ser **único** na tabela (testar); códigos especiais do SIH (ex.: "ignorado", municípios criados ou extintos) sem correspondência; os arquivos auxiliares do TabWin (item 1) podem trazer a tabela de municípios já no formato de 6 dígitos — **comparar as duas fontes**, se ambas forem obtidas |
+| Item | Evidência | Classe |
+|---|---|---|
+| `ftp://ftp2.datasus.gov.br/pub/sistemas/tup/downloads/` | repositórios `btran12/SIGTAP` e `RenatoKR/SIGTAP` sincronizam daqui diariamente (sucesso em 2026-11-10) | **B** |
+| Padrão `TabelaUnificada_AAAAMM_vAAMMDDHHMM.zip` | arquivos baixados por essas automações (ex.: `TabelaUnificada_202601_v2601221740.zip`) | **B** |
+| Existência da competência 202401 no FTP | as automações listam o diretório e pegam só os 6 últimos → o diretório guarda mais competências | inferência — **E** |
+| Nome exato do arquivo 202401 (sufixo `v…` não dedutível) | — | **E** (listar) |
+| Página de download `https://wiki.datasus.gov.br/sigtap/index.php/Download` | resultado de busca (arquivos .txt por competência + notas técnicas) | **D** |
 
-## Licenciamento
+- **Relacionamento:** `dim_procedimento.procedimento_cod` (10 dígitos) ↔ código do procedimento;
+  `grupo_cod` ↔ código do grupo (confirma P-011).
+- **Riscos:** procedimentos de AIHs de longa permanência iniciadas antes de 2024 podem não existir
+  em 202401 → cobertura reportada e, se preciso, competência anterior **documentada**; o pacote tem
+  várias tabelas e layout próprio (descrito no pacote). Licença: um espelho afirma "domínio
+  público" — **afirmação de terceiro, não verificada**.
 
-Dados do DATASUS e do IBGE são publicações oficiais de acesso público. A **licença ou os termos de
-uso específicos não foram verificados** para nenhum dos arquivos. No download, registrar o texto
-ou a página de termos de cada fonte (captura da página ou link), para documentar no manifesto e no
-README. A publicação de tabelas de referência no GitHub (Release) depende dessa verificação.
+## 5. CID-10 — diagnósticos — prioridade 5
 
-## Instruções de download no Windows
+| Item | Evidência | Classe |
+|---|---|---|
+| Página "Tabelas da CID-10" `http://www2.datasus.gov.br/cid10/V2008/download.htm` e página dos CSV `http://www2.datasus.gov.br/cid10/V2008/descrcsv.htm` | resultado de busca | **D** |
+| Arquivos `CID-10-CAPITULOS.CSV`, `CID-10-GRUPOS.CSV`, `CID-10-CATEGORIAS.CSV`, `CID-10-SUBCATEGORIAS.CSV` | presentes, com esses nomes, no pacote público `com.github.kyriosdata.cid10:cid10-dados:2008.1.0` (Maven Central, código-fonte) | **C** |
+| Formato | ISO-8859-1, separador `;`, cabeçalho; chaves `SUBCAT` (4) e `CAT` (3) **sem ponto** | **C** |
+| Arquivo zip/nome do download na página oficial | — | **E** |
 
-Use o **PowerShell**. Escreva `curl.exe` (com `.exe`): no Windows PowerShell 5, `curl` sozinho é
-um apelido de outro comando.
+- **Viabilidade medida (cópia de terceiro, não incorporada):** chaves únicas; dos 3.759 códigos do
+  RD, 3.349 casam com `SUBCAT` e 410 com `CAT`; **0 sem correspondência**. Regra de junção:
+  subcategoria e, na falta, categoria.
+- **Riscos:** versão "V2008" × atualizações posteriores da CID-10 — refazer a cobertura com o
+  arquivo oficial; termos de uso não verificados.
 
-**Passo 1 — listar os diretórios (não baixa nada; envie-me o texto da saída):**
+## Testes de aceitação (obrigatórios antes de qualquer integração)
 
-```powershell
-curl.exe --list-only ftp://ftp.datasus.gov.br/dissemin/publicos/SIHSUS/200801_/
-```
-```powershell
-curl.exe --list-only ftp://ftp.datasus.gov.br/dissemin/publicos/CNES/200508_/
-```
-```powershell
-curl.exe --list-only ftp://ftp.datasus.gov.br/dissemin/publicos/CNES/200508_/Dados/
-```
-
-Repita `--list-only` nas subpastas que aparecerem (ex.: a de auxiliares do SIH e a do grupo `ST`
-do CNES). Alternativa sem linha de comando: cole o endereço `ftp://…` na barra de endereços do
-**Explorador de Arquivos** do Windows.
-
-**Passo 2 — baixar cada arquivo identificado na listagem** (substitua pelo caminho exato listado):
-
-```powershell
-curl.exe -O ftp://ftp.datasus.gov.br/dissemin/publicos/<caminho exato da listagem>
-```
-
-**Passo 3 — registrar a integridade de cada arquivo:**
-
-```powershell
-Get-FileHash .\<arquivo> -Algorithm SHA256; (Get-Item .\<arquivo>).Length
-```
-
-**SIGTAP, CID-10, IBGE e OpenDataSUS (sites web):** abra o site oficial no navegador, navegue até a
-área de downloads, baixe o arquivo da versão/competência indicada acima e anote: **URL exata da
-página e do arquivo**, data do download, versão/competência informada no site e os termos de uso.
-
-**Entrega dos arquivos:** como no `.dbc` (Release do repositório criada por você, ex. `ref-2024-01`)
-— somente após verificar os termos de uso. Para cada arquivo, informe: URL, data, versão, tamanho
-e SHA-256.
-
-## Testes de aceitação do enriquecimento
-
-O enriquecimento só pode **acrescentar colunas às dimensões**. Critérios obrigatórios:
-
-1. **Fato intocado:** `fato_registro_aih.csv` **byte a byte idêntico** ao atual (mesmo SHA-256 de
-   `reports/powerbi/export_summary.json`) → 73.046 registros e R$ 125.440.636,13 por construção.
-2. **Dimensões sem perda ou duplicação:** contagem de linhas e conjunto de chaves de cada dimensão
-   iguais aos atuais (240, 262, 1.094, …); a junção com a referência é feita a partir da dimensão
-   (`left join`) e a chave da referência precisa ser **única** (teste dedicado; falha se houver
-   duplicata).
-3. **As 64 verificações atuais continuam passando** (chaves, 0 órfãos, join sem duplicação, totais,
-   medidas = indicadores validados) e os SHA-256 das camadas bruta e tratada continuam iguais
-   (`make verify`).
-4. **Cobertura reportada, não forçada:** para cada dimensão, % de códigos com nome oficial e lista
-   dos não encontrados (vão para a página de qualidade); sem correspondência aproximada.
-5. **Proveniência:** cada referência registrada em `data/MANIFEST.json` (URL, data, versão/competência,
-   SHA-256, termos) e conferida antes do uso.
-6. **Conferência com a fonte secundária:** tabela comparando rótulos do dicionário atual × oficiais;
-   divergências listadas e decididas explicitamente (nunca sobrescritas em silêncio).
+1. **Fato intocado:** `fato_registro_aih.csv` byte a byte idêntico (SHA-256 em
+   `reports/powerbi/export_summary.json`) → 73.046 registros e R$ 125.440.636,13 por construção;
+   `registro_id` e `aih_id` inalterados.
+2. **Dimensões:** mesmo número de linhas e mesmo conjunto de chaves; junção a partir da dimensão;
+   chave da referência **única** (falha se duplicada); nenhuma nova relação no modelo.
+3. **Integridade atual:** as 64 verificações de `make powerbi` e `make verify` continuam passando.
+4. **Cobertura reportada, nunca forçada:** % de códigos com nome oficial por dimensão + lista dos
+   não encontrados; sem correspondência aproximada.
+5. **Proveniência:** cada arquivo de referência registrado em `data/MANIFEST.json` (URL, data,
+   versão/competência, SHA-256, termos de uso) e conferido antes do uso.
+6. **Secundária × oficial:** tabela comparativa dos rótulos atuais com os oficiais; divergências
+   decididas explicitamente.
 7. **Reprodutibilidade:** duas exportações seguidas com SHA-256 idênticos.
 
-## Lista priorizada do que obter
+## Como obter os arquivos
 
-| # | O quê | Como | Classe do endereço |
-|---|---|---|---|
-| 1 | **Listagens** de `SIHSUS/200801_/`, `CNES/200508_/` e `CNES/200508_/Dados/` (e subpastas relevantes) | `curl.exe --list-only` (passo 1) — enviar o texto | raiz V / C2 |
-| 2 | Pacote de tabelas auxiliares do TabWin para o SIH + documentação do layout do RD | da listagem do item 1 | K (pasta a confirmar) |
-| 3 | Cadastro de estabelecimentos do CNES, RJ, competência 2024-01 + `TAB_CNES.zip` | da listagem do item 1 | C2 / C1 |
-| 4 | Tabela Unificada SIGTAP, competência 2024-01 | portal SIGTAP (navegador) | K |
-| 5 | Tabelas da CID-10 (categorias e subcategorias) | publicação do DATASUS (navegador) | K |
-| 6 | Municípios IBGE (DTB que cubra jan/2024) | site do IBGE (navegador) | K |
+**Opção B (escolhida) — download manual no Windows (PowerShell; use `curl.exe` com `.exe`).**
+Primeiro **listar** (os nomes exatos saem da listagem), depois baixar e registrar o SHA-256 com
+`Get-FileHash .\<arquivo> -Algorithm SHA256`. Para páginas web, anotar URL da página e do arquivo,
+data, versão/competência e termos de uso.
 
-Após receber as listagens (item 1), atualizo este plano com os **nomes exatos** dos arquivos e só
-então peço a sua aprovação para integrar.
+**Alternativa a considerar — GitHub Actions no próprio repositório.** Como o FTP do DATASUS
+responde ao GitHub Actions, um workflow manual (`workflow_dispatch`) poderia listar os diretórios e
+baixar os arquivos com registro automático de SHA-256 — acesso direto, reproduzível e auditável.
+Requer sua autorização (criação de workflow e decisão sobre onde guardar os arquivos).

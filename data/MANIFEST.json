@@ -2,11 +2,44 @@
   "derived": {
     "data/raw/RDRJ2401.parquet": {
       "columns": 113,
-      "content_fingerprint": "e9fcf1b88e2c15fe4b8bceb3fa8d161b113acbbc6d979f4f7272177669f60106",
-      "created_at": "2026-11-10T01:48:35+00:00",
+      "content_fingerprint": "b3dfcaba8ef916912a04520fe6587c3fcea9d46b50241a7946c7e4de9e0f67c7",
+      "created_at": "2026-11-10T02:01:24+00:00",
       "derived_from": "data/raw/RDRJ2401.dbc",
-      "encoding": "latin-1",
+      "encoding": "cp850",
+      "history": [
+        {
+          "columns": 113,
+          "content_fingerprint": "e9fcf1b88e2c15fe4b8bceb3fa8d161b113acbbc6d979f4f7272177669f60106",
+          "created_at": "2026-11-10T01:48:35+00:00",
+          "derived_from": "data/raw/RDRJ2401.dbc",
+          "encoding": "latin-1",
+          "intermediate_dbf": {
+            "header_records": 73046,
+            "language_driver": 2,
+            "last_update": "2025-02-08",
+            "sha256": "9e3c83bdaf9d086e445efcd8916548bd128f82d493cebbc3c1639d7f9a3934f5",
+            "size_bytes": 51281941,
+            "version": 3
+          },
+          "records": 73046,
+          "sha256": "9b123b4b02713a7e2359e5c6c70daf5b4d54c88ebc7647b8b62b03ee74180337",
+          "size_bytes": 3274547,
+          "source_sha256": "a3f0ea9a6ce75099fa8210d81b13736fc4da4ac1acf30e8245c7aa3a0d7dfc9c",
+          "step": "raw_conversion (.dbc -> .dbf -> Arrow -> Parquet, no treatment)",
+          "superseded_at": "2026-11-10T02:01:24+00:00",
+          "superseded_reason": "Adopt CP850 (decision D-019): the DBF header declares language driver 0x02 = CP850. Latin-1 showed C1 control characters instead of 'É'/'á' in 23 AUD_JUST values. Raw bytes unchanged: raw-bytes fingerprint identical before and after.",
+          "tool_versions": {
+            "dbfread": "2.0.7",
+            "hospital-analytics": "0.1.0",
+            "pandas": "3.1.1",
+            "pyarrow": "26.0.1",
+            "pyreaddbc": "2.0.4",
+            "python": "3.13.18"
+          }
+        }
+      ],
       "intermediate_dbf": {
+        "declared_encoding": "cp850",
         "header_records": 73046,
         "language_driver": 2,
         "last_update": "2025-02-08",
@@ -14,9 +47,10 @@
         "size_bytes": 51281941,
         "version": 3
       },
+      "raw_bytes_fingerprint": "6ea7c886bbc44d009278a3761ab5a3a90cd7e63ba29cb54f175582bfb4ee607e",
       "records": 73046,
-      "sha256": "9b123b4b02713a7e2359e5c6c70daf5b4d54c88ebc7647b8b62b03ee74180337",
-      "size_bytes": 3274547,
+      "sha256": "de7000cdcb70f1af6ae48891297868f02ad8693a2bb917fd435108bfec59a831",
+      "size_bytes": 3274545,
       "source_sha256": "a3f0ea9a6ce75099fa8210d81b13736fc4da4ac1acf30e8245c7aa3a0d7dfc9c",
       "step": "raw_conversion (.dbc -> .dbf -> Arrow -> Parquet, no treatment)",
       "tool_versions": {

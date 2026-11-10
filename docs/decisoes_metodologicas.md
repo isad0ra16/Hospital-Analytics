@@ -131,6 +131,24 @@ SHA-256, versão dos dados (data de atualização do cabeçalho DBF: 2025-02-08)
 impressões digitais. Recuperação: `make fetch-data` (Release → verificação). Ver
 [`recuperacao_dados.md`](recuperacao_dados.md).
 
+## D-019 — Encoding CP850, declarado pelo cabeçalho do DBF
+**Status:** Adotada (Fase 2) — resolve P-008 · aprovada pela autora
+**Contexto:** a camada bruta foi gerada inicialmente com Latin-1 (D-012). O cabeçalho do DBF declara
+*language driver* `0x02` = CP850. Em `AUD_JUST`, 23 valores continham os bytes `0x90`/`0xA0`,
+exibidos em Latin-1 como caracteres de controle.
+**Alternativas:** (a) manter Latin-1 — reversível, mas exibição incorreta e contrária ao que o
+arquivo declara; (b) guardar bytes brutos em vez de texto — fiel, mas pouco prático para análise;
+(c) **CP850** — o que o arquivo declara, também reversível para os 256 bytes.
+**Decisão:** CP850. A conversão passa a **recusar** um encoding que contradiga o cabeçalho.
+**Prova de que nenhum valor bruto mudou:** nova impressão digital sobre os **bytes** de cada campo
+(independente de encoding): idêntica antes (Latin-1) e depois (CP850) —
+`6ea7c886bbc44d009278a3761ab5a3a90cd7e63ba29cb54f175582bfb4ee607e`. Comparação célula a célula:
+somente 23 células de `AUD_JUST` mudaram de texto (`RECÉM` ×13, `USUáRIO` ×10 — o "á" minúsculo
+está no dado de origem). Caracteres de controle na base: 13 → 0.
+**Consequências:** a impressão digital do texto mudou (`e9fcf1b8…` → `b3dfcaba…`); a entrada
+anterior foi mantida em `history` no manifesto (substituição explícita com motivo, via
+`convert --supersede`). Registros, colunas e `VAL_TOT` inalterados.
+
 ---
 
 ## Decisões pendentes
@@ -144,4 +162,4 @@ impressões digitais. Recuperação: `make fetch-data` (Release → verificaçã
 | P-005 | Campo de classificação clínico/cirúrgico | Fase 4 |
 | P-006 | Papel de cada arquivo Parquet. **Parcial:** `data/raw/RDRJ2401.parquet` = conversão direta sem tratamento (D-012). Pendentes: `processed/sih_rj_2024_01*.parquet` | Fase 3 |
 | P-007 | Licença do projeto | Antes da Fase 6 |
-| P-008 | **Encoding: Latin-1 ou CP850.** O cabeçalho DBF declara *language driver* `0x02` = CP850. Em `AUD_JUST`, 23 valores têm bytes `0x90`/`0xA0`: em CP850 viram `É`/`á` (plausível); em Latin-1, caracteres de controle. Nenhum outro campo tem bytes não ASCII. Ambos os encodings são reversíveis (nenhum byte foi perdido), mas a exibição atual desses 23 valores está incorreta. **Recomendação:** adotar CP850, conforme declarado no arquivo, e regenerar a camada bruta. Não afeta contagens nem `VAL_TOT` | Aprovação da autora |
+| ~~P-008~~ | Encoding — **resolvida pela D-019** | — |

@@ -1,5 +1,9 @@
 # Plano operacional de enriquecimento — fontes oficiais de referência
 
+> **Revisão 5:** diagnóstico concluído para todas as fontes (inclui CADGERRJ, TP_PFPJ.CNV,
+> RJ_municip.cnv e Estabelecimento.def; 7/7 arquivos A1). Resultados, riscos e colunas propostas em
+> [`diagnostico_referencias.md`](diagnostico_referencias.md). Integração aguarda aprovação.
+>
 > **Status:** plano para aprovação (revisão 4 — arquivos obtidos pela autora; leitores e diagnóstico
 > preparados, **sem integração**). Nada foi integrado ao modelo. Dados originais,
 > camadas, fato, identificadores técnicos e testes permanecem intactos.

@@ -84,11 +84,12 @@ def read_fixed_width(data: bytes, layout: list[FixedField], encoding: str) -> li
     return rows
 
 
-def read_sigtap_table(archive: Path, table: str, encoding: str = "latin-1") -> list[dict[str, str]]:
+def read_sigtap_table(archive: Path, table: str, encoding: str = "cp1252") -> list[dict[str, str]]:
     """Read ``<table>.txt`` from a SIGTAP archive with ``<table>_layout.txt`` from the same archive.
 
     Byte positions equal character positions only for single-byte encodings, so only those are
-    accepted (Latin-1 is the encoding used by public SIGTAP readers; verify on the real file).
+    accepted. Default CP1252: verified on TabelaUnificada_202401 (12 procedure names use bytes
+    0x93/0x94/0x96 = quotation marks and en dash, which Latin-1 decodes as control characters).
     """
     if encoding.lower().replace("_", "-") not in {"latin-1", "iso-8859-1", "cp1252", "cp850"}:
         raise ValueError(f"{encoding}: fixed-width byte positions require a single-byte encoding")
@@ -242,3 +243,63 @@ def fact_unchanged(export_summary: Path, fact_csv: Path) -> bool:
 
     summary = json.loads(Path(export_summary).read_text(encoding="utf-8"))
     return summary["tables"]["fato_registro_aih"]["csv"]["sha256"] == sha256_file(fact_csv)
+
+
+# ---------------------------------------------------------------------------
+# TabWin conversion files (.cnv)
+# ---------------------------------------------------------------------------
+@dataclass(frozen=True)
+class CnvCategory:
+    sequence: int
+    label: str
+    codes: tuple[str, ...]  # single codes, ranges "a-b", or "" (blank value)
+
+
+def read_cnv(path: Path, encoding: str = "cp1252") -> tuple[tuple[str, ...], list[CnvCategory]]:
+    """Read a TabWin ``.cnv`` file as observed in the official files (RJ_municip.cnv, TP_PFPJ.CNV).
+
+    First line: header tokens (category count, code width, optional flags). Each further line:
+    sequence number, label, and the comma-separated codes (last token). The category count in
+    the header must match. Overlapping codes are kept as published (precedence is not inferred).
+    """
+    lines = [ln for ln in Path(path).read_bytes().decode(encoding).splitlines() if ln.strip()]
+    if not lines:
+        raise ReferenceFormatError(f"{Path(path).name}: empty file")
+    header = tuple(lines[0].split())
+    if not header or not header[0].isdigit():
+        raise ReferenceFormatError(f"{Path(path).name}: header must start with the category count")
+    categories = []
+    for line in lines[1:]:
+        tokens = line.split()
+        if len(tokens) < 3 or not tokens[0].isdigit():
+            raise ReferenceFormatError(f"{Path(path).name}: unexpected line {line!r}")
+        codes = tokens[-1]
+        start = line.index(tokens[0]) + len(tokens[0])
+        label = line[start : line.rindex(codes)].strip()
+        categories.append(CnvCategory(int(tokens[0]), label, tuple(codes.split(","))))
+    if int(header[0]) != len(categories):
+        raise ReferenceFormatError(
+            f"{Path(path).name}: header declares {header[0]} categories, found {len(categories)}"
+        )
+    return header, categories
+
+
+def cnv_lookup(categories: list[CnvCategory], code: str) -> list[CnvCategory]:
+    """Categories whose code list contains ``code`` (exact code or numeric range a-b)."""
+    found = []
+    for cat in categories:
+        for item in cat.codes:
+            if "-" in item:
+                lo, hi = item.split("-", 1)
+                if (
+                    lo.isdigit()
+                    and hi.isdigit()
+                    and code.isdigit()
+                    and int(lo) <= int(code) <= int(hi)
+                ):
+                    found.append(cat)
+                    break
+            elif item == code:
+                found.append(cat)
+                break
+    return found

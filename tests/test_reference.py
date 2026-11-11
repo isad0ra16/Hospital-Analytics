@@ -10,11 +10,13 @@ from synthetic_data import FieldSpec, build_dbc, build_dbf, write
 from hospital_analytics.integrity import sha256_file
 from hospital_analytics.reference import (
     ReferenceFormatError,
+    cnv_lookup,
     coverage,
     enrichment_guard,
     fact_unchanged,
     key_report,
     parse_layout,
+    read_cnv,
     read_fixed_width,
     read_ibge_municipios,
     read_sigtap_table,
@@ -217,3 +219,43 @@ def test_file_with_wrong_hash_is_never_read(incoming):
     entry = run_diagnostic(inc, pbi, sources)["sources"]["cnes_st"]
     assert entry["integrity"]["integrity_ok"] is False
     assert "structure" not in entry
+
+
+def test_sigtap_default_encoding_is_cp1252(tmp_path):
+    name = "SAÚDE \x96 X".encode("latin-1")  # 0x96 is an en dash in CP1252
+    data = b"0301040168" + name.ljust(8)[:8] + b"\n"
+    path = sigtap_zip(tmp_path, {"tb_proc.txt": data, "tb_proc_layout.txt": LAYOUT})
+    (row,) = read_sigtap_table(path, "tb_proc")
+    assert row["NO_PROC"] == "SAÚDE –"
+    (latin,) = read_sigtap_table(path, "tb_proc", encoding="latin-1")
+    assert latin["NO_PROC"] == "SAÚDE \x96"
+
+
+CNV = (
+    "3 6\r\n"
+    "      1   MUNICIPIO IGNORADO - RJ                           330000,339999\r\n"
+    "      2  330455 RIO DE JANEIRO                              330455,334501-334530\r\n"
+    "      3  Não informado                                     ,0-3\r\n"
+)
+
+
+def test_cnv_reader_handles_lists_ranges_and_blank_codes(tmp_path):
+    path = tmp_path / "x.cnv"
+    path.write_bytes(CNV.encode("cp1252"))
+    header, cats = read_cnv(path)
+    assert header == ("3", "6")
+    assert [(c.sequence, c.label, c.codes) for c in cats] == [
+        (1, "MUNICIPIO IGNORADO - RJ", ("330000", "339999")),
+        (2, "330455 RIO DE JANEIRO", ("330455", "334501-334530")),
+        (3, "Não informado", ("", "0-3")),
+    ]
+    assert [c.sequence for c in cnv_lookup(cats, "334510")] == [2]  # inside a range
+    assert [c.sequence for c in cnv_lookup(cats, "330455")] == [2]
+    assert cnv_lookup(cats, "330999") == []
+
+
+def test_cnv_header_count_must_match(tmp_path):
+    path = tmp_path / "x.cnv"
+    path.write_bytes(CNV.replace("3 6", "4 6", 1).encode("cp1252"))
+    with pytest.raises(ReferenceFormatError, match="declares 4"):
+        read_cnv(path)

@@ -128,6 +128,32 @@ reference_sources:
       tb_cid: {key_column: CO_CID, dimension: fato_registro_aih.diagnostico_principal_cod}
   ibge_municipios:
     filename: municipios_ibge.json
+    size_bytes: 2470036
+    sha256: 86ecdccdf97d72e7e5e46f0854cfcea8bacc28154cc1bc4ed0e6110e3a6c9c02
     official_url: https://servicodados.ibge.gov.br/api/v1/localidades/municipios
     competence: "API not versioned: record the query date"
     dimension: dim_municipio_residencia.municipio_residencia_cod (6-digit prefix of the IBGE id)
+  cnes_cadger:
+    filename: CADGERRJ.dbf
+    size_bytes: 25397490
+    sha256: f667b7e767fbd21378a51aa8fd651e133fad0bde7fff1a74bba080c1d2f80de4
+    official_package: ftp://ftp.datasus.gov.br/dissemin/publicos/CNES/200508_/Auxiliar/TAB_CNES.zip (DBF/CADGERRJ.DBF)
+    competence: "DBF header last update 2026-10-15 (registry current at download, not 2024-01)"
+    encoding: cp1252
+    key_column: CNES
+    name_column: FANTASIA
+  tp_pfpj:
+    filename: TP_PFPJ.CNV
+    size_bytes: 200
+    sha256: d36dc029b8883d911bc336d90d3835382b185410ba051514ed356094bd07b8ff
+    official_package: TAB_CNES.zip (CNV/TP_PFPJ.CNV)
+  rj_municip:
+    filename: RJ_municip.cnv
+    size_bytes: 6365
+    sha256: ce45aad9bc80894773993d3925820ddb41928ef82bc4a7e9c9a4a20153b752b0
+    official_package: TAB_CNES.zip (CNV/RJ_municip.cnv)
+  cnes_def:
+    filename: Estabelecimento.def
+    size_bytes: 25631
+    sha256: 778d442a794ac34a93b1c796359f0ed9872fe5047befb3c39300cab02c91200d
+    official_package: TAB_CNES.zip (Estabelecimento.def)

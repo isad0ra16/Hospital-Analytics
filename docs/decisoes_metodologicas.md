@@ -257,6 +257,14 @@ exato, com testes de cobertura. Do ambiente de execução, todos os hosts oficia
 recusados pela política de rede; as dimensões mantêm os códigos até a obtenção dos arquivos
 (`docs/powerbi/fontes_referencia.md`).
 
+## D-034 — Codificação das referências: CP1252
+**Status:** Adotada (diagnóstico de referências)
+**Evidência:** no SIGTAP 2024-01, 12 nomes usam os bytes 0x93/0x94/0x96 (aspas tipográficas e
+travessão), que só CP1252 decodifica corretamente (Latin-1 produz caracteres de controle); no
+CADGERRJ, os bytes acentuados decodificam como `ÃÇÉÓÚ` em CP1252 e como desenho de caixa em CP850.
+**Decisão:** leitor do SIGTAP com padrão CP1252 (posição em bytes = posição em caracteres
+preservada); CADGERRJ lido em CP1252. Diagnóstico em `docs/powerbi/diagnostico_referencias.md`.
+
 ---
 
 ## Decisões pendentes
@@ -273,6 +281,6 @@ recusados pela política de rede; as dimensões mantêm os códigos até a obten
 | ~~P-008~~ | Encoding | **Resolvida pela D-019** |
 | P-009 | Confirmar o dicionário na fonte primária (Informe Técnico SIH/SUS) | **Bloqueada** neste ambiente: requer download pela autora |
 | P-010 | Códigos de `ESPEC` 10, 14 e 87 (364 registros) | Aberta: ausentes da fonte secundária |
-| P-011 | Grupos SIGTAP 02–05 (rótulos) | Conhecimento prévio; confirmar na Tabela SIGTAP |
+| ~~P-011~~ | Grupos SIGTAP 02–05 (rótulos) | **Confirmados** pela `tb_grupo` oficial do SIGTAP 2024-01 (integração pendente de aprovação) |
 | P-012 | Enriquecimento oficial (IBGE, CNES, SIGTAP, CID-10) | **Bloqueada** neste ambiente; decisão A/B em `docs/powerbi/fontes_referencia.md` |
 | P-013 | Publicação do `.pbix` (incorpora dados) | Decisão da autora após avaliação de privacidade |

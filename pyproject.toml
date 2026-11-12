@@ -24,10 +24,6 @@ dev = [
     "pytest>=8",
     "ruff>=0.6",
 ]
-notebook = [
-    "jupyterlab>=4",
-    "ipykernel>=6",
-]
 
 [build-system]
 requires = ["hatchling"]

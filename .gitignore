@@ -19,6 +19,13 @@ data/**
 *.duckdb
 *.duckdb.wal
 
+# Power BI: files with imported data and local caches (the PBIP project itself is versioned)
+*.pbix
+.pbi/cache.abf
+.pbi/localSettings.json
+**/.pbi/cache.abf
+**/.pbi/localSettings.json
+
 # ---------------------------------------------------------------------------
 # Python
 # ---------------------------------------------------------------------------

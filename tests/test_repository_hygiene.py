@@ -46,12 +46,15 @@ def is_ignored(relative_path: str) -> bool:
         "data/reference/sigtap_procedimento.parquet",
         "data/powerbi/fato_registro_aih.csv",
         "data/powerbi/dim_estabelecimento.csv",
-        "notebooks/RDRJ2401.dbc",
+        "outra_pasta/RDRJ2401.dbc",
+        "powerbi/HospitalAnalytics.pbix",
+        "powerbi/HospitalAnalytics.SemanticModel/.pbi/cache.abf",
+        "powerbi/HospitalAnalytics.SemanticModel/.pbi/localSettings.json",
         "analysis.duckdb",
         ".env",
         ".env.local",
         ".venv/bin/python",
-        "notebooks/.ipynb_checkpoints/x.ipynb",
+        ".ipynb_checkpoints/x.ipynb",
         "src/hospital_analytics/__pycache__/config.cpython-313.pyc",
     ],
 )
@@ -71,6 +74,9 @@ def test_sensitive_or_bulky_paths_are_ignored(path):
         "uv.lock",
         "src/hospital_analytics/config.py",
         "sql/.gitkeep",
+        "powerbi/HospitalAnalytics.pbip",
+        "powerbi/HospitalAnalytics.SemanticModel/.pbi/editorSettings.json",
+        "powerbi/HospitalAnalytics.SemanticModel/definition/model.tmdl",
     ],
 )
 def test_project_files_are_not_ignored(path):

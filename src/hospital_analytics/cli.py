@@ -13,7 +13,6 @@ import json
 import logging
 import stat
 import sys
-from decimal import Decimal
 from pathlib import Path
 
 from hospital_analytics import pbip, powerbi, reference_diagnose
@@ -48,7 +47,7 @@ from hospital_analytics.manifest import (
     verify_file,
 )
 from hospital_analytics.processed import TransformError, build_processed
-from hospital_analytics.reference import ReferenceFormatError
+from hospital_analytics.reference import ReferenceFormatError, fact_unchanged
 from hospital_analytics.validate import ReferenceTargets, validate_raw_parquet
 
 READ_ONLY = stat.S_IRUSR | stat.S_IRGRP | stat.S_IROTH  # 0o444
@@ -270,19 +269,24 @@ def cmd_powerbi(args: argparse.Namespace) -> int:
     processed = args.processed or _defaults(root)["processed"]
     out = args.output or root / "data" / "powerbi"
     incoming = args.incoming or root / "data" / "reference" / "incoming"
-    summary_path = root / "reports" / "powerbi" / "export_summary.json"
-    previous_fact_sha = None
-    if summary_path.is_file():
-        previous = json.loads(summary_path.read_text(encoding="utf-8"))
-        previous_fact_sha = previous["tables"]["fato_registro_aih"]["csv"]["sha256"]
+    reports = root / "reports"
+    summary_path = reports / "powerbi" / "export_summary.json"
     try:
         references = load_references(incoming, load_params()["reference_sources"])
     except (ReferenceIntegrityError, ReferenceFormatError) as exc:
         print(f"ERROR: official reference data: {exc}", file=sys.stderr)
         return 1
     summary = powerbi.export_model(
-        processed, out, references=references, parquet=args.parquet, reports=root / "reports"
+        processed, out, references=references, parquet=args.parquet, reports=reports
     )
+    # Compared with the summary of the previous export BEFORE it is overwritten.
+    fact_check = None
+    if summary_path.is_file():
+        fact_check = powerbi.ModelCheck(
+            "fato_registro_aih.csv byte-identical to the previous export (SHA-256)",
+            True,
+            fact_unchanged(summary_path, out / "fato_registro_aih.csv"),
+        )
     powerbi.write_summary(summary, summary_path)
     docs = root / "docs" / "powerbi"
     docs.mkdir(parents=True, exist_ok=True)
@@ -290,99 +294,14 @@ def cmd_powerbi(args: argparse.Namespace) -> int:
     (docs / "consultas_power_query.pq").write_text(powerbi.power_query_m(), "utf-8")
     for name, entry in summary["tables"].items():
         print(f"exported {name:<28} rows={entry['rows']}")
-    enrichment = powerbi.enrichment_report(out)
-    ref_reports = root / "reports" / "reference"
-    ref_reports.mkdir(parents=True, exist_ok=True)
-    (ref_reports / "enriquecimento.json").write_text(
-        json.dumps(enrichment, indent=2, ensure_ascii=False) + "\n", "utf-8"
-    )
-    (ref_reports / "enriquecimento.md").write_text(powerbi.enrichment_markdown(enrichment), "utf-8")
+    powerbi.write_enrichment_report(powerbi.enrichment_report(out), reports / "reference")
 
-    reconciliation = json.loads(
-        (root / "reports" / "indicators" / "reconciliation.json").read_text(encoding="utf-8")
-    )
-    full = reconciliation["aggregates"]["base"]["full"]
-    expected = {
-        "records": full["records"],
-        "val_tot_cents": full["val_tot_cents"],
-        "deaths": full["deaths"],
-        "dias_perm_sum": full["dias_perm_sum"],
-        "age_years_count": full["age_years_count"],
-        "distinct_aih": full["records"]
-        - reconciliation["aggregates"]["repeated_aih"]["excess_records"],
-    }
-    checks = powerbi.validate_model(out, expected)
-    if previous_fact_sha is not None:
-        checks.append(
-            powerbi.ModelCheck(
-                "fato_registro_aih.csv byte-identical to the previous export (SHA-256)",
-                previous_fact_sha,
-                summary["tables"]["fato_registro_aih"]["csv"]["sha256"],
-            )
-        )
+    checks, measures = powerbi.pipeline_checks(out, reports)
+    if fact_check is not None:
+        checks.append(fact_check)
     else:
         print("NOTE: no previous export summary; fact preservation check not run.")
-    indicator = {r["id"]: r for r in reconciliation["indicators"]}
-    measures = powerbi.measure_values(out)
-    pairs = {
-        "registros_aih": ("records_full", 1),
-        "valor_total": ("val_tot_full", 1),
-        "valor_medio": ("val_mean_full", 1),
-        "permanencia_media": ("los_mean_full", 1),
-        "obitos": ("deaths_full", 1),
-        "mortalidade_razao": ("mortality_full", 100),
-        "idade_media_anos": ("age_mean_years_full", 1),
-        "concentracao_top10_razao": ("top10_share_full", 100),
-    }
-    q = Decimal("0.0001")
-    for measure, (indicator_id, scale) in pairs.items():
-        reference = (Decimal(indicator[indicator_id]["reproduced"]) / scale).quantize(q)
-        checks.append(
-            powerbi.ModelCheck(
-                f"measure {measure} == indicator {indicator_id}",
-                reference,
-                measures[measure].quantize(q),
-            )
-        )
-    checks.append(
-        powerbi.ModelCheck(
-            "dashboard: distinct AIH == records - repeated-AIH excess",
-            Decimal(expected["distinct_aih"]),
-            measures["aihs_distintas"],
-        )
-    )
-    analysis_path = root / "reports" / "analysis" / "analysis.json"
-    if analysis_path.is_file():
-        analysis = json.loads(analysis_path.read_text(encoding="utf-8"))
-        lorenz = powerbi.lorenz_points(out)
-        for point in analysis["lorenz"]:
-            p = point["records_pct"]
-            checks.append(
-                powerbi.ModelCheck(
-                    f"aux_curva_lorenz p={p} == analysis report (%, 2 decimals)",
-                    Decimal(point["value_pct"]),
-                    (lorenz[p] * 100).quantize(Decimal("0.01")),
-                )
-            )
-    reference_values = {
-        k: str(v.quantize(Decimal("0.000001"))) for k, v in sorted(measures.items())
-    }
-    (root / "reports" / "powerbi" / "medidas_referencia.json").write_text(
-        json.dumps(
-            {
-                "base": "completa (73.046 registros, competência 2024-01)"
-                if measures["registros_aih"] == 73046
-                else "completa",
-                "nota": "Valores exatos das medidas DAX equivalentes (razões não multiplicadas"
-                " por 100). Use-os para conferir os cartões no Power BI.",
-                "medidas": reference_values,
-            },
-            indent=2,
-            ensure_ascii=False,
-        )
-        + "\n",
-        "utf-8",
-    )
+    powerbi.write_measure_reference(measures, reports / "powerbi" / "medidas_referencia.json")
     failed = [c for c in checks if not c.passed]
     for check in checks:
         print(

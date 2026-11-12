@@ -24,7 +24,7 @@ import duckdb
 from hospital_analytics.dictionary import CODEBOOK
 from hospital_analytics.enrichment import References, official_code_rows
 from hospital_analytics.integrity import sha256_file
-from hospital_analytics.sql import read_sql
+from hospital_analytics.sql import path_literal, read_sql
 
 log = logging.getLogger(__name__)
 
@@ -547,10 +547,6 @@ FACT_SOURCE_FIELDS = {
 # ---------------------------------------------------------------------------
 # Build
 # ---------------------------------------------------------------------------
-def _literal(path: Path) -> str:
-    return "'" + str(Path(path).resolve()).replace("'", "''") + "'"
-
-
 def load_reference_tables(con: duckdb.DuckDBPyConnection, refs: References) -> None:
     """Official lookups as DuckDB tables. TabWin codes are resolved in Python for every code
     present in ``base`` (range and precedence semantics cannot be expressed as an equi-join)."""
@@ -613,7 +609,7 @@ def connect_model(processed: Path, refs: References) -> duckdb.DuckDBPyConnectio
     con = duckdb.connect()
     con.execute(
         "create view rd_file as select * from "
-        f"read_parquet({_literal(processed)}, file_row_number = true)"
+        f"read_parquet({path_literal(processed)}, file_row_number = true)"
     )
     con.execute(
         "create table codebook (field varchar, code varchar, label varchar, source_status varchar)"
@@ -661,7 +657,7 @@ def _copy(con, sql: str, params: dict, destination: Path, fmt: str) -> None:
         else "format parquet, compression zstd"
     )
     partial = destination.with_name(destination.name + ".partial")
-    con.execute(f"copy ({sql}) to {_literal(partial)} ({options})", params or None)
+    con.execute(f"copy ({sql}) to {path_literal(partial)} ({options})", params or None)
     os.replace(partial, destination)
 
 
@@ -871,6 +867,14 @@ def enrichment_markdown(report: dict[str, Any]) -> str:
     return "\n".join(lines)
 
 
+def write_enrichment_report(report: dict[str, Any], directory: Path) -> None:
+    directory.mkdir(parents=True, exist_ok=True)
+    (directory / "enriquecimento.json").write_text(
+        json.dumps(report, indent=2, ensure_ascii=False) + "\n", "utf-8"
+    )
+    (directory / "enriquecimento.md").write_text(enrichment_markdown(report), "utf-8")
+
+
 def write_summary(summary: dict[str, Any], path: Path) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(summary, indent=2, ensure_ascii=False) + "\n", "utf-8")
@@ -892,7 +896,7 @@ class ModelCheck:
 
 def _csv(con, directory: Path, name: str) -> str:
     path = directory / f"{name}.csv"
-    return f"read_csv({_literal(path)}, header = true, all_varchar = true)"
+    return f"read_csv({path_literal(path)}, header = true, all_varchar = true)"
 
 
 def validate_model(directory: Path, expected: dict[str, Any]) -> list[ModelCheck]:
@@ -1028,6 +1032,86 @@ def _dashboard_measures(con, directory: Path) -> dict[str, Decimal]:
         "pct_residentes_fora_rj_razao": Decimal(other_uf) / n,
         "mortalidade_aih_principal_razao": Decimal(deaths1) / n1,
     }
+
+
+# Measure equivalents checked against the reconciled indicators: (indicator id, scale).
+MEASURE_INDICATORS = {
+    "registros_aih": ("records_full", 1),
+    "valor_total": ("val_tot_full", 1),
+    "valor_medio": ("val_mean_full", 1),
+    "permanencia_media": ("los_mean_full", 1),
+    "obitos": ("deaths_full", 1),
+    "mortalidade_razao": ("mortality_full", 100),
+    "idade_media_anos": ("age_mean_years_full", 1),
+    "concentracao_top10_razao": ("top10_share_full", 100),
+}
+
+
+def pipeline_checks(directory: Path, reports: Path) -> tuple[list[ModelCheck], dict[str, Decimal]]:
+    """Model checks with expected values taken from the versioned pipeline reports.
+
+    The reconciliation report gives the exact aggregates and indicators; the analysis report,
+    the Lorenz points. Returns the checks and the measure equivalents (for the reference file).
+    """
+    reconciliation = json.loads(
+        (reports / "indicators" / "reconciliation.json").read_text(encoding="utf-8")
+    )
+    full = reconciliation["aggregates"]["base"]["full"]
+    expected = {
+        "records": full["records"],
+        "val_tot_cents": full["val_tot_cents"],
+        "deaths": full["deaths"],
+        "dias_perm_sum": full["dias_perm_sum"],
+        "age_years_count": full["age_years_count"],
+        "distinct_aih": full["records"]
+        - reconciliation["aggregates"]["repeated_aih"]["excess_records"],
+    }
+    checks = validate_model(directory, expected)
+    indicator = {r["id"]: r for r in reconciliation["indicators"]}
+    measures = measure_values(directory)
+    q = Decimal("0.0001")
+    for measure, (indicator_id, scale) in MEASURE_INDICATORS.items():
+        reference = (Decimal(indicator[indicator_id]["reproduced"]) / scale).quantize(q)
+        checks.append(
+            ModelCheck(
+                f"measure {measure} == indicator {indicator_id}",
+                reference,
+                measures[measure].quantize(q),
+            )
+        )
+    checks.append(
+        ModelCheck(
+            "dashboard: distinct AIH == records - repeated-AIH excess",
+            Decimal(expected["distinct_aih"]),
+            measures["aihs_distintas"],
+        )
+    )
+    analysis_path = reports / "analysis" / "analysis.json"
+    if analysis_path.is_file():
+        lorenz = lorenz_points(directory)
+        for point in json.loads(analysis_path.read_text(encoding="utf-8"))["lorenz"]:
+            p = point["records_pct"]
+            checks.append(
+                ModelCheck(
+                    f"aux_curva_lorenz p={p} == analysis report (%, 2 decimals)",
+                    Decimal(point["value_pct"]),
+                    (lorenz[p] * 100).quantize(Decimal("0.01")),
+                )
+            )
+    return checks, measures
+
+
+def write_measure_reference(measures: dict[str, Decimal], path: Path) -> None:
+    """Exact values of the DAX-equivalent measures, used to check the cards in Power BI."""
+    base = "completa (73.046 registros, competência 2024-01)"
+    document = {
+        "base": base if measures["registros_aih"] == 73046 else "completa",
+        "nota": "Valores exatos das medidas DAX equivalentes (razões não multiplicadas"
+        " por 100). Use-os para conferir os cartões no Power BI.",
+        "medidas": {k: str(v.quantize(Decimal("0.000001"))) for k, v in sorted(measures.items())},
+    }
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(json.dumps(document, indent=2, ensure_ascii=False) + "\n", "utf-8")
 
 
 def lorenz_points(directory: Path) -> dict[int, Decimal]:

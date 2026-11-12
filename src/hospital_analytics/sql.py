@@ -28,7 +28,8 @@ def read_sql(name: str) -> str:
     return path.read_text(encoding="utf-8")
 
 
-def _literal_path(path: Path) -> str:
+def path_literal(path: Path) -> str:
+    """Absolute path as a SQL string literal (DuckDB table functions take no parameters)."""
     return "'" + str(Path(path).resolve()).replace("'", "''") + "'"
 
 
@@ -36,9 +37,9 @@ def connect(raw: Path | None = None, processed: Path | None = None) -> duckdb.Du
     """In-memory DuckDB connection with the data layers registered as views."""
     con = duckdb.connect()
     if raw is not None:
-        con.execute(f"create view raw_rd as select * from read_parquet({_literal_path(raw)})")
+        con.execute(f"create view raw_rd as select * from read_parquet({path_literal(raw)})")
     if processed is not None:
-        con.execute(f"create view rd as select * from read_parquet({_literal_path(processed)})")
+        con.execute(f"create view rd as select * from read_parquet({path_literal(processed)})")
     return con
 
 

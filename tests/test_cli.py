@@ -46,7 +46,7 @@ def test_full_pipeline(project, rows, capsys):
     assert main([*common, "convert", "--source", str(source), "--destination", str(parquet)]) == 0
     assert not parquet.stat().st_mode & stat.S_IWUSR
 
-    manifest = json.loads((root / "data" / "MANIFEST.json").read_text())
+    manifest = json.loads((root / "data" / "MANIFEST.json").read_text(encoding="utf-8"))
     assert set(manifest["sources"]) == {"data/raw/SYNTH.dbc"}
     assert manifest["derived"]["data/raw/SYNTH.parquet"]["derived_from"] == "data/raw/SYNTH.dbc"
 

@@ -272,7 +272,7 @@ def cmd_powerbi(args: argparse.Namespace) -> int:
         print(f"exported {name:<28} rows={entry['rows']}")
 
     reconciliation = json.loads(
-        (root / "reports" / "indicators" / "reconciliation.json").read_text()
+        (root / "reports" / "indicators" / "reconciliation.json").read_text(encoding="utf-8")
     )
     full = reconciliation["aggregates"]["base"]["full"]
     expected = {
@@ -436,7 +436,21 @@ def build_parser() -> argparse.ArgumentParser:
     return parser
 
 
+def safe_console() -> None:
+    """Never crash while *printing* a result.
+
+    Reports contain status symbols (✅ 🟠 🔴) and accented text. On Windows, a redirected or
+    piped stdout uses the ANSI code page (cp1252), which cannot encode them: the command would
+    fail after writing its files. Unencodable characters are printed as escapes instead.
+    """
+    for stream in (sys.stdout, sys.stderr):
+        reconfigure = getattr(stream, "reconfigure", None)
+        if reconfigure is not None:
+            reconfigure(errors="backslashreplace")
+
+
 def main(argv: list[str] | None = None) -> int:
+    safe_console()
     logging.basicConfig(level=logging.INFO, format="%(levelname)s %(name)s: %(message)s")
     args = build_parser().parse_args(argv)
     args.root = (args.root or project_root()).resolve()

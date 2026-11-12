@@ -1059,27 +1059,28 @@ def _field_label(f: Field) -> str:
 
 
 PAGES_INTRO = """\
-# Páginas do dashboard (Power BI)
+# Páginas do dashboard
 
-> Gerado a partir de `PAGES` em `src/hospital_analytics/pbip.py` (o mesmo código que gera
-> o relatório PBIR em `powerbi/`). Não editar manualmente.
+Arquivo gerado por `hospital-analytics pbip` a partir de `PAGES` em
+`src/hospital_analytics/pbip.py`, o mesmo código que gera o relatório em `powerbi/`.
+Não edite à mão.
 
-**Estado:** implementado como projeto PBIP (validado contra os esquemas oficiais),
-**ainda não aberto no Power BI Desktop** — ver
-[`README.md`](README.md#abrir-o-projeto-no-power-bi-desktop). Se o Desktop recusar o
-relatório, monte cada página com os visuais abaixo sobre o modelo.
+Este guia descreve cada visual com os campos e as medidas do modelo. Ele serve para revisar o
+relatório e para remontá-lo caso o Power BI Desktop não aceite os arquivos gerados (ver
+[`07_dashboard.md`](../07_dashboard.md#abrir-o-projeto-no-power-bi-desktop)).
 
-Tela {w}×{h}. Todas as páginas têm título, rodapé com a fonte e a unidade de análise e, à
-direita, cinco segmentações **sincronizadas entre as páginas** (tipo de AIH, caráter,
-complexidade, faixa etária, sexo). Rótulos dos códigos: colunas oficiais (`*_oficial`).
+Todas as páginas têm {w}×{h} pixels, título, rodapé com a fonte e cinco segmentações
+sincronizadas à direita: tipo de AIH, caráter, complexidade, faixa etária e sexo. Os rótulos dos
+códigos vêm das colunas oficiais (`*_oficial`).
 
 Rodapé: *{footer}*
+
 """
 
 
 def pages_markdown() -> str:
     """Page-by-page description of the report, generated from ``PAGES`` (manual fallback)."""
-    lines = PAGES_INTRO.format(w=PAGE_W, h=PAGE_H, footer=FOOTER).splitlines()
+    lines = PAGES_INTRO.format(w=PAGE_W, h=PAGE_H, footer=FOOTER).split("\n")[:-1]
     for page in PAGES:
         lines += [f"## {page.title}", "", page.subtitle, "", "| Visual | Título | Campos |",
                   "|---|---|---|"]  # fmt: skip
@@ -1095,7 +1096,8 @@ def pages_markdown() -> str:
                 for role, fields in v.roles.items()
             )
             if v.sort:
-                roles += f"; ordenar por {_field_label(v.sort[0])} ({v.sort[1].lower()})"
+                order = {"Ascending": "crescente", "Descending": "decrescente"}[v.sort[1]]
+                roles += f"; ordenar por {_field_label(v.sort[0])} ({order})"
             title = v.title + (f" — *{v.subtitle}*" if v.subtitle else "")
             lines.append(f"| {VISUAL_NAMES.get(v.kind, v.kind)} | {title} | {roles} |")
         lines.append("")

@@ -98,6 +98,6 @@ def test_derived_names_never_clash_with_originals_ignoring_case():
 def test_every_derived_column_is_documented():
     from hospital_analytics.config import project_root
 
-    doc = (project_root() / "docs" / "pipeline_dados.md").read_text(encoding="utf-8")
+    doc = (project_root() / "docs" / "03_tratamento.md").read_text(encoding="utf-8")
     missing = [c.name for c in DERIVED_COLUMNS if f"`{c.name}`" not in doc]
     assert not missing, f"undocumented derived columns: {missing}"

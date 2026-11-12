@@ -191,7 +191,7 @@ def to_markdown(report: dict[str, Any]) -> str:
         "> Gerado por `hospital-analytics analysis`. Não editar manualmente. Análises"
         " **descritivas**:",
         "> nenhuma associação é causal. Unidade: registro de AIH. Rótulos de códigos: fonte",
-        "> secundária (ver `docs/dicionario_variaveis.md`). Permanência = `DIAS_PERM`.",
+        "> secundária (ver `docs/03_tratamento.md`). Permanência = `DIAS_PERM`.",
         "",
         f"Base: **{_br(t['records'])}** registros · **R$ {_br(t['val_tot_brl'])}**.",
         "",
@@ -242,7 +242,7 @@ def to_markdown(report: dict[str, Any]) -> str:
         " 90% de menor",
         f"  valor somam {_br(lorenz[90])}%. Os 10% de maior valor (k = ⌊0,1·n⌋, mesmo critério do",
         f"  indicador) concentram **{_br(report['top10_share_value_pct'])}%** — ver"
-        " `docs/indicadores.md` sobre a referência histórica de 58,20% (não reproduzida).",
+        " `docs/05_validacao.md` sobre a referência histórica de 58,20% (não reproduzida).",
         f"- **{h['hospitals']}** estabelecimentos (CNES); os 10 de maior valor concentram "
         f"**{_br(h['top10_share_value_pct'])}%** do valor e"
         f" {_br(h['top10_share_records_pct'])}% dos registros.",
@@ -276,7 +276,7 @@ def to_markdown(report: dict[str, Any]) -> str:
         "## 7. Qualidade dos dados",
         "",
         "Ver [`reports/audit/audit_rdrj2401.md`](../audit/audit_rdrj2401.md) e"
-        " `docs/qualidade_dados.md`.",
+        " `docs/05_validacao.md`.",
         "",
     ]
     return "\n".join(lines)

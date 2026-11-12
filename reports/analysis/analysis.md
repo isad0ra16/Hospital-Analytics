@@ -2,7 +2,7 @@
 
 > Gerado por `hospital-analytics analysis`. Não editar manualmente. Análises **descritivas**:
 > nenhuma associação é causal. Unidade: registro de AIH. Rótulos de códigos: fonte
-> secundária (ver `docs/dicionario_variaveis.md`). Permanência = `DIAS_PERM`.
+> secundária (ver `docs/03_tratamento.md`). Permanência = `DIAS_PERM`.
 
 Base: **73.046** registros · **R$ 125.440.636,13**.
 
@@ -130,7 +130,7 @@ tipo de leito e complexidade; **não** indicam qualidade assistencial nem causal
 
 - Os 50% de registros de menor valor somam **11,37%** do `VAL_TOT`; os 90% de menor
   valor somam 42,25%. Os 10% de maior valor (k = ⌊0,1·n⌋, mesmo critério do
-  indicador) concentram **57,74%** — ver `docs/indicadores.md` sobre a referência histórica de 58,20% (não reproduzida).
+  indicador) concentram **57,74%** — ver `docs/05_validacao.md` sobre a referência histórica de 58,20% (não reproduzida).
 - **240** estabelecimentos (CNES); os 10 de maior valor concentram **30,85%** do valor e 18,25% dos registros.
 
 ## 5. Permanência hospitalar
@@ -164,4 +164,4 @@ Todos os registros têm competência 2024-01; 40% das saídas ocorreram em 2023.
 
 ## 7. Qualidade dos dados
 
-Ver [`reports/audit/audit_rdrj2401.md`](../audit/audit_rdrj2401.md) e `docs/qualidade_dados.md`.
+Ver [`reports/audit/audit_rdrj2401.md`](../audit/audit_rdrj2401.md) e `docs/05_validacao.md`.

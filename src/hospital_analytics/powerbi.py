@@ -2,7 +2,7 @@
 
 A single schema (``TABLES``) drives everything: the export, the field dictionary, the Power
 Query (M) import script and the tests. Grain of the fact table: one row per AIH *record*.
-A record is not a patient and not necessarily a distinct admission (see docs/powerbi/modelo.md).
+A record is not a patient and not necessarily a distinct admission (see docs/04_modelagem.md).
 
 Privacy: identifying fields (N_AIH, NASC, CEP, CPF_AUT, GESTOR_CPF, INSC_PN) and free text
 (AUD_JUST, SIS_JUST) are never exported. N_AIH is replaced by ``aih_id``, a deterministic

@@ -1,6 +1,6 @@
 -- Month dimension covering every admission and discharge month (full years). Dates are exported
--- at MONTH granularity on purpose (data minimisation: see docs/powerbi/privacidade.md).
--- The competence (2024-01) is a processing month, not a time series: see docs/powerbi/modelo.md.
+-- at MONTH granularity on purpose (data minimisation: see docs/04_modelagem.md).
+-- The competence (2024-01) is a processing month, not a time series: see docs/04_modelagem.md.
 with bounds as (
     select
         make_date(year(min(least(admission_date, discharge_date))), 1, 1) as m0,

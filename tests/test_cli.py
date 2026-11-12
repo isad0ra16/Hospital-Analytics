@@ -125,3 +125,16 @@ def test_verify_reports_ok_missing_and_mismatch(project, capsys):
     source.unlink()  # a missing original source is fatal
     assert main([*common, "verify"]) == 1
     assert "[source] data/raw/SYNTH.dbc: MISSING" in capsys.readouterr().out
+
+
+def test_verify_checks_declared_reference_files(project, capsys):
+    root, source, parquet, common = project
+    register(source, common)
+    capsys.readouterr()
+    assert main([*common, "verify"]) == 0  # reference files absent: reported, not fatal
+    assert "[reference] LEITOS.CNV: MISSING (required by powerbi)" in capsys.readouterr().out
+    incoming = root / "data" / "reference" / "incoming"
+    incoming.mkdir(parents=True)
+    (incoming / "LEITOS.CNV").write_bytes(b"not the official file")
+    assert main([*common, "verify"]) == 1  # a divergent reference file is fatal
+    assert "data/reference/incoming/LEITOS.CNV: SIZE/SHA-256 MISMATCH" in capsys.readouterr().out

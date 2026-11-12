@@ -30,9 +30,14 @@ from hospital_analytics.convert import (
 )
 from hospital_analytics.dbc import DbcError, read_dbf_header
 from hospital_analytics.dbf import DbfError
-from hospital_analytics.enrichment import ReferenceIntegrityError, load_references
+from hospital_analytics.enrichment import (
+    REQUIRED_SOURCES,
+    ReferenceIntegrityError,
+    load_references,
+)
 from hospital_analytics.indicators import run_indicators
 from hospital_analytics.indicators import write_report as indicators_write
+from hospital_analytics.integrity import sha256_file
 from hospital_analytics.manifest import (
     ManifestError,
     load_manifest,
@@ -391,6 +396,18 @@ def cmd_verify(args: argparse.Namespace) -> int:
             status = "OK" if ok else f"SHA-256 MISMATCH (observed {observed})"
             all_ok = all_ok and ok
         print(f"[{kind}] {key}: {status}")
+    # Official reference files declared in config/params.yaml (reference_sources).
+    incoming = root / "data" / "reference" / "incoming"
+    for name, spec in load_params()["reference_sources"].items():
+        path = incoming / spec["filename"]
+        if not path.is_file():
+            needed = name in REQUIRED_SOURCES
+            status = "MISSING (required by powerbi)" if needed else "not stored (optional)"
+        else:
+            ok = path.stat().st_size == spec["size_bytes"] and sha256_file(path) == spec["sha256"]
+            status = "OK" if ok else "SIZE/SHA-256 MISMATCH"
+            all_ok = all_ok and ok
+        print(f"[reference] {_key(path, root) if path.is_file() else spec['filename']}: {status}")
     return 0 if all_ok else 1
 
 

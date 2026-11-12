@@ -109,7 +109,11 @@ def test_verify_reports_ok_missing_and_mismatch(project, capsys):
     assert main([*common, "verify"]) == 0
     assert capsys.readouterr().out.count(": OK") == 2
 
-    parquet.unlink()  # derived files can be regenerated: reported, not fatal
+    # Derived files can be regenerated: reported, not fatal. The CLI writes them read-only;
+    # Windows refuses to delete read-only files, so restore write permission first (as for
+    # the source below) — deleting a protected file is a deliberate act, also on POSIX.
+    parquet.chmod(0o644)
+    parquet.unlink()
     assert main([*common, "verify"]) == 0
     assert "MISSING (regenerate" in capsys.readouterr().out
 

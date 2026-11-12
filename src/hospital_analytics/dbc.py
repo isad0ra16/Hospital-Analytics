@@ -1,7 +1,8 @@
 """Decompression of DATASUS ``.dbc`` files into ``.dbf``.
 
 A ``.dbc`` file is the DBF header, followed by a 4-byte CRC, followed by the DBF records
-compressed with PKWare DCL "implode". ``pyreaddbc.dbc2dbf`` (C code) decompresses it.
+compressed with PKWare DCL "implode". ``pyreaddbc.dbc2dbf`` (C code) decompresses it, in a
+child process (see ``_run_decoder``).
 
 Important: on error, the C function only *prints* a message and returns normally; it may
 leave an empty or truncated ``.dbf`` behind. This module therefore never trusts the call
@@ -11,10 +12,10 @@ alone: it checks that the output has exactly the size declared by the DBF header
 from __future__ import annotations
 
 import struct
+import subprocess
+import sys
 from dataclasses import dataclass
 from pathlib import Path
-
-import pyreaddbc
 
 DBF_HEADER_PREFIX = struct.Struct(
     "<BBBBIHH"
@@ -91,11 +92,38 @@ def decompress_dbc(source: Path, destination: Path) -> DbfHeader:
 
     header = read_dbf_header(source)
     try:
-        pyreaddbc.dbc2dbf(str(source), str(destination))
+        diagnostics = _run_decoder(source, destination)
         if not destination.is_file():
-            raise DbcError(f"Decompression produced no output for {source}.")
-        check_dbf_size(destination, header)
+            raise DbcError(f"Decompression produced no output for {source}. {diagnostics}".strip())
+        try:
+            check_dbf_size(destination, header)
+        except DbcError as exc:
+            raise DbcError(f"{exc} {diagnostics}".strip()) from None
     except BaseException:
         destination.unlink(missing_ok=True)
         raise
     return header
+
+
+_DECODER = "import sys, pyreaddbc; pyreaddbc.dbc2dbf(sys.argv[1], sys.argv[2])"
+
+
+def _run_decoder(source: Path, destination: Path) -> str:
+    """Run ``pyreaddbc.dbc2dbf`` in a child process and return its diagnostic output.
+
+    On invalid input the C decoder returns without closing the output file. In-process, that
+    leaked handle keeps the partial ``.dbf`` locked on Windows (WinError 32), so it could not be
+    removed. A child process releases every handle when it exits, on any platform, and also lets
+    the messages the C code prints be captured instead of leaking to the console.
+    """
+    result = subprocess.run(
+        # -I: isolated mode, so the current directory never shadows an installed module.
+        [sys.executable, "-I", "-c", _DECODER, str(source), str(destination)],
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    output = " ".join((result.stdout + " " + result.stderr).split())
+    if result.returncode != 0:
+        raise DbcError(f"Decoder failed for {source} (exit {result.returncode}): {output}")
+    return f"(decoder output: {output})" if output else ""

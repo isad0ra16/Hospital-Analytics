@@ -3,6 +3,7 @@
 import os
 import shutil
 import subprocess
+from pathlib import Path
 
 import pytest
 
@@ -10,14 +11,53 @@ from hospital_analytics.config import project_root
 
 HOOK = project_root() / "scripts" / "git-hooks" / "commit-msg"
 
-pytestmark = pytest.mark.skipif(shutil.which("bash") is None, reason="requires bash")
+
+def _bash_candidates() -> list[str]:
+    """Bash interpreters to try, the one git itself uses first.
+
+    On Windows, ``bash`` on PATH is often ``System32\\bash.exe``: the WSL launcher, which fails
+    when no Linux distribution is installed. Git hooks run under the bash bundled with Git for
+    Windows, so that one is preferred (``<git>/bin/bash.exe`` next to ``<git>/cmd/git.exe``).
+    """
+    candidates = []
+    git = shutil.which("git")
+    if git and os.name == "nt":
+        git_root = Path(git).resolve().parent.parent
+        candidates += [
+            str(git_root / "bin" / "bash.exe"),
+            str(git_root / "usr" / "bin" / "bash.exe"),
+        ]
+    if found := shutil.which("bash"):
+        candidates.append(found)
+    return candidates
+
+
+def _working_bash() -> str | None:
+    """First candidate that actually runs a script (probing beats trusting PATH)."""
+    for candidate in _bash_candidates():
+        if not Path(candidate).is_file():
+            continue
+        try:
+            probe = subprocess.run(
+                [candidate, "-c", "echo ok"], capture_output=True, text=True, timeout=30
+            )
+        except (OSError, subprocess.TimeoutExpired):
+            continue
+        if probe.returncode == 0 and probe.stdout.strip() == "ok":
+            return candidate
+    return None
+
+
+BASH = _working_bash()
+
+pytestmark = pytest.mark.skipif(BASH is None, reason="requires a working bash")
 
 
 def run_hook(tmp_path, message: str, **env: str) -> subprocess.CompletedProcess:
     path = tmp_path / "COMMIT_EDITMSG"
     path.write_text(message, encoding="utf-8")
     return subprocess.run(
-        ["bash", str(HOOK), str(path)],
+        [BASH, str(HOOK), str(path)],
         capture_output=True,
         text=True,
         env=os.environ | env,

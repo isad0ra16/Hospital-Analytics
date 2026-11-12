@@ -9,10 +9,12 @@ from decimal import Decimal
 
 import pytest
 from synthetic_data import SIH_FIELDS, SIH_RECORDS, build_dbc, build_dbf, write
+from synthetic_references import build_references
 
 from hospital_analytics import powerbi
 from hospital_analytics.config import project_root
 from hospital_analytics.convert import convert_dbc_to_parquet
+from hospital_analytics.enrichment import load_references
 from hospital_analytics.processed import build_processed
 
 EDGE_RECORD = dataclasses.replace(
@@ -28,8 +30,13 @@ def exported(tmp_path):
     convert_dbc_to_parquet(dbc, tmp_path / "raw.parquet")
     build_processed(tmp_path / "raw.parquet", tmp_path / "processed.parquet")
     out = tmp_path / "powerbi"
-    summary = powerbi.export_model(tmp_path / "processed.parquet", out)
+    refs = load_references(tmp_path / "ref", build_references(tmp_path / "ref"))
+    summary = powerbi.export_model(tmp_path / "processed.parquet", out, references=refs)
     return out, summary
+
+
+def references(tmp_path):
+    return load_references(tmp_path / "ref", build_references(tmp_path / "ref"))
 
 
 def read(directory, table):
@@ -106,6 +113,9 @@ def test_unknown_age_unit_becomes_null_and_unlabelled_code_is_kept(exported):
     assert espec["87"]["descricao"] == ""
     assert espec["87"]["fonte"] == "sem rótulo na fonte disponível"
     assert espec["01"]["fonte"] == "fonte secundária (microdatasus)"
+    # the official TabWin table labels the code the secondary source left blank
+    assert espec["87"]["descricao_oficial"] == "Saúde Mental (Clínico)"
+    assert espec["87"]["fonte_oficial"].endswith("LEITOS.CNV")
 
 
 def test_dates_are_exported_at_month_granularity_only(exported):
@@ -141,7 +151,9 @@ def test_pseudonymous_aih_id_supports_distinct_counts(exported):
 
 def test_export_is_reproducible_byte_for_byte(tmp_path, exported):
     out, summary = exported
-    again = powerbi.export_model(tmp_path / "processed.parquet", tmp_path / "again")
+    again = powerbi.export_model(
+        tmp_path / "processed.parquet", tmp_path / "again", references=references(tmp_path)
+    )
     assert again == summary
     for t in powerbi.TABLES:
         assert (out / f"{t.name}.csv").read_bytes() == (
@@ -152,7 +164,12 @@ def test_export_is_reproducible_byte_for_byte(tmp_path, exported):
 def test_optional_parquet_matches_csv(tmp_path, exported):
     import duckdb
 
-    powerbi.export_model(tmp_path / "processed.parquet", tmp_path / "pq", parquet=True)
+    powerbi.export_model(
+        tmp_path / "processed.parquet",
+        tmp_path / "pq",
+        references=references(tmp_path),
+        parquet=True,
+    )
     con = duckdb.connect()
     for t in powerbi.TABLES:
         base = tmp_path / "pq" / t.name

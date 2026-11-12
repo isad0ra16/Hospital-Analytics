@@ -22,6 +22,7 @@ from typing import Any
 import duckdb
 
 from hospital_analytics.dictionary import CODEBOOK
+from hospital_analytics.enrichment import References, official_code_rows
 from hospital_analytics.integrity import sha256_file
 from hospital_analytics.sql import read_sql
 
@@ -54,6 +55,7 @@ class Column:
     description: str
     origin: str
     nullable: bool = False
+    enriched: bool = False  # filled from an official reference table (added, never replacing)
 
 
 @dataclass(frozen=True)
@@ -63,7 +65,8 @@ class Table:
     grain: str
     columns: tuple[Column, ...]
     sql: str  # sql/powerbi/<sql>.sql, or "report:<name>" for auxiliary tables built from reports
-    code_dimension: tuple[str, str] | None = None  # (source column, codebook field)
+    # (source column, codebook field, official TabWin source in params reference_sources)
+    code_dimension: tuple[str, str, str] | None = None
 
     @property
     def column_names(self) -> list[str]:
@@ -73,19 +76,46 @@ class Table:
 TXT, INT, DATE, NUM, CUR = "type text", "Int64.Type", "type date", "type number", "Currency.Type"
 
 
-def _code_dim(name: str, code_col: str, source: str, field: str, what: str) -> Table:
+def _code_dim(name: str, code_col: str, source: str, field: str, what: str, official: str) -> Table:
     return Table(
         name,
         (code_col,),
         f"1 linha por código de {source} presente no fato",
         (
             Column(code_col, TXT, f"Código de {what} ({source})", source),
-            Column("descricao", TXT, f"Descrição do código ({what})", "dicionário", nullable=True),
+            Column(
+                "descricao",
+                TXT,
+                f"Descrição do código ({what}) — fonte secundária",
+                "dicionário",
+                nullable=True,
+            ),
             Column("fonte", TXT, "Fonte/status da interpretação do código", "dicionário"),
+            Column(
+                "descricao_oficial",
+                TXT,
+                f"Descrição oficial ({what}) — usar nos visuais",
+                "TabWin SIH/SUS",
+                nullable=True,
+                enriched=True,
+            ),
+            Column(
+                "fonte_oficial",
+                TXT,
+                "Pacote e tabela de conversão oficiais",
+                "TabWin SIH/SUS",
+                nullable=True,
+                enriched=True,
+            ),
         ),
         "dim_code",
-        (source, field),
+        (source, field, official),
     )
+
+
+def _named(name: str, description: str, origin: str) -> Column:
+    """Column filled by an official reference: null only when the code is not found."""
+    return Column(name, TXT, description, origin, nullable=True, enriched=True)
 
 
 TABLES: tuple[Table, ...] = (
@@ -141,7 +171,7 @@ TABLES: tuple[Table, ...] = (
             Column(
                 "diagnostico_principal_cod",
                 TXT,
-                "Diagnóstico principal, código CID-10 (sem dimensão: descrições pendentes)",
+                "Diagnóstico principal, código CID-10 (chave de dim_diagnostico)",
                 "DIAG_PRINC",
             ),
             Column(
@@ -234,13 +264,35 @@ TABLES: tuple[Table, ...] = (
                 "2 primeiros dígitos do código do município",
                 "MUNIC_MOV",
             ),
-            Column(
-                "natureza_juridica_cod",
-                TXT,
-                "Natureza jurídica (código; descrição pendente)",
-                "NAT_JUR",
+            Column("natureza_juridica_cod", TXT, "Natureza jurídica (código)", "NAT_JUR"),
+            Column("gestao_cod", TXT, "Tipo de gestão (código)", "GESTAO"),
+            _named(
+                "estabelecimento_nome",
+                "Nome fantasia no cadastro CNES (cadastro vigente no download, não 2024-01)",
+                "CNES CADGERRJ.FANTASIA",
             ),
-            Column("gestao_cod", TXT, "Tipo de gestão (código; descrição pendente)", "GESTAO"),
+            _named(
+                "estabelecimento_rotulo",
+                "Nome fantasia (CNES) — único; usar nos visuais (há nomes repetidos)",
+                "CNES CADGERRJ.FANTASIA",
+            ),
+            _named("municipio_estabelecimento_nome", "Município do estabelecimento", "IBGE"),
+            _named("uf_estabelecimento_sigla", "UF do estabelecimento", "IBGE"),
+            _named(
+                "natureza_juridica_descricao",
+                "Natureza jurídica (texto oficial)",
+                "TabWin SIH/SUS natjur.cnv",
+            ),
+            _named(
+                "esfera_juridica",
+                "Esfera: administração pública (federal, estadual, municipal), empresarial,"
+                " sem fins lucrativos",
+                "TabWin SIH/SUS esferajur.cnv",
+            ),
+            _named(
+                "gestao_descricao", "Tipo de gestão (texto oficial)", "TabWin SIH/SUS GESTAO.CNV"
+            ),
+            _named("estabelecimento_nome_fonte", "Fonte e data do cadastro do nome", "CNES"),
         ),
         "dim_estabelecimento",
     ),
@@ -258,6 +310,15 @@ TABLES: tuple[Table, ...] = (
             Column(
                 "uf_residencia_cod", TXT, "2 primeiros dígitos do código do município", "MUNIC_RES"
             ),
+            _named("municipio_residencia_ibge", "Código IBGE de 7 dígitos", "IBGE"),
+            _named("municipio_residencia_nome", "Nome do município de residência", "IBGE"),
+            _named("uf_residencia_sigla", "UF de residência (sigla)", "IBGE"),
+            _named(
+                "municipio_residencia_rotulo",
+                "Município (UF) — único; usar nos visuais",
+                "IBGE",
+            ),
+            _named("municipio_residencia_fonte", "Fonte do nome", "IBGE"),
         ),
         "dim_municipio_residencia",
     ),
@@ -278,13 +339,70 @@ TABLES: tuple[Table, ...] = (
                 "dicionário",
                 nullable=True,
             ),
+            _named("procedimento_nome", "Nome oficial do procedimento", "SIGTAP tb_procedimento"),
+            _named("grupo_nome_sigtap", "Nome oficial do grupo (texto literal)", "SIGTAP tb_grupo"),
+            Column("subgrupo_cod", TXT, "Subgrupo SIGTAP (4 primeiros dígitos)", "PROC_REA"),
+            _named("subgrupo_nome", "Nome oficial do subgrupo", "SIGTAP tb_sub_grupo"),
+            Column(
+                "forma_organizacao_cod",
+                TXT,
+                "Forma de organização SIGTAP (6 primeiros dígitos)",
+                "PROC_REA",
+            ),
+            _named(
+                "forma_organizacao_nome",
+                "Nome oficial da forma de organização",
+                "SIGTAP tb_forma_organizacao",
+            ),
+            _named("procedimento_fonte", "Fonte e competência dos nomes", "SIGTAP"),
         ),
         "dim_procedimento",
     ),
-    _code_dim("dim_especialidade", "especialidade_cod", "ESPEC", "ESPEC", "especialidade do leito"),
-    _code_dim("dim_carater", "carater_cod", "CAR_INT", "CAR_INT", "caráter da internação"),
-    _code_dim("dim_complexidade", "complexidade_cod", "COMPLEX", "COMPLEX", "complexidade"),
-    _code_dim("dim_tipo_aih", "tipo_aih_cod", "IDENT", "IDENT", "tipo de AIH"),
+    Table(
+        "dim_diagnostico",
+        ("diagnostico_cod",),
+        "1 linha por código CID-10 de diagnóstico principal presente no fato",
+        (
+            Column(
+                "diagnostico_cod", TXT, "Código CID-10 (3 ou 4 caracteres, sem ponto)", "DIAG_PRINC"
+            ),
+            _named("diagnostico_nome", "Descrição oficial do código", "SIGTAP tb_cid"),
+            _named("diagnostico_rotulo", "Código · descrição — usar nos visuais", "SIGTAP tb_cid"),
+            Column("categoria_cod", TXT, "Categoria CID-10 (3 primeiros caracteres)", "DIAG_PRINC"),
+            _named("categoria_nome", "Descrição oficial da categoria", "SIGTAP tb_cid"),
+            Column(
+                "capitulo_ordem",
+                INT,
+                "Ordenação do capítulo CID-10 (1–22)",
+                "TabWin SIH/SUS CID10CAP.CNV",
+                nullable=True,
+                enriched=True,
+            ),
+            _named("capitulo", "Capítulo CID-10 (texto oficial)", "TabWin SIH/SUS CID10CAP.CNV"),
+            _named("diagnostico_fonte", "Fonte e competência das descrições", "SIGTAP"),
+        ),
+        "dim_diagnostico",
+    ),
+    _code_dim(
+        "dim_especialidade",
+        "especialidade_cod",
+        "ESPEC",
+        "ESPEC",
+        "especialidade do leito",
+        "sih_leitos",
+    ),
+    _code_dim(
+        "dim_carater", "carater_cod", "CAR_INT", "CAR_INT", "caráter da internação", "sih_carater"
+    ),
+    _code_dim(
+        "dim_complexidade",
+        "complexidade_cod",
+        "COMPLEX",
+        "COMPLEX",
+        "complexidade",
+        "sih_complexidade",
+    ),
+    _code_dim("dim_tipo_aih", "tipo_aih_cod", "IDENT", "IDENT", "tipo de AIH", "sih_ident"),
     Table(
         "dim_perfil_demografico",
         ("perfil_id",),
@@ -311,10 +429,34 @@ TABLES: tuple[Table, ...] = (
                 "dicionário",
                 nullable=True,
             ),
+            _named("sexo_descricao_oficial", "Sexo (texto oficial)", "TabWin SIH/SUS SEXO.CNV"),
+            _named(
+                "raca_cor_descricao_oficial",
+                "Raça/cor (texto oficial)",
+                "TabWin SIH/SUS RACACOR.CNV",
+            ),
         ),
         "dim_perfil_demografico",
     ),
 )
+
+# Columns that an official reference must fill for every row (coverage is checked, never forced).
+ENRICHED_COLUMNS: dict[str, tuple[str, ...]] = {
+    "dim_estabelecimento": (
+        "estabelecimento_nome", "municipio_estabelecimento_nome", "natureza_juridica_descricao",
+        "esfera_juridica", "gestao_descricao",
+    ),
+    "dim_municipio_residencia": ("municipio_residencia_nome", "uf_residencia_sigla"),
+    "dim_procedimento": (
+        "procedimento_nome", "grupo_nome_sigtap", "subgrupo_nome", "forma_organizacao_nome",
+    ),
+    "dim_diagnostico": ("diagnostico_nome", "capitulo"),
+    "dim_especialidade": ("descricao_oficial",),
+    "dim_carater": ("descricao_oficial",),
+    "dim_complexidade": ("descricao_oficial",),
+    "dim_tipo_aih": ("descricao_oficial",),
+    "dim_perfil_demografico": ("sexo_descricao_oficial", "raca_cor_descricao_oficial"),
+}  # fmt: skip
 
 AUXILIARY_TABLES: tuple[Table, ...] = (
     Table(
@@ -369,6 +511,7 @@ RELATIONSHIPS: tuple[tuple[str, str, str, str, bool], ...] = (
         True,
     ),
     ("procedimento_cod", "dim_procedimento", "procedimento_cod", "N:1", True),
+    ("diagnostico_principal_cod", "dim_diagnostico", "diagnostico_cod", "N:1", True),
     ("especialidade_cod", "dim_especialidade", "especialidade_cod", "N:1", True),
     ("carater_cod", "dim_carater", "carater_cod", "N:1", True),
     ("complexidade_cod", "dim_complexidade", "complexidade_cod", "N:1", True),
@@ -391,8 +534,65 @@ def _literal(path: Path) -> str:
     return "'" + str(Path(path).resolve()).replace("'", "''") + "'"
 
 
-def connect_model(processed: Path) -> duckdb.DuckDBPyConnection:
-    """Connection with the processed layer, the codebook and the ``base`` table."""
+def load_reference_tables(con: duckdb.DuckDBPyConnection, refs: References) -> None:
+    """Official lookups as DuckDB tables. TabWin codes are resolved in Python for every code
+    present in ``base`` (range and precedence semantics cannot be expressed as an equi-join)."""
+    simple = {
+        "ref_procedimento": refs.procedimento,
+        "ref_grupo": refs.grupo,
+        "ref_subgrupo": refs.subgrupo,
+        "ref_forma": refs.forma,
+        "ref_cid": refs.cid,
+        "ref_estabelecimento": refs.estabelecimento,
+    }
+    for name, mapping in simple.items():
+        con.execute(f"create table {name} (code varchar primary key, nome varchar)")
+        con.executemany(f"insert into {name} values (?, ?)", sorted(mapping.items()))
+    con.execute(
+        "create table ref_municipio (code varchar primary key, ibge_id varchar, nome varchar,"
+        " uf_sigla varchar)"
+    )
+    con.executemany(
+        "insert into ref_municipio values (?, ?, ?, ?)",
+        [(k, v["id"], v["nome"], v["uf_sigla"]) for k, v in sorted(refs.municipio.items())],
+    )
+    con.execute("create table ref_source (name varchar primary key, label varchar)")
+    con.executemany("insert into ref_source values (?, ?)", sorted(refs.sources.items()))
+    fields = {
+        source: [
+            r[0]
+            for r in con.execute(f'select distinct "{RD_FIELD_OF[source]}" from base').fetchall()
+        ]
+        for source in refs.cnv
+    }
+    con.execute(
+        "create table official_code (source varchar, code varchar, label varchar,"
+        " sequence varchar, file varchar, primary key (source, code))"
+    )
+    con.executemany(
+        "insert into official_code values (?, ?, ?, ?, ?)",
+        [(*row, refs.cnv[row[0]].name) for row in official_code_rows(refs, fields)],
+    )
+
+
+# RD field described by each official TabWin source (as in RD2008.DEF).
+RD_FIELD_OF = {
+    "sih_leitos": "ESPEC",
+    "sih_ident": "IDENT",
+    "sih_carater": "CAR_INT",
+    "sih_complexidade": "COMPLEX",
+    "sih_sexo": "SEXO",
+    "sih_raca_cor": "RACA_COR",
+    "sih_natureza_juridica": "NAT_JUR",
+    "sih_esfera_juridica": "NAT_JUR",
+    "sih_gestao": "GESTAO",
+    "sih_cid10_capitulo": "DIAG_PRINC",
+}
+
+
+def connect_model(processed: Path, refs: References) -> duckdb.DuckDBPyConnection:
+    """Connection with the processed layer, the codebook, the ``base`` table and the official
+    reference tables."""
     con = duckdb.connect()
     con.execute(
         "create view rd_file as select * from "
@@ -408,6 +608,7 @@ def connect_model(processed: Path) -> duckdb.DuckDBPyConnection:
     ]
     con.executemany("insert into codebook values (?, ?, ?, ?)", rows)
     con.execute(read_sql("powerbi/base"))
+    load_reference_tables(con, refs)
     return con
 
 
@@ -417,15 +618,22 @@ def table_query(table: Table) -> tuple[str, dict[str, Any]]:
     sql = read_sql(f"powerbi/{table.sql}")
     if table.code_dimension is None:
         return sql, {}
-    source, field = table.code_dimension
+    source, field, official = table.code_dimension
     allowed = {t.code_dimension[0] for t in TABLES if t.code_dimension}
     if source not in allowed or not source.isidentifier():
         raise ValueError(f"column {source!r} is not an allowed code-dimension source")
     if field not in CODEBOOK:
         raise ValueError(f"field {field!r} is not in the codebook")
-    # Identifiers cannot be bound as parameters: both names come from the closed lists above.
-    sql = sql.replace('"$source_column"', f'"{source}"').replace("$field", f"'{field}'")
-    sql = f"select code as {table.key[0]}, descricao, fonte from ({sql}) order by 1"
+    if RD_FIELD_OF.get(official) != source:
+        raise ValueError(f"official source {official!r} does not describe {source}")
+    # Identifiers cannot be bound as parameters: all names come from the closed lists above.
+    sql = (
+        sql.replace('"$source_column"', f'"{source}"')
+        .replace("$field", f"'{field}'")
+        .replace("$official_source", f"'{official}'")
+    )
+    columns = ", ".join(table.column_names[1:])
+    sql = f"select code as {table.key[0]}, {columns} from ({sql}) order by 1"
     return sql, {}
 
 
@@ -488,12 +696,17 @@ def _aux_query(table: Table) -> str:
 
 
 def export_model(
-    processed: Path, directory: Path, *, parquet: bool = False, reports: Path | None = None
+    processed: Path,
+    directory: Path,
+    *,
+    references: References,
+    parquet: bool = False,
+    reports: Path | None = None,
 ) -> dict[str, Any]:
     """Export every table. Returns a deterministic summary (row counts, SHA-256, totals)."""
     directory = Path(directory)
     directory.mkdir(parents=True, exist_ok=True)
-    con = connect_model(processed)
+    con = connect_model(processed, references)
     summary: dict[str, Any] = {"source": Path(processed).name, "tables": {}}
     for table in [*TABLES, *load_auxiliary(con, reports)]:
         sql, params = table_query(table)
@@ -517,8 +730,128 @@ def export_model(
         summary["tables"][table.name] = entry
     (cents,) = con.execute("select sum(val_tot_cents) from base").fetchone()
     summary["fact_valor_total_centavos"] = int(cents)
+    summary["references"] = {
+        name: {"file": p["file"], "sha256": p["sha256"]}
+        for name, p in sorted(references.provenance.items())
+    }
     log.info("exported %d tables to %s", len(TABLES), directory)
     return summary
+
+
+LABEL_COMPARISONS = (
+    # (table, code column, secondary label, official label)
+    ("dim_especialidade", "especialidade_cod", "descricao", "descricao_oficial"),
+    ("dim_carater", "carater_cod", "descricao", "descricao_oficial"),
+    ("dim_complexidade", "complexidade_cod", "descricao", "descricao_oficial"),
+    ("dim_tipo_aih", "tipo_aih_cod", "descricao", "descricao_oficial"),
+    ("dim_perfil_demografico", "sexo_cod", "sexo_descricao", "sexo_descricao_oficial"),
+    ("dim_perfil_demografico", "raca_cor_cod", "raca_cor_descricao", "raca_cor_descricao_oficial"),
+    ("dim_procedimento", "grupo_cod", "grupo_descricao", "grupo_nome_sigtap"),
+)
+
+
+def _fold(text: str) -> str:
+    import unicodedata
+
+    decomposed = unicodedata.normalize("NFKD", text.casefold())
+    return " ".join("".join(c for c in decomposed if not unicodedata.combining(c)).split())
+
+
+def enrichment_report(directory: Path) -> dict[str, Any]:
+    """Coverage of every enriched column and secondary × official label comparison (aggregates
+    and code labels only; read from the exported CSV files)."""
+    con = duckdb.connect()
+    directory = Path(directory)
+    coverage = []
+    for table, columns in ENRICHED_COLUMNS.items():
+        source = _csv(con, directory, table)
+        for column in columns:
+            rows, filled, distinct = con.execute(
+                f"select count(*), count(nullif({column}, '')), count(distinct {column})"
+                f" from {source}"
+            ).fetchone()
+            coverage.append(
+                {"table": table, "column": column, "rows": rows, "filled": filled,
+                 "distinct": distinct, "pct": round(100 * filled / rows, 2) if rows else 0.0}
+            )  # fmt: skip
+    comparisons = []
+    for table, code, secondary, official in LABEL_COMPARISONS:
+        for c, s, o in con.execute(
+            f"select distinct {code}, {secondary}, {official} from {_csv(con, directory, table)}"
+            " order by 1"
+        ).fetchall():
+            if not s:
+                status = "novo (sem rótulo secundário)"
+            elif not o:
+                status = "sem rótulo oficial"
+            elif s == o:
+                status = "igual"
+            elif _fold(s) == _fold(o):
+                status = "igual (grafia)"
+            else:
+                status = "diferente — adotado o oficial"
+            comparisons.append(
+                {"table": table, "code_column": code, "code": c, "secondary": s or None,
+                 "official": o or None, "status": status}
+            )  # fmt: skip
+    est = _csv(con, directory, "dim_estabelecimento")
+    (repeated_groups, repeated_establishments) = con.execute(
+        "select count(*), coalesce(sum(n), 0) from (select estabelecimento_nome, count(*) n"
+        f" from {est} group by 1 having count(*) > 1)"
+    ).fetchone()
+    return {
+        "coverage": coverage,
+        "label_comparison": comparisons,
+        "establishment_names": {
+            "repeated_name_groups": int(repeated_groups),
+            "establishments_with_repeated_name": int(repeated_establishments),
+            "note": "estabelecimento_rotulo = nome (CNES) is unique and should be used in visuals",
+        },
+    }
+
+
+def enrichment_markdown(report: dict[str, Any]) -> str:
+    lines = [
+        "# Enriquecimento das dimensões — cobertura e rótulos oficiais",
+        "",
+        "> Gerado por `hospital-analytics powerbi` a partir dos CSV exportados. Não editar"
+        " manualmente. Apenas agregados e rótulos de códigos (nenhum dado de pessoa).",
+        "",
+        "## Cobertura por coluna",
+        "",
+        "| Tabela | Coluna | Linhas | Preenchidas | % | Valores distintos |",
+        "|---|---|---:|---:|---:|---:|",
+    ]
+    lines += [
+        f"| `{c['table']}` | `{c['column']}` | {c['rows']} | {c['filled']} | {c['pct']:.2f} "
+        f"| {c['distinct']} |"
+        for c in report["coverage"]
+    ]
+    lines += [
+        "",
+        "## Rótulos: fonte secundária × fonte oficial",
+        "",
+        "Os visuais usam a coluna oficial. A coluna secundária é mantida (nada é sobrescrito).",
+        "",
+        "| Tabela | Código | Secundária | Oficial | Situação |",
+        "|---|---|---|---|---|",
+    ]
+    lines += [
+        f"| `{c['table']}` ({c['code_column']}) | `{c['code']}` | {c['secondary'] or '—'} "
+        f"| {c['official'] or '—'} | {c['status']} |"
+        for c in report["label_comparison"]
+    ]
+    names = report["establishment_names"]
+    lines += [
+        "",
+        "## Nomes de estabelecimentos",
+        "",
+        f"- Grupos de nome fantasia repetido: {names['repeated_name_groups']} "
+        f"({names['establishments_with_repeated_name']} estabelecimentos) — usar "
+        "`estabelecimento_rotulo` (nome + CNES), que é único.",
+        "",
+    ]
+    return "\n".join(lines)
 
 
 def write_summary(summary: dict[str, Any], path: Path) -> None:
@@ -575,6 +908,28 @@ def validate_model(directory: Path, expected: dict[str, Any]) -> list[ModelCheck
         checks.append(
             ModelCheck(f"RI fato.{fact_col} -> {dim}.{dim_col}: orphans", 0, int(orphans))
         )
+        if dim != "dim_mes":  # dim_mes holds complete years on purpose
+            (dim_rows, fact_keys) = con.execute(
+                f"select (select count(*) from {dim}),"
+                f" (select count(distinct {fact_col}) from fato_registro_aih)"
+            ).fetchone()
+            checks.append(
+                ModelCheck(
+                    f"{dim}: rows == distinct fato.{fact_col} (no fan-out, no extra rows)",
+                    int(fact_keys),
+                    int(dim_rows),
+                )
+            )
+    for table, columns in ENRICHED_COLUMNS.items():
+        if table not in {t.name for t in present}:
+            continue
+        for column in columns:
+            (rows, filled) = con.execute(
+                f"select count(*), count(nullif({column}, '')) from {table}"
+            ).fetchone()
+            checks.append(
+                ModelCheck(f"coverage {table}.{column}: rows with official value", rows, filled)
+            )
     joins = " ".join(
         f"join {dim} on f.{fc} = {dim}.{dc}" for fc, dim, dc, _, active in RELATIONSHIPS if active
     )

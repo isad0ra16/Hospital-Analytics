@@ -30,6 +30,7 @@ from hospital_analytics.convert import (
 )
 from hospital_analytics.dbc import DbcError, read_dbf_header
 from hospital_analytics.dbf import DbfError
+from hospital_analytics.enrichment import ReferenceIntegrityError, load_references
 from hospital_analytics.indicators import run_indicators
 from hospital_analytics.indicators import write_report as indicators_write
 from hospital_analytics.manifest import (
@@ -42,6 +43,7 @@ from hospital_analytics.manifest import (
     verify_file,
 )
 from hospital_analytics.processed import TransformError, build_processed
+from hospital_analytics.reference import ReferenceFormatError
 from hospital_analytics.validate import ReferenceTargets, validate_raw_parquet
 
 READ_ONLY = stat.S_IRUSR | stat.S_IRGRP | stat.S_IROTH  # 0o444
@@ -262,14 +264,34 @@ def cmd_powerbi(args: argparse.Namespace) -> int:
     root = args.root
     processed = args.processed or _defaults(root)["processed"]
     out = args.output or root / "data" / "powerbi"
-    summary = powerbi.export_model(processed, out, parquet=args.parquet, reports=root / "reports")
-    powerbi.write_summary(summary, root / "reports" / "powerbi" / "export_summary.json")
+    incoming = args.incoming or root / "data" / "reference" / "incoming"
+    summary_path = root / "reports" / "powerbi" / "export_summary.json"
+    previous_fact_sha = None
+    if summary_path.is_file():
+        previous = json.loads(summary_path.read_text(encoding="utf-8"))
+        previous_fact_sha = previous["tables"]["fato_registro_aih"]["csv"]["sha256"]
+    try:
+        references = load_references(incoming, load_params()["reference_sources"])
+    except (ReferenceIntegrityError, ReferenceFormatError) as exc:
+        print(f"ERROR: official reference data: {exc}", file=sys.stderr)
+        return 1
+    summary = powerbi.export_model(
+        processed, out, references=references, parquet=args.parquet, reports=root / "reports"
+    )
+    powerbi.write_summary(summary, summary_path)
     docs = root / "docs" / "powerbi"
     docs.mkdir(parents=True, exist_ok=True)
     (docs / "dicionario_campos.md").write_text(powerbi.field_dictionary_markdown(), "utf-8")
     (docs / "consultas_power_query.pq").write_text(powerbi.power_query_m(), "utf-8")
     for name, entry in summary["tables"].items():
         print(f"exported {name:<28} rows={entry['rows']}")
+    enrichment = powerbi.enrichment_report(out)
+    ref_reports = root / "reports" / "reference"
+    ref_reports.mkdir(parents=True, exist_ok=True)
+    (ref_reports / "enriquecimento.json").write_text(
+        json.dumps(enrichment, indent=2, ensure_ascii=False) + "\n", "utf-8"
+    )
+    (ref_reports / "enriquecimento.md").write_text(powerbi.enrichment_markdown(enrichment), "utf-8")
 
     reconciliation = json.loads(
         (root / "reports" / "indicators" / "reconciliation.json").read_text(encoding="utf-8")
@@ -285,6 +307,16 @@ def cmd_powerbi(args: argparse.Namespace) -> int:
         - reconciliation["aggregates"]["repeated_aih"]["excess_records"],
     }
     checks = powerbi.validate_model(out, expected)
+    if previous_fact_sha is not None:
+        checks.append(
+            powerbi.ModelCheck(
+                "fato_registro_aih.csv byte-identical to the previous export (SHA-256)",
+                previous_fact_sha,
+                summary["tables"]["fato_registro_aih"]["csv"]["sha256"],
+            )
+        )
+    else:
+        print("NOTE: no previous export summary; fact preservation check not run.")
     indicator = {r["id"]: r for r in reconciliation["indicators"]}
     measures = powerbi.measure_values(out)
     pairs = {
@@ -423,6 +455,9 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument("--processed", type=Path)
     p.add_argument("--output", type=Path, help="default: data/powerbi")
     p.add_argument("--parquet", action="store_true", help="also write Parquet files")
+    p.add_argument(
+        "--incoming", type=Path, help="official reference files (default: data/reference/incoming)"
+    )
     p.set_defaults(func=cmd_powerbi)
 
     p = sub.add_parser(

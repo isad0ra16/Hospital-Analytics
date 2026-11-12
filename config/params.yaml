@@ -132,6 +132,9 @@ reference_sources:
     sha256: 86ecdccdf97d72e7e5e46f0854cfcea8bacc28154cc1bc4ed0e6110e3a6c9c02
     official_url: https://servicodados.ibge.gov.br/api/v1/localidades/municipios
     competence: "API not versioned: record the query date"
+    # Modification time of the file saved by the author (Windows, UTC-03:00). The query time
+    # itself was not recorded; this timestamp is the closest available evidence.
+    file_timestamp: "2026-11-10T19:19:32-03:00"
     dimension: dim_municipio_residencia.municipio_residencia_cod (6-digit prefix of the IBGE id)
   cnes_cadger:
     filename: CADGERRJ.dbf
@@ -157,3 +160,101 @@ reference_sources:
     size_bytes: 25631
     sha256: 778d442a794ac34a93b1c796359f0ed9872fe5047befb3c39300cab02c91200d
     official_package: TAB_CNES.zip (Estabelecimento.def)
+
+  # --- Official SIH/SUS TabWin package (dictionary of the RD file) -------------------------
+  # TAB_SIH.zip (pasta Auxiliar do SIHSUS, obtida pela autora em 2026-11-10) is NOT copied:
+  # only the members below were extracted, each with its own SHA-256 (CRC checked on read).
+  # The package hash identifies the exact version (members dated 2026-10-15).
+  tab_sih:
+    filename: TAB_SIH.zip
+    size_bytes: 6083658
+    sha256: 21e42384645a9386add9f3644264145f39fc00bbb602f305d87bd0793b7e476b
+    official_dir: ftp://ftp.datasus.gov.br/dissemin/publicos/SIHSUS/200801_/Auxiliar/
+    competence: "package current at download date (members dated 2026-10-15)"
+  # RD2008.DEF maps every RD field to its conversion file and start position (``start``):
+  # the lookup key is the field value from ``start`` with the width declared by the .cnv.
+  sih_rd_def:
+    filename: RD2008.DEF
+    size_bytes: 33581
+    sha256: 15376fb2e56917b4122fa475b15f1e270e9daa4238f518d75e6bb6044372c652
+    official_package: TAB_SIH.zip (RD2008.DEF)
+  sih_leitos:
+    filename: LEITOS.CNV
+    size_bytes: 4766
+    sha256: 040504bd1af5aae1e28d9384abad44dcece26d03b1886a5d6ccd578da93f0eda
+    official_package: TAB_SIH.zip (CNV/LEITOS.CNV)
+    kind: cnv
+    rd_field: ESPEC
+    start: 1
+  sih_ident:
+    filename: IDENT.CNV
+    size_bytes: 196
+    sha256: 85fe489e20e61abff994fc22d836ca208d7e9fee947bb5dbc76193d883c53828
+    official_package: TAB_SIH.zip (CNV/IDENT.CNV)
+    kind: cnv
+    rd_field: IDENT
+    start: 1
+  sih_carater:
+    filename: CARATEND.CNV
+    size_bytes: 389
+    sha256: e57c08cd045e6eab1403013d96c7782c963d17bddf4864840a964b99155d27f8
+    official_package: TAB_SIH.zip (CNV/CARATEND.CNV)
+    kind: cnv
+    rd_field: CAR_INT
+    start: 1
+  sih_complexidade:
+    filename: COMPLEX2.CNV
+    size_bytes: 265
+    sha256: 680eb03bd06964cf4dae4b571bc757990688279adb164b54d5253009d8a3975f
+    official_package: TAB_SIH.zip (CNV/COMPLEX2.CNV)
+    kind: cnv
+    rd_field: COMPLEX
+    start: 1
+  sih_sexo:
+    filename: SEXO.CNV
+    size_bytes: 198
+    sha256: 003e1b250d26b987867b9d0c1d155c42e340c4a62bffdcd4db85c7c41e60691e
+    official_package: TAB_SIH.zip (CNV/SEXO.CNV)
+    kind: cnv
+    rd_field: SEXO
+    start: 1
+  sih_raca_cor:
+    filename: RACACOR.CNV
+    size_bytes: 394
+    sha256: 9a9a88bea4575d91f1f5a81ad8b3423e235f4ce21d3e3541825a529b131e63f7
+    official_package: TAB_SIH.zip (CNV/RACACOR.CNV)
+    kind: cnv
+    rd_field: RACA_COR
+    start: 1
+  sih_natureza_juridica:
+    filename: natjur.cnv
+    size_bytes: 12199
+    sha256: 6896cdd68da2f95b8bd6666f68bc5d6607e2429d7f21a0470aaea82819acb42f
+    official_package: TAB_SIH.zip (CNV/natjur.cnv)
+    kind: cnv
+    rd_field: NAT_JUR
+    start: 1
+  sih_esfera_juridica:
+    filename: esferajur.cnv
+    size_bytes: 1129
+    sha256: edd6560c125f86d8a2b1612809392f297a4a71920f7b3cf69c94f2b0c7fb798e
+    official_package: TAB_SIH.zip (CNV/esferajur.cnv)
+    kind: cnv
+    rd_field: NAT_JUR
+    start: 1
+  sih_gestao:
+    filename: GESTAO.CNV
+    size_bytes: 265
+    sha256: c8d5e054def7ff4552507263aa77f9c4332ee86198a7479130fef1cd9e946c0e
+    official_package: TAB_SIH.zip (CNV/GESTAO.CNV)
+    kind: cnv
+    rd_field: GESTAO
+    start: 1
+  sih_cid10_capitulo:
+    filename: CID10CAP.CNV
+    size_bytes: 1680
+    sha256: a8d276b6efe96e84a805a789c384cba7e6549e10de56c80ab31080e26785261e
+    official_package: TAB_SIH.zip (CNV/CID10CAP.CNV)
+    kind: cnv
+    rd_field: DIAG_PRINC
+    start: 1

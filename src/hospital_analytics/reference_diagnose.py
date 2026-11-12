@@ -27,6 +27,7 @@ from hospital_analytics.reference import (
     coverage,
     key_report,
     read_cnv,
+    read_cnv_table,
     read_ibge_municipios,
     read_sigtap_table,
 )
@@ -249,6 +250,34 @@ def diagnose_rj_municip(path: Path, powerbi_dir: Path, incoming: Path) -> dict[s
     return out
 
 
+RD_FIELDS_OF_INTEREST = (
+    "ESPEC", "IDENT", "CAR_INT", "COMPLEX", "SEXO", "RACA_COR", "NAT_JUR", "GESTAO", "DIAG_PRINC",
+)  # fmt: skip
+
+
+def diagnose_rd_def(path: Path) -> dict[str, Any]:
+    """Conversion file and start position declared by RD2008.DEF for the model's code fields."""
+    text = path.read_bytes().decode("cp1252")
+    out: dict[str, list[str]] = {}
+    for line in text.splitlines():
+        parts = [p.strip() for p in line.split(",")]
+        if len(parts) >= 4 and parts[1] in RD_FIELDS_OF_INTEREST and line[:1] in "LSX":
+            out.setdefault(parts[1], []).append(f"start={parts[2]} file={parts[3]}")
+    return {"fields": out}
+
+
+def diagnose_cnv_table(path: Path, spec: dict, powerbi_dir: Path) -> dict[str, Any]:
+    """Structure of a TabWin table (categories, width, flags) — codes are resolved on export."""
+    table = read_cnv_table(path)
+    return {
+        "categories": len(table.entries),
+        "width": table.width,
+        "flags": list(table.flags),
+        "hierarchical": any(e.parent for e in table.entries),
+        "rd_field": spec.get("rd_field"),
+    }
+
+
 def run_diagnostic(
     incoming: Path, powerbi_dir: Path, sources: dict[str, Any] | None = None
 ) -> dict[str, Any]:
@@ -264,12 +293,19 @@ def run_diagnostic(
         "rj_municip": lambda p, s: diagnose_rj_municip(p, powerbi_dir, incoming),
         "cnes_def": lambda p, s: diagnose_def(p),
     }
+    readers["tab_sih"] = readers["tab_cnes"]
+    readers["sih_rd_def"] = lambda p, s: diagnose_rd_def(p)
     for name, spec in sources.items():
         path = incoming / spec["filename"]
         entry = {"integrity": check_file(path, spec)}
-        if entry["integrity"].get("present") and entry["integrity"].get("integrity_ok"):
+        reader = readers.get(name) or (
+            (lambda p, s: diagnose_cnv_table(p, s, powerbi_dir))
+            if spec.get("kind") == "cnv"
+            else None
+        )
+        if reader and entry["integrity"].get("present") and entry["integrity"].get("integrity_ok"):
             try:
-                entry["structure"] = readers[name](path, spec)
+                entry["structure"] = reader(path, spec)
             except (ReferenceFormatError, ValueError, KeyError, zipfile.BadZipFile) as exc:
                 entry["structure"] = {"error": f"{type(exc).__name__}: {exc}"}
         report["sources"][name] = entry

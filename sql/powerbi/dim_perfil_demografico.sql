@@ -1,5 +1,6 @@
 -- Demographic PROFILE of the record (age band x sex x race/colour). This is NOT a patient
 -- dimension: the SIH RD file has no patient identifier.
+-- *_oficial: labels from the official SIH/SUS TabWin tables (SEXO.CNV, RACACOR.CNV).
 select distinct
     b.perfil_id,
     b.faixa_etaria_ordem,
@@ -11,8 +12,12 @@ select distinct
     b.SEXO as sexo_cod,
     s.label as sexo_descricao,
     b.RACA_COR as raca_cor_cod,
-    r.label as raca_cor_descricao
+    r.label as raca_cor_descricao,
+    os.label as sexo_descricao_oficial,
+    orc.label as raca_cor_descricao_oficial
 from base b
 left join codebook s on s.field = 'SEXO' and s.code = b.SEXO
 left join codebook r on r.field = 'RACA_COR' and r.code = b.RACA_COR
+left join official_code os on os.source = 'sih_sexo' and os.code = b.SEXO
+left join official_code orc on orc.source = 'sih_raca_cor' and orc.code = b.RACA_COR
 order by b.perfil_id

@@ -51,93 +51,138 @@ in
 
 // ---- dim_estabelecimento ----
 let
-    Fonte = Csv.Document(File.Contents(PastaDados & "dim_estabelecimento.csv"), [Delimiter = ",", Columns = 5, Encoding = 65001, QuoteStyle = QuoteStyle.Csv]),
+    Fonte = Csv.Document(File.Contents(PastaDados & "dim_estabelecimento.csv"), [Delimiter = ",", Columns = 13, Encoding = 65001, QuoteStyle = QuoteStyle.Csv]),
     Cabecalho = Table.PromoteHeaders(Fonte, [PromoteAllScalars = true]),
     Tipos = Table.TransformColumnTypes(Cabecalho, {
         {"cnes", type text},
         {"municipio_estabelecimento_cod", type text},
         {"uf_estabelecimento_cod", type text},
         {"natureza_juridica_cod", type text},
-        {"gestao_cod", type text}
+        {"gestao_cod", type text},
+        {"estabelecimento_nome", type text},
+        {"estabelecimento_rotulo", type text},
+        {"municipio_estabelecimento_nome", type text},
+        {"uf_estabelecimento_sigla", type text},
+        {"natureza_juridica_descricao", type text},
+        {"esfera_juridica", type text},
+        {"gestao_descricao", type text},
+        {"estabelecimento_nome_fonte", type text}
     }, "en-US")
 in
     Tipos
 
 // ---- dim_municipio_residencia ----
 let
-    Fonte = Csv.Document(File.Contents(PastaDados & "dim_municipio_residencia.csv"), [Delimiter = ",", Columns = 2, Encoding = 65001, QuoteStyle = QuoteStyle.Csv]),
+    Fonte = Csv.Document(File.Contents(PastaDados & "dim_municipio_residencia.csv"), [Delimiter = ",", Columns = 7, Encoding = 65001, QuoteStyle = QuoteStyle.Csv]),
     Cabecalho = Table.PromoteHeaders(Fonte, [PromoteAllScalars = true]),
     Tipos = Table.TransformColumnTypes(Cabecalho, {
         {"municipio_residencia_cod", type text},
-        {"uf_residencia_cod", type text}
+        {"uf_residencia_cod", type text},
+        {"municipio_residencia_ibge", type text},
+        {"municipio_residencia_nome", type text},
+        {"uf_residencia_sigla", type text},
+        {"municipio_residencia_rotulo", type text},
+        {"municipio_residencia_fonte", type text}
     }, "en-US")
 in
     Tipos
 
 // ---- dim_procedimento ----
 let
-    Fonte = Csv.Document(File.Contents(PastaDados & "dim_procedimento.csv"), [Delimiter = ",", Columns = 4, Encoding = 65001, QuoteStyle = QuoteStyle.Csv]),
+    Fonte = Csv.Document(File.Contents(PastaDados & "dim_procedimento.csv"), [Delimiter = ",", Columns = 11, Encoding = 65001, QuoteStyle = QuoteStyle.Csv]),
     Cabecalho = Table.PromoteHeaders(Fonte, [PromoteAllScalars = true]),
     Tipos = Table.TransformColumnTypes(Cabecalho, {
         {"procedimento_cod", type text},
         {"grupo_cod", type text},
         {"grupo_descricao", type text},
-        {"grupo_fonte", type text}
+        {"grupo_fonte", type text},
+        {"procedimento_nome", type text},
+        {"grupo_nome_sigtap", type text},
+        {"subgrupo_cod", type text},
+        {"subgrupo_nome", type text},
+        {"forma_organizacao_cod", type text},
+        {"forma_organizacao_nome", type text},
+        {"procedimento_fonte", type text}
+    }, "en-US")
+in
+    Tipos
+
+// ---- dim_diagnostico ----
+let
+    Fonte = Csv.Document(File.Contents(PastaDados & "dim_diagnostico.csv"), [Delimiter = ",", Columns = 8, Encoding = 65001, QuoteStyle = QuoteStyle.Csv]),
+    Cabecalho = Table.PromoteHeaders(Fonte, [PromoteAllScalars = true]),
+    Tipos = Table.TransformColumnTypes(Cabecalho, {
+        {"diagnostico_cod", type text},
+        {"diagnostico_nome", type text},
+        {"diagnostico_rotulo", type text},
+        {"categoria_cod", type text},
+        {"categoria_nome", type text},
+        {"capitulo_ordem", Int64.Type},
+        {"capitulo", type text},
+        {"diagnostico_fonte", type text}
     }, "en-US")
 in
     Tipos
 
 // ---- dim_especialidade ----
 let
-    Fonte = Csv.Document(File.Contents(PastaDados & "dim_especialidade.csv"), [Delimiter = ",", Columns = 3, Encoding = 65001, QuoteStyle = QuoteStyle.Csv]),
+    Fonte = Csv.Document(File.Contents(PastaDados & "dim_especialidade.csv"), [Delimiter = ",", Columns = 5, Encoding = 65001, QuoteStyle = QuoteStyle.Csv]),
     Cabecalho = Table.PromoteHeaders(Fonte, [PromoteAllScalars = true]),
     Tipos = Table.TransformColumnTypes(Cabecalho, {
         {"especialidade_cod", type text},
         {"descricao", type text},
-        {"fonte", type text}
+        {"fonte", type text},
+        {"descricao_oficial", type text},
+        {"fonte_oficial", type text}
     }, "en-US")
 in
     Tipos
 
 // ---- dim_carater ----
 let
-    Fonte = Csv.Document(File.Contents(PastaDados & "dim_carater.csv"), [Delimiter = ",", Columns = 3, Encoding = 65001, QuoteStyle = QuoteStyle.Csv]),
+    Fonte = Csv.Document(File.Contents(PastaDados & "dim_carater.csv"), [Delimiter = ",", Columns = 5, Encoding = 65001, QuoteStyle = QuoteStyle.Csv]),
     Cabecalho = Table.PromoteHeaders(Fonte, [PromoteAllScalars = true]),
     Tipos = Table.TransformColumnTypes(Cabecalho, {
         {"carater_cod", type text},
         {"descricao", type text},
-        {"fonte", type text}
+        {"fonte", type text},
+        {"descricao_oficial", type text},
+        {"fonte_oficial", type text}
     }, "en-US")
 in
     Tipos
 
 // ---- dim_complexidade ----
 let
-    Fonte = Csv.Document(File.Contents(PastaDados & "dim_complexidade.csv"), [Delimiter = ",", Columns = 3, Encoding = 65001, QuoteStyle = QuoteStyle.Csv]),
+    Fonte = Csv.Document(File.Contents(PastaDados & "dim_complexidade.csv"), [Delimiter = ",", Columns = 5, Encoding = 65001, QuoteStyle = QuoteStyle.Csv]),
     Cabecalho = Table.PromoteHeaders(Fonte, [PromoteAllScalars = true]),
     Tipos = Table.TransformColumnTypes(Cabecalho, {
         {"complexidade_cod", type text},
         {"descricao", type text},
-        {"fonte", type text}
+        {"fonte", type text},
+        {"descricao_oficial", type text},
+        {"fonte_oficial", type text}
     }, "en-US")
 in
     Tipos
 
 // ---- dim_tipo_aih ----
 let
-    Fonte = Csv.Document(File.Contents(PastaDados & "dim_tipo_aih.csv"), [Delimiter = ",", Columns = 3, Encoding = 65001, QuoteStyle = QuoteStyle.Csv]),
+    Fonte = Csv.Document(File.Contents(PastaDados & "dim_tipo_aih.csv"), [Delimiter = ",", Columns = 5, Encoding = 65001, QuoteStyle = QuoteStyle.Csv]),
     Cabecalho = Table.PromoteHeaders(Fonte, [PromoteAllScalars = true]),
     Tipos = Table.TransformColumnTypes(Cabecalho, {
         {"tipo_aih_cod", type text},
         {"descricao", type text},
-        {"fonte", type text}
+        {"fonte", type text},
+        {"descricao_oficial", type text},
+        {"fonte_oficial", type text}
     }, "en-US")
 in
     Tipos
 
 // ---- dim_perfil_demografico ----
 let
-    Fonte = Csv.Document(File.Contents(PastaDados & "dim_perfil_demografico.csv"), [Delimiter = ",", Columns = 7, Encoding = 65001, QuoteStyle = QuoteStyle.Csv]),
+    Fonte = Csv.Document(File.Contents(PastaDados & "dim_perfil_demografico.csv"), [Delimiter = ",", Columns = 9, Encoding = 65001, QuoteStyle = QuoteStyle.Csv]),
     Cabecalho = Table.PromoteHeaders(Fonte, [PromoteAllScalars = true]),
     Tipos = Table.TransformColumnTypes(Cabecalho, {
         {"perfil_id", Int64.Type},
@@ -146,7 +191,9 @@ let
         {"sexo_cod", type text},
         {"sexo_descricao", type text},
         {"raca_cor_cod", type text},
-        {"raca_cor_descricao", type text}
+        {"raca_cor_descricao", type text},
+        {"sexo_descricao_oficial", type text},
+        {"raca_cor_descricao_oficial", type text}
     }, "en-US")
 in
     Tipos

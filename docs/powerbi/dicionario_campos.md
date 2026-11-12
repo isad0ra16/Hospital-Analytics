@@ -17,7 +17,7 @@
 | `cnes` | `type text` | não | CNES | Estabelecimento (chave de dim_estabelecimento) |
 | `municipio_residencia_cod` | `type text` | não | MUNIC_RES | Município de residência (chave de dim_municipio_residencia) |
 | `procedimento_cod` | `type text` | não | PROC_REA | Procedimento realizado, código SIGTAP (chave de dim_procedimento) |
-| `diagnostico_principal_cod` | `type text` | não | DIAG_PRINC | Diagnóstico principal, código CID-10 (sem dimensão: descrições pendentes) |
+| `diagnostico_principal_cod` | `type text` | não | DIAG_PRINC | Diagnóstico principal, código CID-10 (chave de dim_diagnostico) |
 | `especialidade_cod` | `type text` | não | ESPEC | Especialidade do leito (chave de dim_especialidade) |
 | `carater_cod` | `type text` | não | CAR_INT | Caráter da internação (chave de dim_carater) |
 | `complexidade_cod` | `type text` | não | COMPLEX | Complexidade (chave de dim_complexidade) |
@@ -57,8 +57,16 @@
 | `cnes` | `type text` | não | CNES | Código CNES do estabelecimento |
 | `municipio_estabelecimento_cod` | `type text` | não | MUNIC_MOV | Município do ESTABELECIMENTO (≠ residência) |
 | `uf_estabelecimento_cod` | `type text` | não | MUNIC_MOV | 2 primeiros dígitos do código do município |
-| `natureza_juridica_cod` | `type text` | não | NAT_JUR | Natureza jurídica (código; descrição pendente) |
-| `gestao_cod` | `type text` | não | GESTAO | Tipo de gestão (código; descrição pendente) |
+| `natureza_juridica_cod` | `type text` | não | NAT_JUR | Natureza jurídica (código) |
+| `gestao_cod` | `type text` | não | GESTAO | Tipo de gestão (código) |
+| `estabelecimento_nome` | `type text` | sim | CNES CADGERRJ.FANTASIA | Nome fantasia no cadastro CNES (cadastro vigente no download, não 2024-01) |
+| `estabelecimento_rotulo` | `type text` | sim | CNES CADGERRJ.FANTASIA | Nome fantasia (CNES) — único; usar nos visuais (há nomes repetidos) |
+| `municipio_estabelecimento_nome` | `type text` | sim | IBGE | Município do estabelecimento |
+| `uf_estabelecimento_sigla` | `type text` | sim | IBGE | UF do estabelecimento |
+| `natureza_juridica_descricao` | `type text` | sim | TabWin SIH/SUS natjur.cnv | Natureza jurídica (texto oficial) |
+| `esfera_juridica` | `type text` | sim | TabWin SIH/SUS esferajur.cnv | Esfera: administração pública (federal, estadual, municipal), empresarial, sem fins lucrativos |
+| `gestao_descricao` | `type text` | sim | TabWin SIH/SUS GESTAO.CNV | Tipo de gestão (texto oficial) |
+| `estabelecimento_nome_fonte` | `type text` | sim | CNES | Fonte e data do cadastro do nome |
 
 ## `dim_municipio_residencia`
 
@@ -69,6 +77,11 @@
 |---|---|---|---|---|
 | `municipio_residencia_cod` | `type text` | não | MUNIC_RES | Código do município de RESIDÊNCIA (6 dígitos) |
 | `uf_residencia_cod` | `type text` | não | MUNIC_RES | 2 primeiros dígitos do código do município |
+| `municipio_residencia_ibge` | `type text` | sim | IBGE | Código IBGE de 7 dígitos |
+| `municipio_residencia_nome` | `type text` | sim | IBGE | Nome do município de residência |
+| `uf_residencia_sigla` | `type text` | sim | IBGE | UF de residência (sigla) |
+| `municipio_residencia_rotulo` | `type text` | sim | IBGE | Município (UF) — único; usar nos visuais |
+| `municipio_residencia_fonte` | `type text` | sim | IBGE | Fonte do nome |
 
 ## `dim_procedimento`
 
@@ -81,6 +94,29 @@
 | `grupo_cod` | `type text` | não | PROC_REA | Grupo SIGTAP (2 primeiros dígitos) |
 | `grupo_descricao` | `type text` | sim | dicionário | Descrição do grupo SIGTAP |
 | `grupo_fonte` | `type text` | sim | dicionário | Fonte/status da descrição do grupo |
+| `procedimento_nome` | `type text` | sim | SIGTAP tb_procedimento | Nome oficial do procedimento |
+| `grupo_nome_sigtap` | `type text` | sim | SIGTAP tb_grupo | Nome oficial do grupo (texto literal) |
+| `subgrupo_cod` | `type text` | não | PROC_REA | Subgrupo SIGTAP (4 primeiros dígitos) |
+| `subgrupo_nome` | `type text` | sim | SIGTAP tb_sub_grupo | Nome oficial do subgrupo |
+| `forma_organizacao_cod` | `type text` | não | PROC_REA | Forma de organização SIGTAP (6 primeiros dígitos) |
+| `forma_organizacao_nome` | `type text` | sim | SIGTAP tb_forma_organizacao | Nome oficial da forma de organização |
+| `procedimento_fonte` | `type text` | sim | SIGTAP | Fonte e competência dos nomes |
+
+## `dim_diagnostico`
+
+- **Granularidade:** 1 linha por código CID-10 de diagnóstico principal presente no fato
+- **Chave:** `diagnostico_cod`
+
+| Campo | Tipo (Power Query) | Pode ser nulo | Origem | Descrição |
+|---|---|---|---|---|
+| `diagnostico_cod` | `type text` | não | DIAG_PRINC | Código CID-10 (3 ou 4 caracteres, sem ponto) |
+| `diagnostico_nome` | `type text` | sim | SIGTAP tb_cid | Descrição oficial do código |
+| `diagnostico_rotulo` | `type text` | sim | SIGTAP tb_cid | Código · descrição — usar nos visuais |
+| `categoria_cod` | `type text` | não | DIAG_PRINC | Categoria CID-10 (3 primeiros caracteres) |
+| `categoria_nome` | `type text` | sim | SIGTAP tb_cid | Descrição oficial da categoria |
+| `capitulo_ordem` | `Int64.Type` | sim | TabWin SIH/SUS CID10CAP.CNV | Ordenação do capítulo CID-10 (1–22) |
+| `capitulo` | `type text` | sim | TabWin SIH/SUS CID10CAP.CNV | Capítulo CID-10 (texto oficial) |
+| `diagnostico_fonte` | `type text` | sim | SIGTAP | Fonte e competência das descrições |
 
 ## `dim_especialidade`
 
@@ -90,8 +126,10 @@
 | Campo | Tipo (Power Query) | Pode ser nulo | Origem | Descrição |
 |---|---|---|---|---|
 | `especialidade_cod` | `type text` | não | ESPEC | Código de especialidade do leito (ESPEC) |
-| `descricao` | `type text` | sim | dicionário | Descrição do código (especialidade do leito) |
+| `descricao` | `type text` | sim | dicionário | Descrição do código (especialidade do leito) — fonte secundária |
 | `fonte` | `type text` | não | dicionário | Fonte/status da interpretação do código |
+| `descricao_oficial` | `type text` | sim | TabWin SIH/SUS | Descrição oficial (especialidade do leito) — usar nos visuais |
+| `fonte_oficial` | `type text` | sim | TabWin SIH/SUS | Pacote e tabela de conversão oficiais |
 
 ## `dim_carater`
 
@@ -101,8 +139,10 @@
 | Campo | Tipo (Power Query) | Pode ser nulo | Origem | Descrição |
 |---|---|---|---|---|
 | `carater_cod` | `type text` | não | CAR_INT | Código de caráter da internação (CAR_INT) |
-| `descricao` | `type text` | sim | dicionário | Descrição do código (caráter da internação) |
+| `descricao` | `type text` | sim | dicionário | Descrição do código (caráter da internação) — fonte secundária |
 | `fonte` | `type text` | não | dicionário | Fonte/status da interpretação do código |
+| `descricao_oficial` | `type text` | sim | TabWin SIH/SUS | Descrição oficial (caráter da internação) — usar nos visuais |
+| `fonte_oficial` | `type text` | sim | TabWin SIH/SUS | Pacote e tabela de conversão oficiais |
 
 ## `dim_complexidade`
 
@@ -112,8 +152,10 @@
 | Campo | Tipo (Power Query) | Pode ser nulo | Origem | Descrição |
 |---|---|---|---|---|
 | `complexidade_cod` | `type text` | não | COMPLEX | Código de complexidade (COMPLEX) |
-| `descricao` | `type text` | sim | dicionário | Descrição do código (complexidade) |
+| `descricao` | `type text` | sim | dicionário | Descrição do código (complexidade) — fonte secundária |
 | `fonte` | `type text` | não | dicionário | Fonte/status da interpretação do código |
+| `descricao_oficial` | `type text` | sim | TabWin SIH/SUS | Descrição oficial (complexidade) — usar nos visuais |
+| `fonte_oficial` | `type text` | sim | TabWin SIH/SUS | Pacote e tabela de conversão oficiais |
 
 ## `dim_tipo_aih`
 
@@ -123,8 +165,10 @@
 | Campo | Tipo (Power Query) | Pode ser nulo | Origem | Descrição |
 |---|---|---|---|---|
 | `tipo_aih_cod` | `type text` | não | IDENT | Código de tipo de AIH (IDENT) |
-| `descricao` | `type text` | sim | dicionário | Descrição do código (tipo de AIH) |
+| `descricao` | `type text` | sim | dicionário | Descrição do código (tipo de AIH) — fonte secundária |
 | `fonte` | `type text` | não | dicionário | Fonte/status da interpretação do código |
+| `descricao_oficial` | `type text` | sim | TabWin SIH/SUS | Descrição oficial (tipo de AIH) — usar nos visuais |
+| `fonte_oficial` | `type text` | sim | TabWin SIH/SUS | Pacote e tabela de conversão oficiais |
 
 ## `dim_perfil_demografico`
 
@@ -140,6 +184,8 @@
 | `sexo_descricao` | `type text` | sim | dicionário | Sexo (fonte secundária) |
 | `raca_cor_cod` | `type text` | não | RACA_COR | Código de raça/cor |
 | `raca_cor_descricao` | `type text` | sim | dicionário | Raça/cor (fonte secundária) |
+| `sexo_descricao_oficial` | `type text` | sim | TabWin SIH/SUS SEXO.CNV | Sexo (texto oficial) |
+| `raca_cor_descricao_oficial` | `type text` | sim | TabWin SIH/SUS RACACOR.CNV | Raça/cor (texto oficial) |
 
 ## `ref_indicadores_validados`
 
@@ -180,6 +226,7 @@
 | `fato_registro_aih[cnes]` | `dim_estabelecimento[cnes]` | N:1 | sim | única (dimensão → fato) |
 | `fato_registro_aih[municipio_residencia_cod]` | `dim_municipio_residencia[municipio_residencia_cod]` | N:1 | sim | única (dimensão → fato) |
 | `fato_registro_aih[procedimento_cod]` | `dim_procedimento[procedimento_cod]` | N:1 | sim | única (dimensão → fato) |
+| `fato_registro_aih[diagnostico_principal_cod]` | `dim_diagnostico[diagnostico_cod]` | N:1 | sim | única (dimensão → fato) |
 | `fato_registro_aih[especialidade_cod]` | `dim_especialidade[especialidade_cod]` | N:1 | sim | única (dimensão → fato) |
 | `fato_registro_aih[carater_cod]` | `dim_carater[carater_cod]` | N:1 | sim | única (dimensão → fato) |
 | `fato_registro_aih[complexidade_cod]` | `dim_complexidade[complexidade_cod]` | N:1 | sim | única (dimensão → fato) |

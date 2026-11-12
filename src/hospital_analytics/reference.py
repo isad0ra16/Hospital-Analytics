@@ -14,6 +14,7 @@ from __future__ import annotations
 import csv
 import io
 import json
+import re
 import zipfile
 from collections import Counter
 from dataclasses import dataclass, field
@@ -282,6 +283,171 @@ def read_cnv(path: Path, encoding: str = "cp1252") -> tuple[tuple[str, ...], lis
             f"{Path(path).name}: header declares {header[0]} categories, found {len(categories)}"
         )
     return header, categories
+
+
+@dataclass(frozen=True)
+class CnvEntry:
+    """One category of a TabWin conversion table, with every code item and its file line."""
+
+    sequence: str
+    parent: str | None  # sequence of the parent category (hierarchical files), else None
+    label: str
+    items: tuple[tuple[str, int], ...]  # (code item, line number) — item: code, "a-b" or ""
+
+
+@dataclass(frozen=True)
+class CnvTable:
+    """A TabWin ``.cnv`` file read completely (see ``read_cnv_table``)."""
+
+    name: str
+    flags: tuple[str, ...]
+    width: int
+    entries: tuple[CnvEntry, ...]
+
+    def entry(self, sequence: str) -> CnvEntry:
+        return next(e for e in self.entries if int(e.sequence) == int(sequence))
+
+    def key(self, value: str, start: int = 1) -> str:
+        """Lookup key: ``width`` characters of the field from ``start`` (1-based), as TabWin."""
+        return value[start - 1 : start - 1 + self.width]
+
+    def resolve(self, value: str, start: int = 1) -> CnvEntry | None:
+        """The single category of ``value``, or None when no category lists it.
+
+        Codes may be listed by more than one category (e.g. a catch-all range first, specific
+        codes after). The format's precedence rule is not documented in the files, so two
+        plausible rules are applied and must agree: the most specific item wins (exact code,
+        then the narrowest numeric range) and the last listed item wins. Disagreement or a tie
+        is an error — the category is never guessed.
+        """
+        key = self.key(value, start)
+        matches = [
+            (e, _specificity(item), line)
+            for e in self.entries
+            for item, line in e.items
+            if _item_matches(item, key)
+        ]
+        if not matches:
+            return None
+        best_rank = min(rank for _, rank, _ in matches)
+        best = {e.sequence: e for e, rank, _ in matches if rank == best_rank}
+        if len(best) > 1:
+            raise ReferenceFormatError(
+                f"{self.name}: {key!r} matches categories {sorted(best)} with equal precedence"
+            )
+        (most_specific,) = best.values()
+        last_listed = max(matches, key=lambda m: m[2])[0]
+        if last_listed.sequence != most_specific.sequence:
+            raise ReferenceFormatError(
+                f"{self.name}: precedence rules disagree for {key!r} "
+                f"(most specific {most_specific.sequence}, last listed {last_listed.sequence})"
+            )
+        return most_specific
+
+    def full_label(self, entry: CnvEntry) -> str:
+        """Label with its parent category in hierarchical files: ``parent — child``."""
+        if entry.parent is None:
+            return entry.label
+        child = entry.label.lstrip(". ").strip()
+        return f"{self.entry(entry.parent).label} — {child}"
+
+
+_CODE_ITEM = re.compile(r"^[0-9A-Za-z]*(-[0-9A-Za-z]*)?$")
+
+
+def _item_matches(item: str, key: str) -> bool:
+    if item == "":
+        return key.strip() == ""
+    if "-" in item:
+        lo, hi = item.split("-", 1)
+        if lo.isdigit() and hi.isdigit() and key.isdigit():
+            return int(lo) <= int(key) <= int(hi)
+        if lo.isdigit() and hi.isdigit():
+            return False
+        return lo <= key <= hi  # alphanumeric range (e.g. CID-10 "A00-B99"), string order
+    return item == key
+
+
+def _specificity(item: str) -> tuple[int, int]:
+    """Lower is more specific: exact code or blank, numeric range by width, other ranges."""
+    if "-" not in item:
+        return (0, 0)
+    lo, hi = item.split("-", 1)
+    if lo.isdigit() and hi.isdigit():
+        return (1, int(hi) - int(lo))
+    return (2, 0)
+
+
+def read_cnv_table(path: Path, encoding: str = "cp1252") -> CnvTable:
+    """Read a TabWin ``.cnv`` file, including the variants found in the official SIH package.
+
+    Header: optional flag tokens (e.g. ``N``), category count, code width, optional flags
+    (e.g. ``L``). Each line: [parent sequence] sequence, label, codes (last token: comma
+    separated codes, ranges ``a-b`` and empty items for blank values). A category may continue
+    on further lines with the same sequence and label. The number of distinct categories must
+    equal the declared count.
+    """
+    path = Path(path)
+    lines = [ln for ln in path.read_bytes().decode(encoding).splitlines() if ln.strip()]
+    if not lines:
+        raise ReferenceFormatError(f"{path.name}: empty file")
+    header = lines[0].split()
+    numbers = [i for i, tok in enumerate(header) if tok.isdigit()]
+    if len(numbers) < 2 or numbers[1] != numbers[0] + 1:
+        raise ReferenceFormatError(f"{path.name}: header must hold count and width: {header}")
+    count, width = int(header[numbers[0]]), int(header[numbers[1]])
+    flags = tuple(t for i, t in enumerate(header) if i not in numbers[:2])
+
+    order: list[str] = []
+    data: dict[str, dict[str, Any]] = {}
+    for number, line in enumerate(lines[1:], start=2):
+        spans = [(m.group(), m.start(), m.end()) for m in re.finditer(r"\S+", line)]
+        if len(spans) < 2 or not spans[0][0].isdigit():
+            raise ReferenceFormatError(f"{path.name} line {number}: unexpected {line!r}")
+        top_level = {int(s) for s in order if data[s]["parent"] is None}
+        hierarchical = len(spans) >= 4 and spans[1][0].isdigit() and int(spans[0][0]) in top_level
+        parent, (seq, _, seq_end) = (spans[0][0], spans[1]) if hierarchical else (None, spans[0])
+        codes, codes_start, _ = spans[-1]
+        raw_items = codes.split(",")
+        if not all(_CODE_ITEM.match(i) for i in raw_items):
+            raise ReferenceFormatError(f"{path.name} line {number}: invalid codes {codes!r}")
+        # A trailing comma only terminates the list ("A00-B99,"); an empty item before it
+        # (",0-3" or a lone ",") stands for the blank value.
+        items = [i for i in raw_items if i]
+        if "" in raw_items[:-1]:
+            items.append("")
+        label = line[seq_end:codes_start].strip()
+        key = str(int(seq))
+        if key in data:
+            if data[key]["label"] != label or data[key]["parent"] != parent:
+                raise ReferenceFormatError(
+                    f"{path.name} line {number}: sequence {seq} reused with a different label"
+                )
+        else:
+            order.append(key)
+            data[key] = {"sequence": seq, "parent": parent, "label": label, "items": []}
+        data[key]["items"] += [(i, number) for i in items]
+    if len(order) != count:
+        raise ReferenceFormatError(
+            f"{path.name}: header declares {count} categories, found {len(order)}"
+        )
+    entries = tuple(
+        CnvEntry(d["sequence"], d["parent"], d["label"], tuple(dict.fromkeys(d["items"])))
+        for d in (data[k] for k in order)
+    )
+    return CnvTable(path.name, flags, width, entries)
+
+
+def clean_label(label: str, code: str) -> str:
+    """Official label without a leading copy of its own code (``01-Cirúrgico``, ``01 Eletivo``,
+    ``101-5 Orgao …`` for code 1015). The remaining text is kept literally."""
+    first, _, rest = label.partition(" ")
+    if first.replace("-", "") == code and rest:
+        return rest.lstrip("- ").strip()
+    for sep in ("-", " "):
+        if label.startswith(code + sep) and len(label) > len(code) + 1:
+            return label[len(code) + 1 :].strip()
+    return label
 
 
 def cnv_lookup(categories: list[CnvCategory], code: str) -> list[CnvCategory]:

@@ -10,6 +10,7 @@ from synthetic_data import FieldSpec, build_dbc, build_dbf, write
 from hospital_analytics.integrity import sha256_file
 from hospital_analytics.reference import (
     ReferenceFormatError,
+    clean_label,
     cnv_lookup,
     coverage,
     enrichment_guard,
@@ -17,6 +18,7 @@ from hospital_analytics.reference import (
     key_report,
     parse_layout,
     read_cnv,
+    read_cnv_table,
     read_fixed_width,
     read_ibge_municipios,
     read_sigtap_table,
@@ -259,3 +261,73 @@ def test_cnv_header_count_must_match(tmp_path):
     path.write_bytes(CNV.replace("3 6", "4 6", 1).encode("cp1252"))
     with pytest.raises(ReferenceFormatError, match="declares 4"):
         read_cnv(path)
+
+
+# ---- TabWin .cnv, full reader (official SIH package variants) ----------------------------
+def cnv_file(tmp_path, text, name="x.cnv"):
+    path = tmp_path / name
+    path.write_bytes(text.encode("cp1252"))
+    return read_cnv_table(path)
+
+
+def test_cnv_table_header_flags_width_and_catch_all_precedence(tmp_path):
+    t = cnv_file(tmp_path, "N 3 1 L\n  3  Outras   0-9\n  1  Normal   1\n  2  Longa    5\n")
+    assert (t.flags, t.width, len(t.entries)) == (("N", "L"), 1, 3)
+    assert t.resolve("1").label == "Normal"  # specific code listed after the catch-all
+    assert t.resolve("7").label == "Outras"
+    assert t.resolve("X") is None
+
+
+def test_cnv_table_hierarchy_continuation_and_trailing_comma(tmp_path):
+    t = cnv_file(
+        tmp_path,
+        "3 4\n 01  Administração Pública  1000-1999,\n 01  02  .. Estadual  1023,\n"
+        " 01  02  .. Estadual  1058\n 03  Ignorado  0000\n",
+    )
+    estadual = t.resolve("1058")  # continuation line of category 02
+    assert (estadual.sequence, estadual.parent) == ("02", "01")
+    assert t.full_label(estadual) == "Administração Pública — Estadual"
+    assert t.resolve("1999").label == "Administração Pública"
+    assert t.resolve("") is None  # a trailing comma is not a blank code
+
+
+def test_cnv_table_blank_items_alphanumeric_ranges_and_key_width(tmp_path):
+    t = cnv_file(tmp_path, "2 3 L\n  1  X. Respiratório  J00-J99,\n  2  Não preenchido  ,\n")
+    assert t.resolve("J189").label == "X. Respiratório"  # first 3 characters, string range
+    assert t.resolve("   ").label == "Não preenchido"
+    assert t.key("0101234", start=3) == "012"
+    pf = cnv_file(tmp_path, "3 1 L\n  3  Não informado  ,0-3\n  1  PF  1\n  2  PJ  3\n")
+    assert pf.resolve("3").label == "PJ" and pf.resolve("").label == "Não informado"
+
+
+def test_cnv_table_refuses_to_guess_when_precedence_rules_disagree(tmp_path):
+    # the specific code comes FIRST and the catch-all range LAST: the rules disagree
+    t = cnv_file(tmp_path, "2 1\n  1  Normal  1\n  2  Outras  0-9\n")
+    with pytest.raises(ReferenceFormatError, match="precedence rules disagree"):
+        t.resolve("1")
+    tie = cnv_file(tmp_path, "2 1\n  1  A  1\n  2  B  1\n")
+    with pytest.raises(ReferenceFormatError, match="equal precedence"):
+        tie.resolve("1")
+
+
+@pytest.mark.parametrize(
+    "text",
+    ["x 2\n 1 A 1\n", "2 1\n 1 A 1\n", "2 1\n 1 A 1\n 1 B 2\n", "1 1\n 1 Ação Não\n"],
+)
+def test_inconsistent_cnv_tables_are_rejected(tmp_path, text):
+    with pytest.raises(ReferenceFormatError):
+        cnv_file(tmp_path, text)
+
+
+@pytest.mark.parametrize(
+    ("label", "code", "clean"),
+    [
+        ("01-Cirúrgico", "01", "Cirúrgico"),
+        ("01 Eletivo", "01", "Eletivo"),
+        ("101-5 Orgao Publico Federal", "1015", "Orgao Publico Federal"),
+        ("Normal", "1", "Normal"),
+        ("330010 ANGRA DOS REIS", "330010", "ANGRA DOS REIS"),
+    ],
+)
+def test_clean_label_removes_only_a_leading_copy_of_the_code(label, code, clean):
+    assert clean_label(label, code) == clean

@@ -81,3 +81,23 @@ def test_sensitive_or_bulky_paths_are_ignored(path):
 )
 def test_project_files_are_not_ignored(path):
     assert not is_ignored(path), f"{path} is wrongly ignored"
+
+
+@pytest.mark.parametrize(
+    "path",
+    [
+        "powerbi/HospitalAnalytics.pbip",
+        "docs/powerbi/medidas.dax",
+        "reports/audit/audit_rdrj2401.md",
+    ],
+)
+def test_generated_text_files_are_checked_out_with_lf(path):
+    """Generators write LF; a CRLF checkout would make regenerated files look modified."""
+    result = subprocess.run(
+        ["git", "check-attr", "eol", "--", path],
+        cwd=ROOT,
+        capture_output=True,
+        text=True,
+        check=True,
+    )
+    assert result.stdout.strip().endswith("eol: lf"), result.stdout

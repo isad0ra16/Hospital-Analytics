@@ -1,0 +1,9 @@
+# Text files use LF in every checkout. The generators (reports, Power BI project, docs) write
+# LF, so a Windows checkout with core.autocrlf would otherwise show regenerated files as changed.
+* text=auto eol=lf
+
+*.png binary
+*.dbc binary
+*.dbf binary
+*.parquet binary
+*.zip binary

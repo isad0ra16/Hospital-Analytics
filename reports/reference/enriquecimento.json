@@ -1,0 +1,419 @@
+{
+  "coverage": [
+    {
+      "table": "dim_estabelecimento",
+      "column": "estabelecimento_nome",
+      "rows": 240,
+      "filled": 240,
+      "distinct": 238,
+      "pct": 100.0
+    },
+    {
+      "table": "dim_estabelecimento",
+      "column": "municipio_estabelecimento_nome",
+      "rows": 240,
+      "filled": 240,
+      "distinct": 82,
+      "pct": 100.0
+    },
+    {
+      "table": "dim_estabelecimento",
+      "column": "natureza_juridica_descricao",
+      "rows": 240,
+      "filled": 240,
+      "distinct": 16,
+      "pct": 100.0
+    },
+    {
+      "table": "dim_estabelecimento",
+      "column": "esfera_juridica",
+      "rows": 240,
+      "filled": 240,
+      "distinct": 6,
+      "pct": 100.0
+    },
+    {
+      "table": "dim_estabelecimento",
+      "column": "gestao_descricao",
+      "rows": 240,
+      "filled": 240,
+      "distinct": 2,
+      "pct": 100.0
+    },
+    {
+      "table": "dim_municipio_residencia",
+      "column": "municipio_residencia_nome",
+      "rows": 262,
+      "filled": 262,
+      "distinct": 259,
+      "pct": 100.0
+    },
+    {
+      "table": "dim_municipio_residencia",
+      "column": "uf_residencia_sigla",
+      "rows": 262,
+      "filled": 262,
+      "distinct": 26,
+      "pct": 100.0
+    },
+    {
+      "table": "dim_procedimento",
+      "column": "procedimento_nome",
+      "rows": 1094,
+      "filled": 1094,
+      "distinct": 1094,
+      "pct": 100.0
+    },
+    {
+      "table": "dim_procedimento",
+      "column": "grupo_nome_sigtap",
+      "rows": 1094,
+      "filled": 1094,
+      "distinct": 4,
+      "pct": 100.0
+    },
+    {
+      "table": "dim_procedimento",
+      "column": "subgrupo_nome",
+      "rows": 1094,
+      "filled": 1094,
+      "distinct": 30,
+      "pct": 100.0
+    },
+    {
+      "table": "dim_procedimento",
+      "column": "forma_organizacao_nome",
+      "rows": 1094,
+      "filled": 1094,
+      "distinct": 106,
+      "pct": 100.0
+    },
+    {
+      "table": "dim_diagnostico",
+      "column": "diagnostico_nome",
+      "rows": 3759,
+      "filled": 3759,
+      "distinct": 3758,
+      "pct": 100.0
+    },
+    {
+      "table": "dim_diagnostico",
+      "column": "capitulo",
+      "rows": 3759,
+      "filled": 3759,
+      "distinct": 20,
+      "pct": 100.0
+    },
+    {
+      "table": "dim_especialidade",
+      "column": "descricao_oficial",
+      "rows": 12,
+      "filled": 12,
+      "distinct": 12,
+      "pct": 100.0
+    },
+    {
+      "table": "dim_carater",
+      "column": "descricao_oficial",
+      "rows": 4,
+      "filled": 4,
+      "distinct": 4,
+      "pct": 100.0
+    },
+    {
+      "table": "dim_complexidade",
+      "column": "descricao_oficial",
+      "rows": 2,
+      "filled": 2,
+      "distinct": 2,
+      "pct": 100.0
+    },
+    {
+      "table": "dim_tipo_aih",
+      "column": "descricao_oficial",
+      "rows": 2,
+      "filled": 2,
+      "distinct": 2,
+      "pct": 100.0
+    },
+    {
+      "table": "dim_perfil_demografico",
+      "column": "sexo_descricao_oficial",
+      "rows": 78,
+      "filled": 78,
+      "distinct": 2,
+      "pct": 100.0
+    },
+    {
+      "table": "dim_perfil_demografico",
+      "column": "raca_cor_descricao_oficial",
+      "rows": 78,
+      "filled": 78,
+      "distinct": 6,
+      "pct": 100.0
+    }
+  ],
+  "label_comparison": [
+    {
+      "table": "dim_especialidade",
+      "code_column": "especialidade_cod",
+      "code": "01",
+      "secondary": "Cirúrgico",
+      "official": "Cirúrgico",
+      "status": "igual"
+    },
+    {
+      "table": "dim_especialidade",
+      "code_column": "especialidade_cod",
+      "code": "02",
+      "secondary": "Obstétricos",
+      "official": "Obstétricos",
+      "status": "igual"
+    },
+    {
+      "table": "dim_especialidade",
+      "code_column": "especialidade_cod",
+      "code": "03",
+      "secondary": "Clínicos",
+      "official": "Clínico",
+      "status": "diferente — adotado o oficial"
+    },
+    {
+      "table": "dim_especialidade",
+      "code_column": "especialidade_cod",
+      "code": "04",
+      "secondary": "Crônicos",
+      "official": "Crônicos",
+      "status": "igual"
+    },
+    {
+      "table": "dim_especialidade",
+      "code_column": "especialidade_cod",
+      "code": "05",
+      "secondary": "Psiquiatria",
+      "official": "Psiquiatria",
+      "status": "igual"
+    },
+    {
+      "table": "dim_especialidade",
+      "code_column": "especialidade_cod",
+      "code": "06",
+      "secondary": "Pneumologia sanitária (tisiologia)",
+      "official": "Pneumologia Sanitária (Tisiologia)",
+      "status": "igual (grafia)"
+    },
+    {
+      "table": "dim_especialidade",
+      "code_column": "especialidade_cod",
+      "code": "07",
+      "secondary": "Pediátricos",
+      "official": "Pediátricos",
+      "status": "igual"
+    },
+    {
+      "table": "dim_especialidade",
+      "code_column": "especialidade_cod",
+      "code": "08",
+      "secondary": "Reabilitação",
+      "official": "Reabilitação",
+      "status": "igual"
+    },
+    {
+      "table": "dim_especialidade",
+      "code_column": "especialidade_cod",
+      "code": "09",
+      "secondary": "Leito dia / cirúrgicos",
+      "official": "Leito Dia / Cirúrgicos",
+      "status": "igual (grafia)"
+    },
+    {
+      "table": "dim_especialidade",
+      "code_column": "especialidade_cod",
+      "code": "10",
+      "secondary": null,
+      "official": "Leito Dia / Aids",
+      "status": "novo (sem rótulo secundário)"
+    },
+    {
+      "table": "dim_especialidade",
+      "code_column": "especialidade_cod",
+      "code": "14",
+      "secondary": null,
+      "official": "Leito Dia / Saúde Mental",
+      "status": "novo (sem rótulo secundário)"
+    },
+    {
+      "table": "dim_especialidade",
+      "code_column": "especialidade_cod",
+      "code": "87",
+      "secondary": null,
+      "official": "Saúde Mental (Clínico)",
+      "status": "novo (sem rótulo secundário)"
+    },
+    {
+      "table": "dim_carater",
+      "code_column": "carater_cod",
+      "code": "01",
+      "secondary": "Eletivo",
+      "official": "Eletivo",
+      "status": "igual"
+    },
+    {
+      "table": "dim_carater",
+      "code_column": "carater_cod",
+      "code": "02",
+      "secondary": "Urgência",
+      "official": "Urgência",
+      "status": "igual"
+    },
+    {
+      "table": "dim_carater",
+      "code_column": "carater_cod",
+      "code": "05",
+      "secondary": "Outros tipos de acidente de trânsito",
+      "official": "Outros tipo de acidente de trânsito",
+      "status": "diferente — adotado o oficial"
+    },
+    {
+      "table": "dim_carater",
+      "code_column": "carater_cod",
+      "code": "06",
+      "secondary": "Outros tipos de lesões e envenenamentos por agentes químicos ou físicos",
+      "official": "Out tp lesões e envenen por agent quím físicos",
+      "status": "diferente — adotado o oficial"
+    },
+    {
+      "table": "dim_complexidade",
+      "code_column": "complexidade_cod",
+      "code": "02",
+      "secondary": "Média complexidade",
+      "official": "Média complexidade",
+      "status": "igual"
+    },
+    {
+      "table": "dim_complexidade",
+      "code_column": "complexidade_cod",
+      "code": "03",
+      "secondary": "Alta complexidade",
+      "official": "Alta complexidade",
+      "status": "igual"
+    },
+    {
+      "table": "dim_tipo_aih",
+      "code_column": "tipo_aih_cod",
+      "code": "1",
+      "secondary": "Principal",
+      "official": "Normal",
+      "status": "diferente — adotado o oficial"
+    },
+    {
+      "table": "dim_tipo_aih",
+      "code_column": "tipo_aih_cod",
+      "code": "5",
+      "secondary": "Longa permanência",
+      "official": "Longa permanência",
+      "status": "igual"
+    },
+    {
+      "table": "dim_perfil_demografico",
+      "code_column": "sexo_cod",
+      "code": "1",
+      "secondary": "Masculino",
+      "official": "Masculino",
+      "status": "igual"
+    },
+    {
+      "table": "dim_perfil_demografico",
+      "code_column": "sexo_cod",
+      "code": "3",
+      "secondary": "Feminino",
+      "official": "Feminino",
+      "status": "igual"
+    },
+    {
+      "table": "dim_perfil_demografico",
+      "code_column": "raca_cor_cod",
+      "code": "01",
+      "secondary": "Branca",
+      "official": "Branca",
+      "status": "igual"
+    },
+    {
+      "table": "dim_perfil_demografico",
+      "code_column": "raca_cor_cod",
+      "code": "02",
+      "secondary": "Preta",
+      "official": "Preta",
+      "status": "igual"
+    },
+    {
+      "table": "dim_perfil_demografico",
+      "code_column": "raca_cor_cod",
+      "code": "03",
+      "secondary": "Parda",
+      "official": "Parda",
+      "status": "igual"
+    },
+    {
+      "table": "dim_perfil_demografico",
+      "code_column": "raca_cor_cod",
+      "code": "04",
+      "secondary": "Amarela",
+      "official": "Amarela",
+      "status": "igual"
+    },
+    {
+      "table": "dim_perfil_demografico",
+      "code_column": "raca_cor_cod",
+      "code": "05",
+      "secondary": "Indígena",
+      "official": "Indígena",
+      "status": "igual"
+    },
+    {
+      "table": "dim_perfil_demografico",
+      "code_column": "raca_cor_cod",
+      "code": "99",
+      "secondary": "Sem informação",
+      "official": "Sem informação",
+      "status": "igual"
+    },
+    {
+      "table": "dim_procedimento",
+      "code_column": "grupo_cod",
+      "code": "02",
+      "secondary": "Procedimentos com finalidade diagnóstica",
+      "official": "Procedimentos com finalidade diagnóstica",
+      "status": "igual"
+    },
+    {
+      "table": "dim_procedimento",
+      "code_column": "grupo_cod",
+      "code": "03",
+      "secondary": "Procedimentos clínicos",
+      "official": "Procedimentos clínicos",
+      "status": "igual"
+    },
+    {
+      "table": "dim_procedimento",
+      "code_column": "grupo_cod",
+      "code": "04",
+      "secondary": "Procedimentos cirúrgicos",
+      "official": "Procedimentos cirúrgicos",
+      "status": "igual"
+    },
+    {
+      "table": "dim_procedimento",
+      "code_column": "grupo_cod",
+      "code": "05",
+      "secondary": "Transplantes de órgãos, tecidos e células",
+      "official": "Transplantes de orgãos, tecidos e células",
+      "status": "igual (grafia)"
+    }
+  ],
+  "establishment_names": {
+    "repeated_name_groups": 2,
+    "establishments_with_repeated_name": 4,
+    "note": "estabelecimento_rotulo = nome (CNES) is unique and should be used in visuals"
+  }
+}

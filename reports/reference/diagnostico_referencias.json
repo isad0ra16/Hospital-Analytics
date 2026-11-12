@@ -621,6 +621,316 @@
           "SES Razao Social - RJ, CNES     , RAZ_SOCI , DBF\\CADGERRJ.DBF"
         ]
       }
+    },
+    "tab_sih": {
+      "integrity": {
+        "file": "TAB_SIH.zip",
+        "present": false
+      }
+    },
+    "sih_rd_def": {
+      "integrity": {
+        "file": "RD2008.DEF",
+        "present": true,
+        "size_bytes": 33581,
+        "sha256": "15376fb2e56917b4122fa475b15f1e270e9daa4238f518d75e6bb6044372c652",
+        "size_ok": true,
+        "sha256_ok": true,
+        "integrity_ok": true
+      },
+      "structure": {
+        "fields": {
+          "NAT_JUR": [
+            "start=1 file=CNV\\NATJUR.CNV",
+            "start=1 file=CNV\\NATJURC.CNV",
+            "start=1 file=CNV\\ESFERAJUR.CNV",
+            "start=1 file=CNV\\ESFERAJURC.CNV"
+          ],
+          "GESTAO": [
+            "start=1 file=CNV\\GESTAO.CNV"
+          ],
+          "SEXO": [
+            "start=1 file=CNV\\SEXO.CNV"
+          ],
+          "RACA_COR": [
+            "start=1 file=CNV\\RACACOR.CNV"
+          ],
+          "ESPEC": [
+            "start=1 file=CNV\\LEITOS.CNV"
+          ],
+          "IDENT": [
+            "start=1 file=CNV\\IDENT.CNV"
+          ],
+          "CAR_INT": [
+            "start=1 file=CNV\\CARATEND.CNV",
+            "start=1 file=CNV\\CARATEND.CNV"
+          ],
+          "COMPLEX": [
+            "start=1 file=CNV\\COMPLEX2.CNV",
+            "start=1 file=CNV\\COMPLEX2.CNV"
+          ],
+          "DIAG_PRINC": [
+            "start=1 file=CNV\\CID10CAP.CNV",
+            "start=1 file=CNV\\CID10CAP.CNV",
+            "start=1 file=CNV\\CID10GRUPO.CNV",
+            "start=1 file=CNV\\CID10GRUPOS.CNV",
+            "start=1 file=CNV\\CID10_3D.CNV",
+            "start=1 file=CNV\\CID10_3D.CNV",
+            "start=1 file=CNV\\AGRAVONOT.CNV",
+            "start=1 file=CNV\\AGRAVONOTS.CNV",
+            "start=1 file=CNV\\SENSIVEISATB01.CNV",
+            "start=1 file=CNV\\SENSIVEISATB01.CNV",
+            "start=1 file=CNV\\SENSIVEISATB02.CNV",
+            "start=1 file=CNV\\SENSIVEISATB02.CNV",
+            "start=1 file=CNV\\SENSIVEISATB03.CNV",
+            "start=1 file=CNV\\SENSIVEISATB03.CNV",
+            "start=1 file=CNV\\AGRAVOBLOQ.CNV",
+            "start=1 file=CNV\\AGRAVOBLOQS.CNV",
+            "start=1 file=CNV\\CIDX01.CNV",
+            "start=1 file=CNV\\CID10_01.CNV",
+            "start=1 file=CNV\\CIDX02.CNV",
+            "start=1 file=CNV\\CID10_02.CNV",
+            "start=1 file=CNV\\CIDX03.CNV",
+            "start=1 file=CNV\\CID10_03.CNV",
+            "start=1 file=CNV\\CIDX04.CNV",
+            "start=1 file=CNV\\CID10_04.CNV",
+            "start=1 file=CNV\\CIDX05.CNV",
+            "start=1 file=CNV\\CID10_05.CNV",
+            "start=1 file=CNV\\CIDX06.CNV",
+            "start=1 file=CNV\\CID10_06.CNV",
+            "start=1 file=CNV\\CIDX07.CNV",
+            "start=1 file=CNV\\CID10_07.CNV",
+            "start=1 file=CNV\\CIDX08.CNV",
+            "start=1 file=CNV\\CID10_08.CNV",
+            "start=1 file=CNV\\CIDX09.CNV",
+            "start=1 file=CNV\\CID10_09.CNV",
+            "start=1 file=CNV\\CIDX10.CNV",
+            "start=1 file=CNV\\CID10_10.CNV",
+            "start=1 file=CNV\\CIDX11.CNV",
+            "start=1 file=CNV\\CID10_11.CNV",
+            "start=1 file=CNV\\CIDX12.CNV",
+            "start=1 file=CNV\\CID10_12.CNV",
+            "start=1 file=CNV\\CIDX13.CNV",
+            "start=1 file=CNV\\CID10_13.CNV",
+            "start=1 file=CNV\\CIDX14.CNV",
+            "start=1 file=CNV\\CID10_14.CNV",
+            "start=1 file=CNV\\CIDX15.CNV",
+            "start=1 file=CNV\\CID10_15.CNV",
+            "start=1 file=CNV\\CIDX16.CNV",
+            "start=1 file=CNV\\CID10_16.CNV",
+            "start=1 file=CNV\\CIDX17.CNV",
+            "start=1 file=CNV\\CID10_17.CNV",
+            "start=1 file=CNV\\CIDX18.CNV",
+            "start=1 file=CNV\\CID10_18.CNV",
+            "start=1 file=CNV\\CIDX19S.CNV",
+            "start=1 file=CNV\\CIDX19T.CNV",
+            "start=1 file=CNV\\CID10_19.CNV",
+            "start=1 file=CNV\\CIDX20A.CNV",
+            "start=1 file=CNV\\CIDX20B.CNV",
+            "start=1 file=CNV\\CIDX20C.CNV",
+            "start=1 file=CNV\\CIDX20D.CNV",
+            "start=1 file=CNV\\CIDX20E.CNV",
+            "start=1 file=CNV\\CIDX20F.CNV",
+            "start=1 file=CNV\\CID10_20.CNV",
+            "start=1 file=CNV\\CIDX21.CNV",
+            "start=1 file=CNV\\CID10_21.CNV",
+            "start=1 file=CNV\\CIDX22.CNV",
+            "start=1 file=CNV\\CID10_22.CNV",
+            "start=1 file=CNV\\DIAGPACTO.CNV"
+          ]
+        }
+      }
+    },
+    "sih_leitos": {
+      "integrity": {
+        "file": "LEITOS.CNV",
+        "present": true,
+        "size_bytes": 4766,
+        "sha256": "040504bd1af5aae1e28d9384abad44dcece26d03b1886a5d6ccd578da93f0eda",
+        "size_ok": true,
+        "sha256_ok": true,
+        "integrity_ok": true
+      },
+      "structure": {
+        "categories": 41,
+        "width": 2,
+        "flags": [
+          "N",
+          "L"
+        ],
+        "hierarchical": false,
+        "rd_field": "ESPEC"
+      }
+    },
+    "sih_ident": {
+      "integrity": {
+        "file": "IDENT.CNV",
+        "present": true,
+        "size_bytes": 196,
+        "sha256": "85fe489e20e61abff994fc22d836ca208d7e9fee947bb5dbc76193d883c53828",
+        "size_ok": true,
+        "sha256_ok": true,
+        "integrity_ok": true
+      },
+      "structure": {
+        "categories": 3,
+        "width": 1,
+        "flags": [],
+        "hierarchical": false,
+        "rd_field": "IDENT"
+      }
+    },
+    "sih_carater": {
+      "integrity": {
+        "file": "CARATEND.CNV",
+        "present": true,
+        "size_bytes": 389,
+        "sha256": "e57c08cd045e6eab1403013d96c7782c963d17bddf4864840a964b99155d27f8",
+        "size_ok": true,
+        "sha256_ok": true,
+        "integrity_ok": true
+      },
+      "structure": {
+        "categories": 6,
+        "width": 2,
+        "flags": [],
+        "hierarchical": false,
+        "rd_field": "CAR_INT"
+      }
+    },
+    "sih_complexidade": {
+      "integrity": {
+        "file": "COMPLEX2.CNV",
+        "present": true,
+        "size_bytes": 265,
+        "sha256": "680eb03bd06964cf4dae4b571bc757990688279adb164b54d5253009d8a3975f",
+        "size_ok": true,
+        "sha256_ok": true,
+        "integrity_ok": true
+      },
+      "structure": {
+        "categories": 4,
+        "width": 2,
+        "flags": [],
+        "hierarchical": false,
+        "rd_field": "COMPLEX"
+      }
+    },
+    "sih_sexo": {
+      "integrity": {
+        "file": "SEXO.CNV",
+        "present": true,
+        "size_bytes": 198,
+        "sha256": "003e1b250d26b987867b9d0c1d155c42e340c4a62bffdcd4db85c7c41e60691e",
+        "size_ok": true,
+        "sha256_ok": true,
+        "integrity_ok": true
+      },
+      "structure": {
+        "categories": 3,
+        "width": 1,
+        "flags": [],
+        "hierarchical": false,
+        "rd_field": "SEXO"
+      }
+    },
+    "sih_raca_cor": {
+      "integrity": {
+        "file": "RACACOR.CNV",
+        "present": true,
+        "size_bytes": 394,
+        "sha256": "9a9a88bea4575d91f1f5a81ad8b3423e235f4ce21d3e3541825a529b131e63f7",
+        "size_ok": true,
+        "sha256_ok": true,
+        "integrity_ok": true
+      },
+      "structure": {
+        "categories": 6,
+        "width": 2,
+        "flags": [
+          "L"
+        ],
+        "hierarchical": false,
+        "rd_field": "RACA_COR"
+      }
+    },
+    "sih_natureza_juridica": {
+      "integrity": {
+        "file": "natjur.cnv",
+        "present": true,
+        "size_bytes": 12199,
+        "sha256": "6896cdd68da2f95b8bd6666f68bc5d6607e2429d7f21a0470aaea82819acb42f",
+        "size_ok": true,
+        "sha256_ok": true,
+        "integrity_ok": true
+      },
+      "structure": {
+        "categories": 103,
+        "width": 4,
+        "flags": [
+          "N"
+        ],
+        "hierarchical": true,
+        "rd_field": "NAT_JUR"
+      }
+    },
+    "sih_esfera_juridica": {
+      "integrity": {
+        "file": "esferajur.cnv",
+        "present": true,
+        "size_bytes": 1129,
+        "sha256": "edd6560c125f86d8a2b1612809392f297a4a71920f7b3cf69c94f2b0c7fb798e",
+        "size_ok": true,
+        "sha256_ok": true,
+        "integrity_ok": true
+      },
+      "structure": {
+        "categories": 12,
+        "width": 4,
+        "flags": [],
+        "hierarchical": true,
+        "rd_field": "NAT_JUR"
+      }
+    },
+    "sih_gestao": {
+      "integrity": {
+        "file": "GESTAO.CNV",
+        "present": true,
+        "size_bytes": 265,
+        "sha256": "c8d5e054def7ff4552507263aa77f9c4332ee86198a7479130fef1cd9e946c0e",
+        "size_ok": true,
+        "sha256_ok": true,
+        "integrity_ok": true
+      },
+      "structure": {
+        "categories": 4,
+        "width": 1,
+        "flags": [
+          "L"
+        ],
+        "hierarchical": false,
+        "rd_field": "GESTAO"
+      }
+    },
+    "sih_cid10_capitulo": {
+      "integrity": {
+        "file": "CID10CAP.CNV",
+        "present": true,
+        "size_bytes": 1680,
+        "sha256": "a8d276b6efe96e84a805a789c384cba7e6549e10de56c80ab31080e26785261e",
+        "size_ok": true,
+        "sha256_ok": true,
+        "integrity_ok": true
+      },
+      "structure": {
+        "categories": 24,
+        "width": 3,
+        "flags": [
+          "L"
+        ],
+        "hierarchical": false,
+        "rd_field": "DIAG_PRINC"
+      }
     }
   }
 }

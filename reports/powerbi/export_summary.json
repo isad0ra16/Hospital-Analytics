@@ -18,56 +18,63 @@
     "dim_estabelecimento": {
       "csv": {
         "file": "dim_estabelecimento.csv",
-        "sha256": "a782dae61119b9499eaa3c8ae505834a17e23827253bb162833d706f805c98b3"
+        "sha256": "ebfe8f1c15269b77549fc1a9ee6637d1474f036b1cfe8cecb9ec5fa2ae93356c"
       },
       "rows": 240
     },
     "dim_municipio_residencia": {
       "csv": {
         "file": "dim_municipio_residencia.csv",
-        "sha256": "27a4be604a20a56a95588714b056e43329c69077349fd4766b128756fc977229"
+        "sha256": "f551af50d62ddc07e5414dae9c33712a7ecae3c9206c6117120ec55cdf1950dc"
       },
       "rows": 262
     },
     "dim_procedimento": {
       "csv": {
         "file": "dim_procedimento.csv",
-        "sha256": "c62d3f8cfb248e5b6b744d1a925bc221f729f638547ce7f77886d7fc47fc5367"
+        "sha256": "b754f21c3d8e6578cfbfdef2cc3e23292c46bd1b7f6824cb58300b5b4dc6decf"
       },
       "rows": 1094
+    },
+    "dim_diagnostico": {
+      "csv": {
+        "file": "dim_diagnostico.csv",
+        "sha256": "a07d0fdc6e87314eb530e54285246eb5cd760232e0ecc28530ed919037ff72a6"
+      },
+      "rows": 3759
     },
     "dim_especialidade": {
       "csv": {
         "file": "dim_especialidade.csv",
-        "sha256": "e6d5bb4f16acfeb593cbd083bd1fb6ea85451f3eda46d460dc2996474e18e081"
+        "sha256": "3910a74b73b06a98da4e0560608da319b05b94429ceea76c7743a9aaada5b367"
       },
       "rows": 12
     },
     "dim_carater": {
       "csv": {
         "file": "dim_carater.csv",
-        "sha256": "1a1fbaa0b02b0a43b064f1aa04b0f1ff1653ac82a78874784fe839cb6c2e791b"
+        "sha256": "59b088d0531c1719e09eb6b3940f77da3b5ed587a7d8566357d1c4544bd7f530"
       },
       "rows": 4
     },
     "dim_complexidade": {
       "csv": {
         "file": "dim_complexidade.csv",
-        "sha256": "ef2973254310472747a438e564f9b37dfab92e256413a3b68a9cc0facc9523ad"
+        "sha256": "63036a2101cc89f2aea5bcbdf969aa46dd94c66b96b17b399919890dc94bed9d"
       },
       "rows": 2
     },
     "dim_tipo_aih": {
       "csv": {
         "file": "dim_tipo_aih.csv",
-        "sha256": "f65e089f9a8ea5d3c8c6825b7fc19c60bce6646c8956230fe2670c31eafb39dc"
+        "sha256": "edc7edd84b8f339f31463a387d46d82e76317e90032cb51ef3c4209a771d289d"
       },
       "rows": 2
     },
     "dim_perfil_demografico": {
       "csv": {
         "file": "dim_perfil_demografico.csv",
-        "sha256": "a69a1fd6b8354563d2d3c90d9b3ab56b7c65d1b31d9d12d0c2e20eeba0f3fd53"
+        "sha256": "87812b9db24d7c015042808256df15faeff87c084ee76b0d5deef03d51a34d07"
       },
       "rows": 78
     },
@@ -86,5 +93,59 @@
       "rows": 113
     }
   },
-  "fact_valor_total_centavos": 12544063613
+  "fact_valor_total_centavos": 12544063613,
+  "references": {
+    "cnes_cadger": {
+      "file": "CADGERRJ.dbf",
+      "sha256": "f667b7e767fbd21378a51aa8fd651e133fad0bde7fff1a74bba080c1d2f80de4"
+    },
+    "ibge_municipios": {
+      "file": "municipios_ibge.json",
+      "sha256": "86ecdccdf97d72e7e5e46f0854cfcea8bacc28154cc1bc4ed0e6110e3a6c9c02"
+    },
+    "sigtap": {
+      "file": "TabelaUnificada_202401_v2402072029.zip",
+      "sha256": "ea520664ab2f2e5fddf0aaa2ec5b82a1861d2ac9bc75c6194b906a9b0f13a367"
+    },
+    "sih_carater": {
+      "file": "CARATEND.CNV",
+      "sha256": "e57c08cd045e6eab1403013d96c7782c963d17bddf4864840a964b99155d27f8"
+    },
+    "sih_cid10_capitulo": {
+      "file": "CID10CAP.CNV",
+      "sha256": "a8d276b6efe96e84a805a789c384cba7e6549e10de56c80ab31080e26785261e"
+    },
+    "sih_complexidade": {
+      "file": "COMPLEX2.CNV",
+      "sha256": "680eb03bd06964cf4dae4b571bc757990688279adb164b54d5253009d8a3975f"
+    },
+    "sih_esfera_juridica": {
+      "file": "esferajur.cnv",
+      "sha256": "edd6560c125f86d8a2b1612809392f297a4a71920f7b3cf69c94f2b0c7fb798e"
+    },
+    "sih_gestao": {
+      "file": "GESTAO.CNV",
+      "sha256": "c8d5e054def7ff4552507263aa77f9c4332ee86198a7479130fef1cd9e946c0e"
+    },
+    "sih_ident": {
+      "file": "IDENT.CNV",
+      "sha256": "85fe489e20e61abff994fc22d836ca208d7e9fee947bb5dbc76193d883c53828"
+    },
+    "sih_leitos": {
+      "file": "LEITOS.CNV",
+      "sha256": "040504bd1af5aae1e28d9384abad44dcece26d03b1886a5d6ccd578da93f0eda"
+    },
+    "sih_natureza_juridica": {
+      "file": "natjur.cnv",
+      "sha256": "6896cdd68da2f95b8bd6666f68bc5d6607e2429d7f21a0470aaea82819acb42f"
+    },
+    "sih_raca_cor": {
+      "file": "RACACOR.CNV",
+      "sha256": "9a9a88bea4575d91f1f5a81ad8b3423e235f4ce21d3e3541825a529b131e63f7"
+    },
+    "sih_sexo": {
+      "file": "SEXO.CNV",
+      "sha256": "003e1b250d26b987867b9d0c1d155c42e340c4a62bffdcd4db85c7c41e60691e"
+    }
+  }
 }

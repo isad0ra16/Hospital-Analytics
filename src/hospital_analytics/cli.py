@@ -401,6 +401,7 @@ def cmd_pbip(args: argparse.Namespace) -> int:
     root = args.root
     measures = (root / "docs" / "powerbi" / "medidas.dax").read_text(encoding="utf-8")
     written = pbip.write_project(root / "powerbi", measures)
+    (root / "docs" / "powerbi" / "paginas.md").write_text(pbip.pages_markdown(), "utf-8")
     print(f"written {len(written)} files under {_key(root / 'powerbi', root)}/")
     return 0
 

@@ -141,3 +141,10 @@ def test_committed_project_is_up_to_date():
 
 def test_generation_is_deterministic():
     assert pbip.project_files(MEASURES_TEXT) == FILES
+
+
+def test_pages_document_is_generated_from_the_same_specification():
+    doc = (ROOT / "docs" / "powerbi" / "paginas.md").read_text(encoding="utf-8")
+    assert doc == pbip.pages_markdown(), "run hospital-analytics pbip"
+    for page in pbip.PAGES:
+        assert f"## {page.title}" in doc

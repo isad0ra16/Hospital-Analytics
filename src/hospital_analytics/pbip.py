@@ -1043,6 +1043,65 @@ def report_files() -> dict[str, str]:
     return files
 
 
+VISUAL_NAMES = {
+    "card": "Cartão",
+    "barChart": "Barras empilhadas (pirâmide)",
+    "clusteredBarChart": "Barras",
+    "clusteredColumnChart": "Colunas",
+    "lineChart": "Linhas",
+    "tableEx": "Tabela",
+}
+ROLE_NAMES = {"Category": "Eixo", "Y": "Valores", "Values": "Campos", "Tooltips": "Dicas"}
+
+
+def _field_label(f: Field) -> str:
+    return f"[{f.name}]" if f.is_measure else f"{f.table}[{f.name}]"
+
+
+PAGES_INTRO = """\
+# Páginas do dashboard (Power BI)
+
+> Gerado a partir de `PAGES` em `src/hospital_analytics/pbip.py` (o mesmo código que gera
+> o relatório PBIR em `powerbi/`). Não editar manualmente.
+
+**Estado:** implementado como projeto PBIP (validado contra os esquemas oficiais),
+**ainda não aberto no Power BI Desktop** — ver
+[`README.md`](README.md#abrir-o-projeto-no-power-bi-desktop). Se o Desktop recusar o
+relatório, monte cada página com os visuais abaixo sobre o modelo.
+
+Tela {w}×{h}. Todas as páginas têm título, rodapé com a fonte e a unidade de análise e, à
+direita, cinco segmentações **sincronizadas entre as páginas** (tipo de AIH, caráter,
+complexidade, faixa etária, sexo). Rótulos dos códigos: colunas oficiais (`*_oficial`).
+
+Rodapé: *{footer}*
+"""
+
+
+def pages_markdown() -> str:
+    """Page-by-page description of the report, generated from ``PAGES`` (manual fallback)."""
+    lines = PAGES_INTRO.format(w=PAGE_W, h=PAGE_H, footer=FOOTER).splitlines()
+    for page in PAGES:
+        lines += [f"## {page.title}", "", page.subtitle, "", "| Visual | Título | Campos |",
+                  "|---|---|---|"]  # fmt: skip
+        for v in page.visuals:
+            if v.kind in {"slicer"} or (v.kind == "textbox" and v.y in (8, 684)):
+                continue
+            if v.kind == "textbox":
+                text = " ".join(t for t, _ in v.text).replace("|", "\\|")
+                lines.append(f"| Caixa de texto | — | {text} |")
+                continue
+            roles = "; ".join(
+                f"{ROLE_NAMES.get(role, role)}: " + ", ".join(_field_label(f) for f in fields)
+                for role, fields in v.roles.items()
+            )
+            if v.sort:
+                roles += f"; ordenar por {_field_label(v.sort[0])} ({v.sort[1].lower()})"
+            title = v.title + (f" — *{v.subtitle}*" if v.subtitle else "")
+            lines.append(f"| {VISUAL_NAMES.get(v.kind, v.kind)} | {title} | {roles} |")
+        lines.append("")
+    return "\n".join(lines)
+
+
 def project_files(measures_text: str) -> dict[str, str]:
     measures = parse_measures(measures_text)
     files = {

@@ -1,0 +1,97 @@
+/// 1 linha por indicador reconciliado (reports/indicators/reconciliation.json); sem relacionamento
+table ref_indicadores_validados
+	lineageTag: 6050f055-38cc-539e-9944-e6507f1d1289
+
+	/// Identificador do indicador (origem: reconciliação)
+	column indicador_id
+		dataType: string
+		lineageTag: d69fc78d-34a0-52fe-8be9-63bb997e11b7
+		summarizeBy: none
+		sourceColumn: indicador_id
+
+		annotation SummarizationSetBy = User
+
+	/// Nome do indicador (origem: reconciliação)
+	column indicador
+		dataType: string
+		lineageTag: e6555058-4597-5ce0-aad3-a64be53ba56f
+		summarizeBy: none
+		sourceColumn: indicador
+
+		annotation SummarizationSetBy = User
+
+	/// Base/escopo (filtro aplicado) (origem: reconciliação)
+	column base
+		dataType: string
+		lineageTag: 261ae8da-fb7b-556e-b4ba-88c753c81aa1
+		summarizeBy: none
+		sourceColumn: base
+
+		annotation SummarizationSetBy = User
+
+	/// count, money, days, years ou pct (origem: reconciliação)
+	column unidade
+		dataType: string
+		lineageTag: 21a229c7-0e32-58cc-ab86-17b7be91d46d
+		summarizeBy: none
+		sourceColumn: unidade
+
+		annotation SummarizationSetBy = User
+
+	/// Valor histórico recuperado (origem: reconciliação)
+	column historico
+		dataType: string
+		lineageTag: a7d44ec9-266d-55f0-8ed5-7d7c0a55887a
+		summarizeBy: none
+		sourceColumn: historico
+
+		annotation SummarizationSetBy = User
+
+	/// Reproduzido na precisão do histórico (origem: reconciliação)
+	column reproduzido
+		dataType: string
+		lineageTag: e5ef1946-9630-5dd4-b639-211a685935b0
+		summarizeBy: none
+		sourceColumn: reproduzido
+
+		annotation SummarizationSetBy = User
+
+	/// Valor reproduzido exato (6 casas) (origem: reconciliação)
+	column valor_exato
+		dataType: double
+		formatString: #,0.00
+		lineageTag: 1f7fc385-ac2b-5c51-8c88-3e0d0c526336
+		summarizeBy: none
+		sourceColumn: valor_exato
+
+		annotation SummarizationSetBy = User
+
+	/// Status de validação (origem: reconciliação)
+	column status
+		dataType: string
+		lineageTag: 5b85e8ca-b7e3-56b4-8517-ed17cb43009b
+		summarizeBy: none
+		sourceColumn: status
+
+		annotation SummarizationSetBy = User
+
+	partition ref_indicadores_validados = m
+		mode: import
+		source =
+			let
+			    Fonte = Csv.Document(File.Contents(PastaDados & "ref_indicadores_validados.csv"), [Delimiter = ",", Columns = 8, Encoding = 65001, QuoteStyle = QuoteStyle.Csv]),
+			    Cabecalho = Table.PromoteHeaders(Fonte, [PromoteAllScalars = true]),
+			    Tipos = Table.TransformColumnTypes(Cabecalho, {
+			        {"indicador_id", type text},
+			        {"indicador", type text},
+			        {"base", type text},
+			        {"unidade", type text},
+			        {"historico", type text},
+			        {"reproduzido", type text},
+			        {"valor_exato", type number},
+			        {"status", type text}
+			    }, "en-US")
+			in
+			    Tipos
+
+	annotation PBI_ResultType = Table

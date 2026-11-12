@@ -1,0 +1,80 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.13.0/schema.json",
+  "name": "38e86dbf2dc250ca9436",
+  "position": {
+    "x": 458,
+    "y": 80,
+    "z": 300,
+    "width": 205,
+    "height": 96,
+    "tabOrder": 300
+  },
+  "visual": {
+    "visualType": "card",
+    "drillFilterOtherVisuals": true,
+    "query": {
+      "queryState": {
+        "Values": {
+          "projections": [
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "_Medidas"
+                    }
+                  },
+                  "Property": "Mortalidade hospitalar - AIH principal (razão)"
+                }
+              },
+              "queryRef": "_Medidas.Mortalidade hospitalar - AIH principal (razão)",
+              "nativeQueryRef": "Mortalidade hospitalar - AIH principal (razão)"
+            }
+          ]
+        }
+      }
+    },
+    "visualContainerObjects": {
+      "title": [
+        {
+          "properties": {
+            "show": {
+              "expr": {
+                "Literal": {
+                  "Value": "true"
+                }
+              }
+            },
+            "text": {
+              "expr": {
+                "Literal": {
+                  "Value": "'Mortalidade — AIH principal'"
+                }
+              }
+            }
+          }
+        }
+      ],
+      "subTitle": [
+        {
+          "properties": {
+            "show": {
+              "expr": {
+                "Literal": {
+                  "Value": "true"
+                }
+              }
+            },
+            "text": {
+              "expr": {
+                "Literal": {
+                  "Value": "'apenas tipo 1'"
+                }
+              }
+            }
+          }
+        }
+      ]
+    }
+  }
+}

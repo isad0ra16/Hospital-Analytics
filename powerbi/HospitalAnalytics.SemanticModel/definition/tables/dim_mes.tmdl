@@ -1,0 +1,98 @@
+/// 1 linha por mês, anos completos cobrindo todos os meses de internação e saída
+table dim_mes
+	lineageTag: d4746e62-2f28-5250-b925-7875052d10df
+	dataCategory: Time
+
+	/// Mês (1º dia do mês) (origem: calendário)
+	column mes
+		dataType: dateTime
+		isKey
+		formatString: yyyy-mm
+		lineageTag: 336ccb77-b49d-50ad-be82-3075b5cdd94e
+		summarizeBy: none
+		sourceColumn: mes
+
+		annotation SummarizationSetBy = User
+
+		annotation UnderlyingDateTimeDataType = Date
+
+	/// Ano (origem: calendário)
+	column ano
+		dataType: int64
+		formatString: 0
+		lineageTag: a2b7c104-2f42-5014-9558-64b9e01c3210
+		summarizeBy: none
+		sourceColumn: ano
+
+		annotation SummarizationSetBy = User
+
+	/// Trimestre (1–4) (origem: calendário)
+	column trimestre
+		dataType: int64
+		formatString: 0
+		lineageTag: 42d70fb9-93e9-5780-8503-3b5f325371eb
+		summarizeBy: none
+		sourceColumn: trimestre
+
+		annotation SummarizationSetBy = User
+
+	/// Mês (1–12) (origem: calendário)
+	column mes_num
+		dataType: int64
+		formatString: 0
+		lineageTag: e6a329f8-9517-54db-ad15-e650a77fc298
+		summarizeBy: none
+		sourceColumn: mes_num
+
+		annotation SummarizationSetBy = User
+
+	/// Ano-mês (AAAA-MM) (origem: calendário)
+	column ano_mes
+		dataType: string
+		sortByColumn: ano_mes_ordem
+		lineageTag: 77fd79b4-8a17-5d29-a8ee-f8e3fea1b819
+		summarizeBy: none
+		sourceColumn: ano_mes
+
+		annotation SummarizationSetBy = User
+
+	/// Ordenação de ano_mes (AAAAMM) (origem: calendário)
+	column ano_mes_ordem
+		dataType: int64
+		formatString: 0
+		isHidden
+		lineageTag: 84dcb9e6-9b87-5eb0-923c-25ca5639752f
+		summarizeBy: none
+		sourceColumn: ano_mes_ordem
+
+		annotation SummarizationSetBy = User
+
+	/// Mês abreviado (pt-BR) (origem: calendário)
+	column mes_abrev
+		dataType: string
+		sortByColumn: mes_num
+		lineageTag: abfe0c29-0861-5a22-a3fc-e5abf01b3cf8
+		summarizeBy: none
+		sourceColumn: mes_abrev
+
+		annotation SummarizationSetBy = User
+
+	partition dim_mes = m
+		mode: import
+		source =
+			let
+			    Fonte = Csv.Document(File.Contents(PastaDados & "dim_mes.csv"), [Delimiter = ",", Columns = 7, Encoding = 65001, QuoteStyle = QuoteStyle.Csv]),
+			    Cabecalho = Table.PromoteHeaders(Fonte, [PromoteAllScalars = true]),
+			    Tipos = Table.TransformColumnTypes(Cabecalho, {
+			        {"mes", type date},
+			        {"ano", Int64.Type},
+			        {"trimestre", Int64.Type},
+			        {"mes_num", Int64.Type},
+			        {"ano_mes", type text},
+			        {"ano_mes_ordem", Int64.Type},
+			        {"mes_abrev", type text}
+			    }, "en-US")
+			in
+			    Tipos
+
+	annotation PBI_ResultType = Table

@@ -1,0 +1,37 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.13.0/schema.json",
+  "name": "07aeef2f59785302bead",
+  "position": {
+    "x": 24,
+    "y": 684,
+    "z": 800,
+    "width": 1232,
+    "height": 30,
+    "tabOrder": 800
+  },
+  "visual": {
+    "visualType": "textbox",
+    "drillFilterOtherVisuals": true,
+    "objects": {
+      "general": [
+        {
+          "properties": {
+            "paragraphs": [
+              {
+                "textRuns": [
+                  {
+                    "value": "Fonte: SIH/SUS (DATASUS), arquivo RD do RJ, competência 2024-01 · nomes: SIGTAP 2024-01, IBGE, CNES e tabelas TabWin do SIH · unidade: registro de AIH (não é paciente)",
+                    "textStyle": {
+                      "fontSize": "9pt",
+                      "color": "#5A5A5A"
+                    }
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      ]
+    }
+  }
+}

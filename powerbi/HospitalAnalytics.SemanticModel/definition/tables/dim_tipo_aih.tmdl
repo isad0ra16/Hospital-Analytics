@@ -1,0 +1,69 @@
+/// 1 linha por código de IDENT presente no fato
+table dim_tipo_aih
+	lineageTag: 75d161bb-1b31-5f78-8081-98fde76979ab
+
+	/// Código de tipo de AIH (IDENT) (origem: IDENT)
+	column tipo_aih_cod
+		dataType: string
+		lineageTag: 5bab8964-4ef1-5db4-b518-368a3d47c29e
+		summarizeBy: none
+		sourceColumn: tipo_aih_cod
+
+		annotation SummarizationSetBy = User
+
+	/// Descrição do código (tipo de AIH) — fonte secundária (origem: dicionário)
+	column descricao
+		dataType: string
+		displayFolder: Proveniência e fonte secundária
+		lineageTag: da9c9499-3fab-5f28-a6ac-93e937cf0192
+		summarizeBy: none
+		sourceColumn: descricao
+
+		annotation SummarizationSetBy = User
+
+	/// Fonte/status da interpretação do código (origem: dicionário)
+	column fonte
+		dataType: string
+		displayFolder: Proveniência e fonte secundária
+		lineageTag: d0fd89a7-b5ee-5a8e-8e6a-edc7b38ab70e
+		summarizeBy: none
+		sourceColumn: fonte
+
+		annotation SummarizationSetBy = User
+
+	/// Descrição oficial (tipo de AIH) — usar nos visuais (origem: TabWin SIH/SUS)
+	column descricao_oficial
+		dataType: string
+		lineageTag: 4b85abab-902f-523f-bf83-96a7a89d197d
+		summarizeBy: none
+		sourceColumn: descricao_oficial
+
+		annotation SummarizationSetBy = User
+
+	/// Pacote e tabela de conversão oficiais (origem: TabWin SIH/SUS)
+	column fonte_oficial
+		dataType: string
+		displayFolder: Proveniência e fonte secundária
+		lineageTag: 3694d35b-ae30-5e8c-ad32-14a00609dfcb
+		summarizeBy: none
+		sourceColumn: fonte_oficial
+
+		annotation SummarizationSetBy = User
+
+	partition dim_tipo_aih = m
+		mode: import
+		source =
+			let
+			    Fonte = Csv.Document(File.Contents(PastaDados & "dim_tipo_aih.csv"), [Delimiter = ",", Columns = 5, Encoding = 65001, QuoteStyle = QuoteStyle.Csv]),
+			    Cabecalho = Table.PromoteHeaders(Fonte, [PromoteAllScalars = true]),
+			    Tipos = Table.TransformColumnTypes(Cabecalho, {
+			        {"tipo_aih_cod", type text},
+			        {"descricao", type text},
+			        {"fonte", type text},
+			        {"descricao_oficial", type text},
+			        {"fonte_oficial", type text}
+			    }, "en-US")
+			in
+			    Tipos
+
+	annotation PBI_ResultType = Table

@@ -1,0 +1,145 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.13.0/schema.json",
+  "name": "0dd7716a473b506fa256",
+  "position": {
+    "x": 24,
+    "y": 436,
+    "z": 700,
+    "width": 488,
+    "height": 236,
+    "tabOrder": 700
+  },
+  "visual": {
+    "visualType": "clusteredBarChart",
+    "drillFilterOtherVisuals": true,
+    "query": {
+      "queryState": {
+        "Category": {
+          "projections": [
+            {
+              "field": {
+                "Column": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "dim_diagnostico"
+                    }
+                  },
+                  "Property": "capitulo"
+                }
+              },
+              "queryRef": "dim_diagnostico.capitulo",
+              "nativeQueryRef": "capitulo",
+              "displayName": "Capítulo CID-10"
+            }
+          ]
+        },
+        "Y": {
+          "projections": [
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "_Medidas"
+                    }
+                  },
+                  "Property": "Mortalidade hospitalar (razão)"
+                }
+              },
+              "queryRef": "_Medidas.Mortalidade hospitalar (razão)",
+              "nativeQueryRef": "Mortalidade hospitalar (razão)",
+              "displayName": "Mortalidade"
+            }
+          ]
+        },
+        "Tooltips": {
+          "projections": [
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "_Medidas"
+                    }
+                  },
+                  "Property": "Registros de AIH"
+                }
+              },
+              "queryRef": "_Medidas.Registros de AIH",
+              "nativeQueryRef": "Registros de AIH"
+            },
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "_Medidas"
+                    }
+                  },
+                  "Property": "Óbitos"
+                }
+              },
+              "queryRef": "_Medidas.Óbitos",
+              "nativeQueryRef": "Óbitos"
+            }
+          ]
+        }
+      },
+      "sortDefinition": {
+        "sort": [
+          {
+            "field": {
+              "Measure": {
+                "Expression": {
+                  "SourceRef": {
+                    "Entity": "_Medidas"
+                  }
+                },
+                "Property": "Mortalidade hospitalar (razão)"
+              }
+            },
+            "direction": "Descending"
+          }
+        ],
+        "isDefaultSort": false
+      }
+    },
+    "objects": {
+      "labels": [
+        {
+          "properties": {
+            "show": {
+              "expr": {
+                "Literal": {
+                  "Value": "true"
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    "visualContainerObjects": {
+      "title": [
+        {
+          "properties": {
+            "show": {
+              "expr": {
+                "Literal": {
+                  "Value": "true"
+                }
+              }
+            },
+            "text": {
+              "expr": {
+                "Literal": {
+                  "Value": "'Mortalidade por capítulo CID-10 do diagnóstico principal'"
+                }
+              }
+            }
+          }
+        }
+      ]
+    }
+  }
+}

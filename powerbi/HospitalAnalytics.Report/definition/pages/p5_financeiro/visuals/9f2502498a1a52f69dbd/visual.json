@@ -1,0 +1,133 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.13.0/schema.json",
+  "name": "9f2502498a1a52f69dbd",
+  "position": {
+    "x": 24,
+    "y": 392,
+    "z": 600,
+    "width": 640,
+    "height": 280,
+    "tabOrder": 600
+  },
+  "visual": {
+    "visualType": "clusteredBarChart",
+    "drillFilterOtherVisuals": true,
+    "query": {
+      "queryState": {
+        "Category": {
+          "projections": [
+            {
+              "field": {
+                "Column": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "dim_estabelecimento"
+                    }
+                  },
+                  "Property": "estabelecimento_rotulo"
+                }
+              },
+              "queryRef": "dim_estabelecimento.estabelecimento_rotulo",
+              "nativeQueryRef": "estabelecimento_rotulo",
+              "displayName": "Estabelecimento (CNES)"
+            }
+          ]
+        },
+        "Y": {
+          "projections": [
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "_Medidas"
+                    }
+                  },
+                  "Property": "Valor total - top 10 estabelecimentos"
+                }
+              },
+              "queryRef": "_Medidas.Valor total - top 10 estabelecimentos",
+              "nativeQueryRef": "Valor total - top 10 estabelecimentos",
+              "displayName": "Valor total"
+            }
+          ]
+        }
+      },
+      "sortDefinition": {
+        "sort": [
+          {
+            "field": {
+              "Measure": {
+                "Expression": {
+                  "SourceRef": {
+                    "Entity": "_Medidas"
+                  }
+                },
+                "Property": "Valor total - top 10 estabelecimentos"
+              }
+            },
+            "direction": "Descending"
+          }
+        ],
+        "isDefaultSort": false
+      }
+    },
+    "objects": {
+      "labels": [
+        {
+          "properties": {
+            "show": {
+              "expr": {
+                "Literal": {
+                  "Value": "true"
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    "visualContainerObjects": {
+      "title": [
+        {
+          "properties": {
+            "show": {
+              "expr": {
+                "Literal": {
+                  "Value": "true"
+                }
+              }
+            },
+            "text": {
+              "expr": {
+                "Literal": {
+                  "Value": "'Top 10 estabelecimentos por valor aprovado'"
+                }
+              }
+            }
+          }
+        }
+      ],
+      "subTitle": [
+        {
+          "properties": {
+            "show": {
+              "expr": {
+                "Literal": {
+                  "Value": "true"
+                }
+              }
+            },
+            "text": {
+              "expr": {
+                "Literal": {
+                  "Value": "'Nome fantasia no cadastro CNES de 2026-10 (pode diferir do nome em 2024)'"
+                }
+              }
+            }
+          }
+        }
+      ]
+    }
+  }
+}

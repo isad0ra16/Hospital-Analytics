@@ -1,0 +1,124 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.13.0/schema.json",
+  "name": "b137bb42252c53ed98c6",
+  "position": {
+    "x": 24,
+    "y": 448,
+    "z": 500,
+    "width": 640,
+    "height": 224,
+    "tabOrder": 500
+  },
+  "visual": {
+    "visualType": "tableEx",
+    "drillFilterOtherVisuals": true,
+    "query": {
+      "queryState": {
+        "Values": {
+          "projections": [
+            {
+              "field": {
+                "Column": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "qualidade_campos"
+                    }
+                  },
+                  "Property": "campo"
+                }
+              },
+              "queryRef": "qualidade_campos.campo",
+              "nativeQueryRef": "campo",
+              "displayName": "Campo do RD"
+            },
+            {
+              "field": {
+                "Column": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "qualidade_campos"
+                    }
+                  },
+                  "Property": "pct_vazios"
+                }
+              },
+              "queryRef": "qualidade_campos.pct_vazios",
+              "nativeQueryRef": "pct_vazios",
+              "displayName": "% vazio"
+            },
+            {
+              "field": {
+                "Column": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "qualidade_campos"
+                    }
+                  },
+                  "Property": "distintos"
+                }
+              },
+              "queryRef": "qualidade_campos.distintos",
+              "nativeQueryRef": "distintos",
+              "displayName": "Valores distintos"
+            },
+            {
+              "field": {
+                "Column": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "qualidade_campos"
+                    }
+                  },
+                  "Property": "exportado_powerbi"
+                }
+              },
+              "queryRef": "qualidade_campos.exportado_powerbi",
+              "nativeQueryRef": "exportado_powerbi",
+              "displayName": "No modelo"
+            }
+          ]
+        }
+      },
+      "sortDefinition": {
+        "sort": [
+          {
+            "field": {
+              "Column": {
+                "Expression": {
+                  "SourceRef": {
+                    "Entity": "qualidade_campos"
+                  }
+                },
+                "Property": "pct_vazios"
+              }
+            },
+            "direction": "Descending"
+          }
+        ],
+        "isDefaultSort": false
+      }
+    },
+    "visualContainerObjects": {
+      "title": [
+        {
+          "properties": {
+            "show": {
+              "expr": {
+                "Literal": {
+                  "Value": "true"
+                }
+              }
+            },
+            "text": {
+              "expr": {
+                "Literal": {
+                  "Value": "'Completude dos 113 campos originais'"
+                }
+              }
+            }
+          }
+        }
+      ]
+    }
+  }
+}

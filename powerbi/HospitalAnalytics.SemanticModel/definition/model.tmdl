@@ -1,0 +1,27 @@
+model Model
+	culture: pt-BR
+	defaultPowerBIDataSourceVersion: powerBI_V3
+	sourceQueryCulture: pt-BR
+	dataAccessOptions
+		legacyRedirects
+		returnErrorValuesAsNull
+
+annotation __PBI_TimeIntelligenceEnabled = 0
+
+annotation PBI_QueryOrder = ["PastaDados", "fato_registro_aih", "dim_mes", "dim_estabelecimento", "dim_municipio_residencia", "dim_procedimento", "dim_diagnostico", "dim_especialidade", "dim_carater", "dim_complexidade", "dim_tipo_aih", "dim_perfil_demografico", "aux_curva_lorenz", "ref_indicadores_validados", "qualidade_campos", "_Medidas"]
+
+ref table fato_registro_aih
+ref table dim_mes
+ref table dim_estabelecimento
+ref table dim_municipio_residencia
+ref table dim_procedimento
+ref table dim_diagnostico
+ref table dim_especialidade
+ref table dim_carater
+ref table dim_complexidade
+ref table dim_tipo_aih
+ref table dim_perfil_demografico
+ref table aux_curva_lorenz
+ref table ref_indicadores_validados
+ref table qualidade_campos
+ref table _Medidas

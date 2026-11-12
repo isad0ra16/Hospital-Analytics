@@ -1,0 +1,89 @@
+/// 1 linha por município de residência presente no fato
+table dim_municipio_residencia
+	lineageTag: 760af864-39e5-5ae5-9612-7c83d40ffb19
+
+	/// Código do município de RESIDÊNCIA (6 dígitos) (origem: MUNIC_RES)
+	column municipio_residencia_cod
+		dataType: string
+		lineageTag: 45455e30-5977-5e1f-a498-e3501c906a78
+		summarizeBy: none
+		sourceColumn: municipio_residencia_cod
+
+		annotation SummarizationSetBy = User
+
+	/// 2 primeiros dígitos do código do município (origem: MUNIC_RES)
+	column uf_residencia_cod
+		dataType: string
+		lineageTag: 4b6f75a3-557a-5e3b-9a37-2b9c1a72be65
+		summarizeBy: none
+		sourceColumn: uf_residencia_cod
+
+		annotation SummarizationSetBy = User
+
+	/// Código IBGE de 7 dígitos (origem: IBGE)
+	column municipio_residencia_ibge
+		dataType: string
+		lineageTag: 6d4e1d12-f20d-5de5-beb5-6833deb636e4
+		summarizeBy: none
+		sourceColumn: municipio_residencia_ibge
+
+		annotation SummarizationSetBy = User
+
+	/// Nome do município de residência (origem: IBGE)
+	column municipio_residencia_nome
+		dataType: string
+		dataCategory: City
+		lineageTag: 315c5174-32a9-565a-bb20-d8f734d9a92e
+		summarizeBy: none
+		sourceColumn: municipio_residencia_nome
+
+		annotation SummarizationSetBy = User
+
+	/// UF de residência (sigla) (origem: IBGE)
+	column uf_residencia_sigla
+		dataType: string
+		dataCategory: StateOrProvince
+		lineageTag: 55251341-7b2c-5fde-88bf-01bb9b2a26f1
+		summarizeBy: none
+		sourceColumn: uf_residencia_sigla
+
+		annotation SummarizationSetBy = User
+
+	/// Município (UF) — único; usar nos visuais (origem: IBGE)
+	column municipio_residencia_rotulo
+		dataType: string
+		lineageTag: f9193eae-6f57-54c2-9427-a9a23803e5d2
+		summarizeBy: none
+		sourceColumn: municipio_residencia_rotulo
+
+		annotation SummarizationSetBy = User
+
+	/// Fonte do nome (origem: IBGE)
+	column municipio_residencia_fonte
+		dataType: string
+		displayFolder: Proveniência e fonte secundária
+		lineageTag: 094e8965-2f65-5b11-bdfc-71b6704be1f1
+		summarizeBy: none
+		sourceColumn: municipio_residencia_fonte
+
+		annotation SummarizationSetBy = User
+
+	partition dim_municipio_residencia = m
+		mode: import
+		source =
+			let
+			    Fonte = Csv.Document(File.Contents(PastaDados & "dim_municipio_residencia.csv"), [Delimiter = ",", Columns = 7, Encoding = 65001, QuoteStyle = QuoteStyle.Csv]),
+			    Cabecalho = Table.PromoteHeaders(Fonte, [PromoteAllScalars = true]),
+			    Tipos = Table.TransformColumnTypes(Cabecalho, {
+			        {"municipio_residencia_cod", type text},
+			        {"uf_residencia_cod", type text},
+			        {"municipio_residencia_ibge", type text},
+			        {"municipio_residencia_nome", type text},
+			        {"uf_residencia_sigla", type text},
+			        {"municipio_residencia_rotulo", type text},
+			        {"municipio_residencia_fonte", type text}
+			    }, "en-US")
+			in
+			    Tipos
+
+	annotation PBI_ResultType = Table

@@ -1,0 +1,81 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.13.0/schema.json",
+  "name": "011ae1aebc4052618037",
+  "position": {
+    "x": 1036,
+    "y": 192,
+    "z": 1000,
+    "width": 220,
+    "height": 100,
+    "tabOrder": 1000
+  },
+  "visual": {
+    "visualType": "slicer",
+    "drillFilterOtherVisuals": true,
+    "query": {
+      "queryState": {
+        "Values": {
+          "projections": [
+            {
+              "field": {
+                "Column": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "dim_carater"
+                    }
+                  },
+                  "Property": "descricao_oficial"
+                }
+              },
+              "queryRef": "dim_carater.descricao_oficial",
+              "nativeQueryRef": "descricao_oficial",
+              "displayName": "Caráter"
+            }
+          ]
+        }
+      }
+    },
+    "syncGroup": {
+      "groupName": "filtro_descricao_oficial_dim_carater",
+      "fieldChanges": true,
+      "filterChanges": true
+    },
+    "objects": {
+      "data": [
+        {
+          "properties": {
+            "mode": {
+              "expr": {
+                "Literal": {
+                  "Value": "'Dropdown'"
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    "visualContainerObjects": {
+      "title": [
+        {
+          "properties": {
+            "show": {
+              "expr": {
+                "Literal": {
+                  "Value": "true"
+                }
+              }
+            },
+            "text": {
+              "expr": {
+                "Literal": {
+                  "Value": "'Caráter'"
+                }
+              }
+            }
+          }
+        }
+      ]
+    }
+  }
+}

@@ -1,0 +1,60 @@
+/// 1 linha por percentil de registros (0–100), base completa; sem relacionamento
+table aux_curva_lorenz
+	lineageTag: 5313a831-f38d-58de-bc38-4f166d1d657e
+
+	/// Percentil de registros (0–100) (origem: derivado)
+	column percentil
+		dataType: int64
+		formatString: 0
+		lineageTag: 6e4ba428-d303-5a79-9515-9c26109f47ee
+		summarizeBy: none
+		sourceColumn: percentil
+
+		annotation SummarizationSetBy = User
+
+	/// Fração acumulada de registros, do menor para o maior valor (origem: VAL_TOT)
+	column pct_registros
+		dataType: double
+		formatString: 0.00%
+		lineageTag: ff86a58d-9be1-53a6-ae84-df4c3617f21e
+		summarizeBy: none
+		sourceColumn: pct_registros
+
+		annotation SummarizationSetBy = User
+
+	/// Fração acumulada do valor total (VAL_TOT) (origem: VAL_TOT)
+	column pct_valor
+		dataType: double
+		formatString: 0.00%
+		lineageTag: bb2dd6aa-861c-578d-80bf-46e61c40a8e0
+		summarizeBy: none
+		sourceColumn: pct_valor
+
+		annotation SummarizationSetBy = User
+
+	/// Linha de igualdade (= pct_registros) (origem: derivado)
+	column igualdade
+		dataType: double
+		formatString: 0.00%
+		lineageTag: 9c7da7c8-f3a1-5e1a-a23c-062fe0ff00d2
+		summarizeBy: none
+		sourceColumn: igualdade
+
+		annotation SummarizationSetBy = User
+
+	partition aux_curva_lorenz = m
+		mode: import
+		source =
+			let
+			    Fonte = Csv.Document(File.Contents(PastaDados & "aux_curva_lorenz.csv"), [Delimiter = ",", Columns = 4, Encoding = 65001, QuoteStyle = QuoteStyle.Csv]),
+			    Cabecalho = Table.PromoteHeaders(Fonte, [PromoteAllScalars = true]),
+			    Tipos = Table.TransformColumnTypes(Cabecalho, {
+			        {"percentil", Int64.Type},
+			        {"pct_registros", type number},
+			        {"pct_valor", type number},
+			        {"igualdade", type number}
+			    }, "en-US")
+			in
+			    Tipos
+
+	annotation PBI_ResultType = Table

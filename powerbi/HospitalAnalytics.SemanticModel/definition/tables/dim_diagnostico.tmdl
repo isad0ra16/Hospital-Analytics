@@ -1,0 +1,99 @@
+/// 1 linha por código CID-10 de diagnóstico principal presente no fato
+table dim_diagnostico
+	lineageTag: 75b3ceb5-dac5-526d-bf4d-bcfc5909bc83
+
+	/// Código CID-10 (3 ou 4 caracteres, sem ponto) (origem: DIAG_PRINC)
+	column diagnostico_cod
+		dataType: string
+		lineageTag: ac4fe920-11b0-5502-94d1-9302e87d5e3b
+		summarizeBy: none
+		sourceColumn: diagnostico_cod
+
+		annotation SummarizationSetBy = User
+
+	/// Descrição oficial do código (origem: SIGTAP tb_cid)
+	column diagnostico_nome
+		dataType: string
+		lineageTag: 0104139a-afdd-5232-9657-e3c37c03f494
+		summarizeBy: none
+		sourceColumn: diagnostico_nome
+
+		annotation SummarizationSetBy = User
+
+	/// Código · descrição — usar nos visuais (origem: SIGTAP tb_cid)
+	column diagnostico_rotulo
+		dataType: string
+		lineageTag: f1dc77cd-a84e-5d4e-8514-0ebfc10d1111
+		summarizeBy: none
+		sourceColumn: diagnostico_rotulo
+
+		annotation SummarizationSetBy = User
+
+	/// Categoria CID-10 (3 primeiros caracteres) (origem: DIAG_PRINC)
+	column categoria_cod
+		dataType: string
+		lineageTag: e8f4c27f-19a2-50e5-a43a-6f46887dee75
+		summarizeBy: none
+		sourceColumn: categoria_cod
+
+		annotation SummarizationSetBy = User
+
+	/// Descrição oficial da categoria (origem: SIGTAP tb_cid)
+	column categoria_nome
+		dataType: string
+		lineageTag: 050db479-cdcf-5f4c-a986-4c790b97fa9c
+		summarizeBy: none
+		sourceColumn: categoria_nome
+
+		annotation SummarizationSetBy = User
+
+	/// Ordenação do capítulo CID-10 (1–22) (origem: TabWin SIH/SUS CID10CAP.CNV)
+	column capitulo_ordem
+		dataType: int64
+		formatString: 0
+		lineageTag: a2729cdc-78eb-5ae1-833b-89a65755af42
+		summarizeBy: none
+		sourceColumn: capitulo_ordem
+
+		annotation SummarizationSetBy = User
+
+	/// Capítulo CID-10 (texto oficial) (origem: TabWin SIH/SUS CID10CAP.CNV)
+	column capitulo
+		dataType: string
+		sortByColumn: capitulo_ordem
+		lineageTag: 4b2644a2-2649-5229-a19d-85f9cc193066
+		summarizeBy: none
+		sourceColumn: capitulo
+
+		annotation SummarizationSetBy = User
+
+	/// Fonte e competência das descrições (origem: SIGTAP)
+	column diagnostico_fonte
+		dataType: string
+		displayFolder: Proveniência e fonte secundária
+		lineageTag: 8b130eb6-8907-57fe-b25d-77fc288a8f20
+		summarizeBy: none
+		sourceColumn: diagnostico_fonte
+
+		annotation SummarizationSetBy = User
+
+	partition dim_diagnostico = m
+		mode: import
+		source =
+			let
+			    Fonte = Csv.Document(File.Contents(PastaDados & "dim_diagnostico.csv"), [Delimiter = ",", Columns = 8, Encoding = 65001, QuoteStyle = QuoteStyle.Csv]),
+			    Cabecalho = Table.PromoteHeaders(Fonte, [PromoteAllScalars = true]),
+			    Tipos = Table.TransformColumnTypes(Cabecalho, {
+			        {"diagnostico_cod", type text},
+			        {"diagnostico_nome", type text},
+			        {"diagnostico_rotulo", type text},
+			        {"categoria_cod", type text},
+			        {"categoria_nome", type text},
+			        {"capitulo_ordem", Int64.Type},
+			        {"capitulo", type text},
+			        {"diagnostico_fonte", type text}
+			    }, "en-US")
+			in
+			    Tipos
+
+	annotation PBI_ResultType = Table

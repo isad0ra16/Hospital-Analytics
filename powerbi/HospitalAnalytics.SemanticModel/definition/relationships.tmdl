@@ -1,0 +1,44 @@
+relationship 30897bb6-7f5d-51d4-80a6-dd1c44041b2c
+	fromColumn: fato_registro_aih.mes_saida
+	toColumn: dim_mes.mes
+
+relationship de408cf6-39e0-5789-9e44-668bd0460f7d
+	isActive: false
+	fromColumn: fato_registro_aih.mes_internacao
+	toColumn: dim_mes.mes
+
+relationship b67ca8d7-3f81-5f9a-8252-92835b093116
+	fromColumn: fato_registro_aih.cnes
+	toColumn: dim_estabelecimento.cnes
+
+relationship 9ef360bd-c788-52aa-83e2-c9bcd73b2829
+	fromColumn: fato_registro_aih.municipio_residencia_cod
+	toColumn: dim_municipio_residencia.municipio_residencia_cod
+
+relationship efc63e55-3350-5f7e-9a65-895727d2631f
+	fromColumn: fato_registro_aih.procedimento_cod
+	toColumn: dim_procedimento.procedimento_cod
+
+relationship 5f5870b4-dac7-5184-a983-6c8d92743e0a
+	fromColumn: fato_registro_aih.diagnostico_principal_cod
+	toColumn: dim_diagnostico.diagnostico_cod
+
+relationship bb5ad154-4f23-5a29-b68c-51bf7b1182ba
+	fromColumn: fato_registro_aih.especialidade_cod
+	toColumn: dim_especialidade.especialidade_cod
+
+relationship bf97cf94-83d4-541e-a9c6-71275a1e261d
+	fromColumn: fato_registro_aih.carater_cod
+	toColumn: dim_carater.carater_cod
+
+relationship a77486dc-e482-5f56-b271-b1b6538312e8
+	fromColumn: fato_registro_aih.complexidade_cod
+	toColumn: dim_complexidade.complexidade_cod
+
+relationship 46487284-e758-5413-801d-a22e3fa3ffbc
+	fromColumn: fato_registro_aih.tipo_aih_cod
+	toColumn: dim_tipo_aih.tipo_aih_cod
+
+relationship a7777b38-cdbc-51dc-adb6-ef4c7230c1e7
+	fromColumn: fato_registro_aih.perfil_id
+	toColumn: dim_perfil_demografico.perfil_id

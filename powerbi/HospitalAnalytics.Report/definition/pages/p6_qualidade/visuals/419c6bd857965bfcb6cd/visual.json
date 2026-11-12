@@ -1,0 +1,108 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.13.0/schema.json",
+  "name": "419c6bd857965bfcb6cd",
+  "position": {
+    "x": 676,
+    "y": 80,
+    "z": 600,
+    "width": 348,
+    "height": 592,
+    "tabOrder": 600
+  },
+  "visual": {
+    "visualType": "textbox",
+    "drillFilterOtherVisuals": true,
+    "objects": {
+      "general": [
+        {
+          "properties": {
+            "paragraphs": [
+              {
+                "textRuns": [
+                  {
+                    "value": "Fontes e limitações",
+                    "textStyle": {
+                      "fontWeight": "bold",
+                      "fontSize": "12pt"
+                    }
+                  }
+                ]
+              },
+              {
+                "textRuns": [
+                  {
+                    "value": "Dados: SIH/SUS (DATASUS), arquivo RD do RJ, competência 2024-01; SHA-256 conferido e preservação byte a byte verificada.",
+                    "textStyle": {
+                      "fontSize": "10pt"
+                    }
+                  }
+                ]
+              },
+              {
+                "textRuns": [
+                  {
+                    "value": "Nomes oficiais: SIGTAP 2024-01 (procedimentos e CID-10), IBGE (municípios), CNES (nome fantasia, cadastro de 2026-10), tabelas TabWin do SIH (rótulos dos códigos). Cobertura de 100%, junção por código exato.",
+                    "textStyle": {
+                      "fontSize": "10pt"
+                    }
+                  }
+                ]
+              },
+              {
+                "textRuns": [
+                  {
+                    "value": "Registro de AIH ≠ paciente ≠ internação: não há medida de pacientes nem de episódios.",
+                    "textStyle": {
+                      "fontSize": "10pt"
+                    }
+                  }
+                ]
+              },
+              {
+                "textRuns": [
+                  {
+                    "value": "Mês de saída não é série histórica: a competência reúne o que foi processado em janeiro de 2024.",
+                    "textStyle": {
+                      "fontSize": "10pt"
+                    }
+                  }
+                ]
+              },
+              {
+                "textRuns": [
+                  {
+                    "value": "Mortalidade bruta, sem ajuste de risco.",
+                    "textStyle": {
+                      "fontSize": "10pt"
+                    }
+                  }
+                ]
+              },
+              {
+                "textRuns": [
+                  {
+                    "value": "Privacidade: sem N_AIH, nascimento, CEP, CPF ou texto livre; datas apenas por mês.",
+                    "textStyle": {
+                      "fontSize": "10pt"
+                    }
+                  }
+                ]
+              },
+              {
+                "textRuns": [
+                  {
+                    "value": "Detalhes: docs/ no repositório (decisões D-001 a D-040).",
+                    "textStyle": {
+                      "fontSize": "9pt",
+                      "color": "#5A5A5A"
+                    }
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      ]
+    }
+  }
+}

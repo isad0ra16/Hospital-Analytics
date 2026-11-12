@@ -1,0 +1,277 @@
+/// 1 linha por registro de AIH do arquivo RD (não é paciente nem, necessariamente, internação)
+table fato_registro_aih
+	lineageTag: 5686b051-4d0d-55cf-ba4a-7f1397b61555
+
+	/// Chave técnica: posição do registro no arquivo (1..n) (origem: ordem física)
+	column registro_id
+		dataType: int64
+		formatString: 0
+		isHidden
+		lineageTag: 040d0d42-ebf5-57a8-a77d-a1380aaeeeed
+		summarizeBy: none
+		sourceColumn: registro_id
+
+		annotation SummarizationSetBy = User
+
+	/// Pseudônimo determinístico do N_AIH (posto denso); só para contagem distinta (origem: N_AIH)
+	column aih_id
+		dataType: int64
+		formatString: 0
+		isHidden
+		lineageTag: 883bb004-b269-5fbb-a9d1-5065eb816a5a
+		summarizeBy: none
+		sourceColumn: aih_id
+
+		annotation SummarizationSetBy = User
+
+	/// Competência de processamento (AAAA-MM) — não é data de ocorrência (origem: ANO_CMPT, MES_CMPT)
+	column competencia
+		dataType: string
+		isHidden
+		lineageTag: 24afb175-3889-5b87-a1b4-325e2db18b58
+		summarizeBy: none
+		sourceColumn: competencia
+
+		annotation SummarizationSetBy = User
+
+	/// Mês da saída, 1º dia do mês (relação ATIVA com dim_mes) (origem: DT_SAIDA)
+	column mes_saida
+		dataType: dateTime
+		formatString: yyyy-mm
+		isHidden
+		lineageTag: 73380990-c298-5b8f-b75a-20323acc4957
+		summarizeBy: none
+		sourceColumn: mes_saida
+
+		annotation SummarizationSetBy = User
+
+		annotation UnderlyingDateTimeDataType = Date
+
+	/// Mês da internação, 1º dia do mês (relação INATIVA com dim_mes) (origem: DT_INTER)
+	column mes_internacao
+		dataType: dateTime
+		formatString: yyyy-mm
+		isHidden
+		lineageTag: 69b3c2e1-dca1-5136-823d-a2e45b5a5914
+		summarizeBy: none
+		sourceColumn: mes_internacao
+
+		annotation SummarizationSetBy = User
+
+		annotation UnderlyingDateTimeDataType = Date
+
+	/// Estabelecimento (chave de dim_estabelecimento) (origem: CNES)
+	column cnes
+		dataType: string
+		isHidden
+		lineageTag: b0054721-f06d-5cfe-95cd-4a24fce02d08
+		summarizeBy: none
+		sourceColumn: cnes
+
+		annotation SummarizationSetBy = User
+
+	/// Município de residência (chave de dim_municipio_residencia) (origem: MUNIC_RES)
+	column municipio_residencia_cod
+		dataType: string
+		isHidden
+		lineageTag: 3afd59d6-7c4d-501f-a21f-cc1cf29a5b0c
+		summarizeBy: none
+		sourceColumn: municipio_residencia_cod
+
+		annotation SummarizationSetBy = User
+
+	/// Procedimento realizado, código SIGTAP (chave de dim_procedimento) (origem: PROC_REA)
+	column procedimento_cod
+		dataType: string
+		isHidden
+		lineageTag: 913ac0f6-2b2d-578f-97c5-b9000b6e3f1c
+		summarizeBy: none
+		sourceColumn: procedimento_cod
+
+		annotation SummarizationSetBy = User
+
+	/// Diagnóstico principal, código CID-10 (chave de dim_diagnostico) (origem: DIAG_PRINC)
+	column diagnostico_principal_cod
+		dataType: string
+		isHidden
+		lineageTag: 227a3060-4b03-56bd-bf17-1ae0ddac6c9b
+		summarizeBy: none
+		sourceColumn: diagnostico_principal_cod
+
+		annotation SummarizationSetBy = User
+
+	/// Especialidade do leito (chave de dim_especialidade) (origem: ESPEC)
+	column especialidade_cod
+		dataType: string
+		isHidden
+		lineageTag: 073b8789-17c7-5a28-b24d-879e66e2b64c
+		summarizeBy: none
+		sourceColumn: especialidade_cod
+
+		annotation SummarizationSetBy = User
+
+	/// Caráter da internação (chave de dim_carater) (origem: CAR_INT)
+	column carater_cod
+		dataType: string
+		isHidden
+		lineageTag: c3234356-80bf-5eb4-b6f7-05638b1a7d36
+		summarizeBy: none
+		sourceColumn: carater_cod
+
+		annotation SummarizationSetBy = User
+
+	/// Complexidade (chave de dim_complexidade) (origem: COMPLEX)
+	column complexidade_cod
+		dataType: string
+		isHidden
+		lineageTag: f38a8721-6ce1-5088-af2d-bcb105f3fc01
+		summarizeBy: none
+		sourceColumn: complexidade_cod
+
+		annotation SummarizationSetBy = User
+
+	/// Tipo de AIH: 1 principal, 5 longa permanência (chave de dim_tipo_aih) (origem: IDENT)
+	column tipo_aih_cod
+		dataType: string
+		isHidden
+		lineageTag: 3cb70153-4534-59a7-9db1-22e9390a6d05
+		summarizeBy: none
+		sourceColumn: tipo_aih_cod
+
+		annotation SummarizationSetBy = User
+
+	/// Perfil demográfico do registro (chave de dim_perfil_demografico) (origem: COD_IDADE, IDADE,
+	/// SEXO, RACA_COR)
+	column perfil_id
+		dataType: int64
+		formatString: 0
+		isHidden
+		lineageTag: 392f6661-6689-579d-839c-8834d413dfb2
+		summarizeBy: none
+		sourceColumn: perfil_id
+
+		annotation SummarizationSetBy = User
+
+	/// Valor total do registro (R$, 2 casas, exato) (origem: VAL_TOT)
+	column valor_total
+		dataType: decimal
+		formatString: R$ #,0.00
+		isHidden
+		lineageTag: 30cfff1b-bb57-591c-9491-3b81e1edf9f6
+		summarizeBy: none
+		sourceColumn: valor_total
+
+		annotation SummarizationSetBy = User
+
+	/// Valor total em centavos (inteiro, para conferência exata) (origem: VAL_TOT)
+	column valor_total_centavos
+		dataType: int64
+		formatString: 0
+		isHidden
+		lineageTag: 9bc5f069-e94d-5205-af16-91fdd2fe002f
+		summarizeBy: none
+		sourceColumn: valor_total_centavos
+
+		annotation SummarizationSetBy = User
+
+	/// Dias de permanência do registro (na AIH tipo 5: dias do período coberto) (origem: DIAS_PERM)
+	column dias_permanencia
+		dataType: int64
+		formatString: 0
+		isHidden
+		lineageTag: 8bed559a-16fc-5803-8367-b7477ba8f9cf
+		summarizeBy: none
+		sourceColumn: dias_permanencia
+
+		annotation SummarizationSetBy = User
+
+	/// DT_SAIDA − DT_INTER em dias (difere de DIAS_PERM na longa permanência) (origem: DT_INTER,
+	/// DT_SAIDA)
+	column dias_entre_datas
+		dataType: int64
+		formatString: 0
+		isHidden
+		lineageTag: ae9ede3d-2153-5076-b1cb-24e146df09a8
+		summarizeBy: none
+		sourceColumn: dias_entre_datas
+
+		annotation SummarizationSetBy = User
+
+	/// Idade em anos convertida pela unidade COD_IDADE (6 casas) (origem: COD_IDADE, IDADE)
+	column idade_anos
+		dataType: double
+		formatString: #,0.00
+		isHidden
+		lineageTag: 6c8526cc-081e-5966-a17b-f26538205edb
+		summarizeBy: none
+		sourceColumn: idade_anos
+
+		annotation SummarizationSetBy = User
+
+	/// 1 = óbito (MORTE = 1); 0 = não (origem: MORTE)
+	column obito
+		dataType: int64
+		formatString: 0
+		isHidden
+		lineageTag: 4a21d041-c1c0-5bf5-88fe-c0317c84d18a
+		summarizeBy: none
+		sourceColumn: obito
+
+		annotation SummarizationSetBy = User
+
+	/// Nº de registros com o mesmo N_AIH (origem: N_AIH)
+	column aih_ocorrencias
+		dataType: int64
+		formatString: 0
+		isHidden
+		lineageTag: 41a306b5-fe93-524d-bd54-4401c53a7cb2
+		summarizeBy: none
+		sourceColumn: aih_ocorrencias
+
+		annotation SummarizationSetBy = User
+
+	/// 1 = o N_AIH aparece em mais de um registro (apenas sinalização) (origem: N_AIH)
+	column aih_repetida
+		dataType: int64
+		formatString: 0
+		isHidden
+		lineageTag: 2149b1e0-41dd-51e5-86cd-1df89c343c10
+		summarizeBy: none
+		sourceColumn: aih_repetida
+
+		annotation SummarizationSetBy = User
+
+	partition fato_registro_aih = m
+		mode: import
+		source =
+			let
+			    Fonte = Csv.Document(File.Contents(PastaDados & "fato_registro_aih.csv"), [Delimiter = ",", Columns = 22, Encoding = 65001, QuoteStyle = QuoteStyle.Csv]),
+			    Cabecalho = Table.PromoteHeaders(Fonte, [PromoteAllScalars = true]),
+			    Tipos = Table.TransformColumnTypes(Cabecalho, {
+			        {"registro_id", Int64.Type},
+			        {"aih_id", Int64.Type},
+			        {"competencia", type text},
+			        {"mes_saida", type date},
+			        {"mes_internacao", type date},
+			        {"cnes", type text},
+			        {"municipio_residencia_cod", type text},
+			        {"procedimento_cod", type text},
+			        {"diagnostico_principal_cod", type text},
+			        {"especialidade_cod", type text},
+			        {"carater_cod", type text},
+			        {"complexidade_cod", type text},
+			        {"tipo_aih_cod", type text},
+			        {"perfil_id", Int64.Type},
+			        {"valor_total", Currency.Type},
+			        {"valor_total_centavos", Int64.Type},
+			        {"dias_permanencia", Int64.Type},
+			        {"dias_entre_datas", Int64.Type},
+			        {"idade_anos", type number},
+			        {"obito", Int64.Type},
+			        {"aih_ocorrencias", Int64.Type},
+			        {"aih_repetida", Int64.Type}
+			    }, "en-US")
+			in
+			    Tipos
+
+	annotation PBI_ResultType = Table

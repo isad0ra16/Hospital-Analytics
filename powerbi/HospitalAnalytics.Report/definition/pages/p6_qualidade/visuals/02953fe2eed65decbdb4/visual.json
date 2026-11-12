@@ -1,0 +1,81 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.13.0/schema.json",
+  "name": "02953fe2eed65decbdb4",
+  "position": {
+    "x": 1036,
+    "y": 304,
+    "z": 1100,
+    "width": 220,
+    "height": 100,
+    "tabOrder": 1100
+  },
+  "visual": {
+    "visualType": "slicer",
+    "drillFilterOtherVisuals": true,
+    "query": {
+      "queryState": {
+        "Values": {
+          "projections": [
+            {
+              "field": {
+                "Column": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "dim_complexidade"
+                    }
+                  },
+                  "Property": "descricao_oficial"
+                }
+              },
+              "queryRef": "dim_complexidade.descricao_oficial",
+              "nativeQueryRef": "descricao_oficial",
+              "displayName": "Complexidade"
+            }
+          ]
+        }
+      }
+    },
+    "syncGroup": {
+      "groupName": "filtro_descricao_oficial_dim_complexidade",
+      "fieldChanges": true,
+      "filterChanges": true
+    },
+    "objects": {
+      "data": [
+        {
+          "properties": {
+            "mode": {
+              "expr": {
+                "Literal": {
+                  "Value": "'Dropdown'"
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    "visualContainerObjects": {
+      "title": [
+        {
+          "properties": {
+            "show": {
+              "expr": {
+                "Literal": {
+                  "Value": "true"
+                }
+              }
+            },
+            "text": {
+              "expr": {
+                "Literal": {
+                  "Value": "'Complexidade'"
+                }
+              }
+            }
+          }
+        }
+      ]
+    }
+  }
+}

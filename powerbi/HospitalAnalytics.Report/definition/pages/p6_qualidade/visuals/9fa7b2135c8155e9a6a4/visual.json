@@ -1,0 +1,81 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.13.0/schema.json",
+  "name": "9fa7b2135c8155e9a6a4",
+  "position": {
+    "x": 1036,
+    "y": 80,
+    "z": 900,
+    "width": 220,
+    "height": 100,
+    "tabOrder": 900
+  },
+  "visual": {
+    "visualType": "slicer",
+    "drillFilterOtherVisuals": true,
+    "query": {
+      "queryState": {
+        "Values": {
+          "projections": [
+            {
+              "field": {
+                "Column": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "dim_tipo_aih"
+                    }
+                  },
+                  "Property": "descricao_oficial"
+                }
+              },
+              "queryRef": "dim_tipo_aih.descricao_oficial",
+              "nativeQueryRef": "descricao_oficial",
+              "displayName": "Tipo de AIH"
+            }
+          ]
+        }
+      }
+    },
+    "syncGroup": {
+      "groupName": "filtro_descricao_oficial_dim_tipo_aih",
+      "fieldChanges": true,
+      "filterChanges": true
+    },
+    "objects": {
+      "data": [
+        {
+          "properties": {
+            "mode": {
+              "expr": {
+                "Literal": {
+                  "Value": "'Dropdown'"
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    "visualContainerObjects": {
+      "title": [
+        {
+          "properties": {
+            "show": {
+              "expr": {
+                "Literal": {
+                  "Value": "true"
+                }
+              }
+            },
+            "text": {
+              "expr": {
+                "Literal": {
+                  "Value": "'Tipo de AIH'"
+                }
+              }
+            }
+          }
+        }
+      ]
+    }
+  }
+}

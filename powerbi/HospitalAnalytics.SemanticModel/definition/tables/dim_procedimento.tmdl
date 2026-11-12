@@ -1,0 +1,129 @@
+/// 1 linha por procedimento realizado presente no fato
+table dim_procedimento
+	lineageTag: 203a465a-fad9-54a6-b6dc-88dd357ea2c9
+
+	/// Código SIGTAP do procedimento realizado (origem: PROC_REA)
+	column procedimento_cod
+		dataType: string
+		lineageTag: e3aa3adf-2e0e-5e91-ad17-2048474df160
+		summarizeBy: none
+		sourceColumn: procedimento_cod
+
+		annotation SummarizationSetBy = User
+
+	/// Grupo SIGTAP (2 primeiros dígitos) (origem: PROC_REA)
+	column grupo_cod
+		dataType: string
+		lineageTag: a59f0901-b3dc-5bdf-8dfc-42038fdbad90
+		summarizeBy: none
+		sourceColumn: grupo_cod
+
+		annotation SummarizationSetBy = User
+
+	/// Descrição do grupo SIGTAP (origem: dicionário)
+	column grupo_descricao
+		dataType: string
+		displayFolder: Proveniência e fonte secundária
+		lineageTag: ae7fad32-9892-5272-97cd-8c4c8dbae31d
+		summarizeBy: none
+		sourceColumn: grupo_descricao
+
+		annotation SummarizationSetBy = User
+
+	/// Fonte/status da descrição do grupo (origem: dicionário)
+	column grupo_fonte
+		dataType: string
+		displayFolder: Proveniência e fonte secundária
+		lineageTag: a33c24e6-d52b-5e4d-af79-011d821fe393
+		summarizeBy: none
+		sourceColumn: grupo_fonte
+
+		annotation SummarizationSetBy = User
+
+	/// Nome oficial do procedimento (origem: SIGTAP tb_procedimento)
+	column procedimento_nome
+		dataType: string
+		lineageTag: 319a3ca1-5e12-5ce0-91fb-3d7d3f6cf67f
+		summarizeBy: none
+		sourceColumn: procedimento_nome
+
+		annotation SummarizationSetBy = User
+
+	/// Nome oficial do grupo (texto literal) (origem: SIGTAP tb_grupo)
+	column grupo_nome_sigtap
+		dataType: string
+		lineageTag: fa5a7586-2488-544e-855e-26faa79b1083
+		summarizeBy: none
+		sourceColumn: grupo_nome_sigtap
+
+		annotation SummarizationSetBy = User
+
+	/// Subgrupo SIGTAP (4 primeiros dígitos) (origem: PROC_REA)
+	column subgrupo_cod
+		dataType: string
+		lineageTag: 34ad9fde-876e-57e7-9fcf-1d425ae60577
+		summarizeBy: none
+		sourceColumn: subgrupo_cod
+
+		annotation SummarizationSetBy = User
+
+	/// Nome oficial do subgrupo (origem: SIGTAP tb_sub_grupo)
+	column subgrupo_nome
+		dataType: string
+		lineageTag: 27c8db4e-c091-57b5-94f2-d82c14921f74
+		summarizeBy: none
+		sourceColumn: subgrupo_nome
+
+		annotation SummarizationSetBy = User
+
+	/// Forma de organização SIGTAP (6 primeiros dígitos) (origem: PROC_REA)
+	column forma_organizacao_cod
+		dataType: string
+		lineageTag: 9f359907-82e0-53bd-b26d-9ca4dd20f2b4
+		summarizeBy: none
+		sourceColumn: forma_organizacao_cod
+
+		annotation SummarizationSetBy = User
+
+	/// Nome oficial da forma de organização (origem: SIGTAP tb_forma_organizacao)
+	column forma_organizacao_nome
+		dataType: string
+		lineageTag: 5751f6ff-e069-59ce-9d96-892b9866d4b5
+		summarizeBy: none
+		sourceColumn: forma_organizacao_nome
+
+		annotation SummarizationSetBy = User
+
+	/// Fonte e competência dos nomes (origem: SIGTAP)
+	column procedimento_fonte
+		dataType: string
+		displayFolder: Proveniência e fonte secundária
+		lineageTag: 8384a776-5506-5735-9299-d450faff2da1
+		summarizeBy: none
+		sourceColumn: procedimento_fonte
+
+		annotation SummarizationSetBy = User
+
+	partition dim_procedimento = m
+		mode: import
+		source =
+			let
+			    Fonte = Csv.Document(File.Contents(PastaDados & "dim_procedimento.csv"), [Delimiter = ",", Columns = 11, Encoding = 65001, QuoteStyle = QuoteStyle.Csv]),
+			    Cabecalho = Table.PromoteHeaders(Fonte, [PromoteAllScalars = true]),
+			    Tipos = Table.TransformColumnTypes(Cabecalho, {
+			        {"procedimento_cod", type text},
+			        {"grupo_cod", type text},
+			        {"grupo_descricao", type text},
+			        {"grupo_fonte", type text},
+			        {"procedimento_nome", type text},
+			        {"grupo_nome_sigtap", type text},
+			        {"subgrupo_cod", type text},
+			        {"subgrupo_nome", type text},
+			        {"forma_organizacao_cod", type text},
+			        {"forma_organizacao_nome", type text},
+			        {"procedimento_fonte", type text}
+			    }, "en-US")
+			in
+			    Tipos
+
+	annotation PBI_ResultType = Table

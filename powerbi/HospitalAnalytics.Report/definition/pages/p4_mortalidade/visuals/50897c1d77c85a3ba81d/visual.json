@@ -1,0 +1,81 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.13.0/schema.json",
+  "name": "50897c1d77c85a3ba81d",
+  "position": {
+    "x": 1036,
+    "y": 528,
+    "z": 1500,
+    "width": 220,
+    "height": 100,
+    "tabOrder": 1500
+  },
+  "visual": {
+    "visualType": "slicer",
+    "drillFilterOtherVisuals": true,
+    "query": {
+      "queryState": {
+        "Values": {
+          "projections": [
+            {
+              "field": {
+                "Column": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "dim_perfil_demografico"
+                    }
+                  },
+                  "Property": "sexo_descricao_oficial"
+                }
+              },
+              "queryRef": "dim_perfil_demografico.sexo_descricao_oficial",
+              "nativeQueryRef": "sexo_descricao_oficial",
+              "displayName": "Sexo"
+            }
+          ]
+        }
+      }
+    },
+    "syncGroup": {
+      "groupName": "filtro_sexo_descricao_oficial_dim_perfil_demografico",
+      "fieldChanges": true,
+      "filterChanges": true
+    },
+    "objects": {
+      "data": [
+        {
+          "properties": {
+            "mode": {
+              "expr": {
+                "Literal": {
+                  "Value": "'Dropdown'"
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    "visualContainerObjects": {
+      "title": [
+        {
+          "properties": {
+            "show": {
+              "expr": {
+                "Literal": {
+                  "Value": "true"
+                }
+              }
+            },
+            "text": {
+              "expr": {
+                "Literal": {
+                  "Value": "'Sexo'"
+                }
+              }
+            }
+          }
+        }
+      ]
+    }
+  }
+}

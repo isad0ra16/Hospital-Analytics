@@ -1,0 +1,5 @@
+/// Pasta com os CSV de data/powerbi (caminho completo, terminado em \).
+expression PastaDados = "C:\Hospital-Analytics-Codigo\data\powerbi\" meta [IsParameterQuery=true, Type="Text", IsParameterQueryRequired=true]
+	lineageTag: de10fff0-5fe9-5cc6-9951-147997feb195
+
+	annotation PBI_ResultType = Text

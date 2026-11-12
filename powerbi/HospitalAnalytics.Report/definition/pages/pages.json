@@ -1,0 +1,12 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/pagesMetadata/1.1.0/schema.json",
+  "pageOrder": [
+    "p1_visao_geral",
+    "p2_perfil",
+    "p3_internacoes",
+    "p4_mortalidade",
+    "p5_financeiro",
+    "p6_qualidade"
+  ],
+  "activePageName": "p1_visao_geral"
+}

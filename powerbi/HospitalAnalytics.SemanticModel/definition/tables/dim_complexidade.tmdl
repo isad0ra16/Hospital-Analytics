@@ -1,0 +1,69 @@
+/// 1 linha por código de COMPLEX presente no fato
+table dim_complexidade
+	lineageTag: b0c37379-9d02-5155-b28f-d05a2134686f
+
+	/// Código de complexidade (COMPLEX) (origem: COMPLEX)
+	column complexidade_cod
+		dataType: string
+		lineageTag: 435b7ded-f617-51d9-95d8-cec8251e97fb
+		summarizeBy: none
+		sourceColumn: complexidade_cod
+
+		annotation SummarizationSetBy = User
+
+	/// Descrição do código (complexidade) — fonte secundária (origem: dicionário)
+	column descricao
+		dataType: string
+		displayFolder: Proveniência e fonte secundária
+		lineageTag: ad9d3770-87af-5590-80b3-3e12a19e2454
+		summarizeBy: none
+		sourceColumn: descricao
+
+		annotation SummarizationSetBy = User
+
+	/// Fonte/status da interpretação do código (origem: dicionário)
+	column fonte
+		dataType: string
+		displayFolder: Proveniência e fonte secundária
+		lineageTag: a5f91e97-2e08-5a92-a379-d48872a10963
+		summarizeBy: none
+		sourceColumn: fonte
+
+		annotation SummarizationSetBy = User
+
+	/// Descrição oficial (complexidade) — usar nos visuais (origem: TabWin SIH/SUS)
+	column descricao_oficial
+		dataType: string
+		lineageTag: 214b2f15-e7a0-58ea-aa12-f20b0e342d91
+		summarizeBy: none
+		sourceColumn: descricao_oficial
+
+		annotation SummarizationSetBy = User
+
+	/// Pacote e tabela de conversão oficiais (origem: TabWin SIH/SUS)
+	column fonte_oficial
+		dataType: string
+		displayFolder: Proveniência e fonte secundária
+		lineageTag: 2615fb71-7107-599d-ab74-6a2ab67b0ee8
+		summarizeBy: none
+		sourceColumn: fonte_oficial
+
+		annotation SummarizationSetBy = User
+
+	partition dim_complexidade = m
+		mode: import
+		source =
+			let
+			    Fonte = Csv.Document(File.Contents(PastaDados & "dim_complexidade.csv"), [Delimiter = ",", Columns = 5, Encoding = 65001, QuoteStyle = QuoteStyle.Csv]),
+			    Cabecalho = Table.PromoteHeaders(Fonte, [PromoteAllScalars = true]),
+			    Tipos = Table.TransformColumnTypes(Cabecalho, {
+			        {"complexidade_cod", type text},
+			        {"descricao", type text},
+			        {"fonte", type text},
+			        {"descricao_oficial", type text},
+			        {"fonte_oficial", type text}
+			    }, "en-US")
+			in
+			    Tipos
+
+	annotation PBI_ResultType = Table

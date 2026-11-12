@@ -1,0 +1,152 @@
+/// 1 linha por CNES presente no fato
+table dim_estabelecimento
+	lineageTag: d796c5a6-152b-5825-88d3-d3d20de8663b
+
+	/// Código CNES do estabelecimento (origem: CNES)
+	column cnes
+		dataType: string
+		lineageTag: 4403e68d-ec26-5ea4-b7d5-e6c194349c5c
+		summarizeBy: none
+		sourceColumn: cnes
+
+		annotation SummarizationSetBy = User
+
+	/// Município do ESTABELECIMENTO (≠ residência) (origem: MUNIC_MOV)
+	column municipio_estabelecimento_cod
+		dataType: string
+		lineageTag: 4d9f64a4-2160-5fba-94b9-4cc3b1d52640
+		summarizeBy: none
+		sourceColumn: municipio_estabelecimento_cod
+
+		annotation SummarizationSetBy = User
+
+	/// 2 primeiros dígitos do código do município (origem: MUNIC_MOV)
+	column uf_estabelecimento_cod
+		dataType: string
+		lineageTag: 12380401-7e9d-5d88-8275-216dffd0bd3c
+		summarizeBy: none
+		sourceColumn: uf_estabelecimento_cod
+
+		annotation SummarizationSetBy = User
+
+	/// Natureza jurídica (código) (origem: NAT_JUR)
+	column natureza_juridica_cod
+		dataType: string
+		lineageTag: 0ce9925a-7529-52ab-900d-028834592aa4
+		summarizeBy: none
+		sourceColumn: natureza_juridica_cod
+
+		annotation SummarizationSetBy = User
+
+	/// Tipo de gestão (código) (origem: GESTAO)
+	column gestao_cod
+		dataType: string
+		lineageTag: 4421428b-b8bc-5c54-97b9-e53cbbce1c02
+		summarizeBy: none
+		sourceColumn: gestao_cod
+
+		annotation SummarizationSetBy = User
+
+	/// Nome fantasia no cadastro CNES (cadastro vigente no download, não 2024-01) (origem: CNES
+	/// CADGERRJ.FANTASIA)
+	column estabelecimento_nome
+		dataType: string
+		lineageTag: 4212ffdb-b3be-58a3-b070-b176c7584612
+		summarizeBy: none
+		sourceColumn: estabelecimento_nome
+
+		annotation SummarizationSetBy = User
+
+	/// Nome fantasia (CNES) — único; usar nos visuais (há nomes repetidos) (origem: CNES
+	/// CADGERRJ.FANTASIA)
+	column estabelecimento_rotulo
+		dataType: string
+		lineageTag: f1816ae5-bb87-5f5a-b7f8-9ed08f7248a7
+		summarizeBy: none
+		sourceColumn: estabelecimento_rotulo
+
+		annotation SummarizationSetBy = User
+
+	/// Município do estabelecimento (origem: IBGE)
+	column municipio_estabelecimento_nome
+		dataType: string
+		dataCategory: City
+		lineageTag: e42753f5-47b9-5bd8-97fa-acfaf6a956a9
+		summarizeBy: none
+		sourceColumn: municipio_estabelecimento_nome
+
+		annotation SummarizationSetBy = User
+
+	/// UF do estabelecimento (origem: IBGE)
+	column uf_estabelecimento_sigla
+		dataType: string
+		dataCategory: StateOrProvince
+		lineageTag: 337d256a-18b0-538e-a5ac-31d825268d71
+		summarizeBy: none
+		sourceColumn: uf_estabelecimento_sigla
+
+		annotation SummarizationSetBy = User
+
+	/// Natureza jurídica (texto oficial) (origem: TabWin SIH/SUS natjur.cnv)
+	column natureza_juridica_descricao
+		dataType: string
+		lineageTag: f7586854-82af-5081-b39f-21ea70f3f49d
+		summarizeBy: none
+		sourceColumn: natureza_juridica_descricao
+
+		annotation SummarizationSetBy = User
+
+	/// Esfera: administração pública (federal, estadual, municipal), empresarial, sem fins lucrativos
+	/// (origem: TabWin SIH/SUS esferajur.cnv)
+	column esfera_juridica
+		dataType: string
+		lineageTag: 273fc5a7-6aed-591e-8eda-4f02e3c17d5c
+		summarizeBy: none
+		sourceColumn: esfera_juridica
+
+		annotation SummarizationSetBy = User
+
+	/// Tipo de gestão (texto oficial) (origem: TabWin SIH/SUS GESTAO.CNV)
+	column gestao_descricao
+		dataType: string
+		lineageTag: ee3898b4-c2f4-5323-bc2e-e4b68bb1b33e
+		summarizeBy: none
+		sourceColumn: gestao_descricao
+
+		annotation SummarizationSetBy = User
+
+	/// Fonte e data do cadastro do nome (origem: CNES)
+	column estabelecimento_nome_fonte
+		dataType: string
+		displayFolder: Proveniência e fonte secundária
+		lineageTag: a652dc98-2d3f-5830-8e51-5626f6940b7d
+		summarizeBy: none
+		sourceColumn: estabelecimento_nome_fonte
+
+		annotation SummarizationSetBy = User
+
+	partition dim_estabelecimento = m
+		mode: import
+		source =
+			let
+			    Fonte = Csv.Document(File.Contents(PastaDados & "dim_estabelecimento.csv"), [Delimiter = ",", Columns = 13, Encoding = 65001, QuoteStyle = QuoteStyle.Csv]),
+			    Cabecalho = Table.PromoteHeaders(Fonte, [PromoteAllScalars = true]),
+			    Tipos = Table.TransformColumnTypes(Cabecalho, {
+			        {"cnes", type text},
+			        {"municipio_estabelecimento_cod", type text},
+			        {"uf_estabelecimento_cod", type text},
+			        {"natureza_juridica_cod", type text},
+			        {"gestao_cod", type text},
+			        {"estabelecimento_nome", type text},
+			        {"estabelecimento_rotulo", type text},
+			        {"municipio_estabelecimento_nome", type text},
+			        {"uf_estabelecimento_sigla", type text},
+			        {"natureza_juridica_descricao", type text},
+			        {"esfera_juridica", type text},
+			        {"gestao_descricao", type text},
+			        {"estabelecimento_nome_fonte", type text}
+			    }, "en-US")
+			in
+			    Tipos
+
+	annotation PBI_ResultType = Table

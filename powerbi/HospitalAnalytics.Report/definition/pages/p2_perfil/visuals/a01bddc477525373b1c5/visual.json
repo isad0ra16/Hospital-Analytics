@@ -1,0 +1,133 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.13.0/schema.json",
+  "name": "a01bddc477525373b1c5",
+  "position": {
+    "x": 24,
+    "y": 80,
+    "z": 100,
+    "width": 520,
+    "height": 380,
+    "tabOrder": 100
+  },
+  "visual": {
+    "visualType": "barChart",
+    "drillFilterOtherVisuals": true,
+    "query": {
+      "queryState": {
+        "Category": {
+          "projections": [
+            {
+              "field": {
+                "Column": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "dim_perfil_demografico"
+                    }
+                  },
+                  "Property": "faixa_etaria"
+                }
+              },
+              "queryRef": "dim_perfil_demografico.faixa_etaria",
+              "nativeQueryRef": "faixa_etaria",
+              "displayName": "Faixa etária"
+            }
+          ]
+        },
+        "Y": {
+          "projections": [
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "_Medidas"
+                    }
+                  },
+                  "Property": "Registros - masculino (pirâmide)"
+                }
+              },
+              "queryRef": "_Medidas.Registros - masculino (pirâmide)",
+              "nativeQueryRef": "Registros - masculino (pirâmide)",
+              "displayName": "Masculino"
+            },
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "_Medidas"
+                    }
+                  },
+                  "Property": "Registros - feminino (pirâmide)"
+                }
+              },
+              "queryRef": "_Medidas.Registros - feminino (pirâmide)",
+              "nativeQueryRef": "Registros - feminino (pirâmide)",
+              "displayName": "Feminino"
+            }
+          ]
+        }
+      },
+      "sortDefinition": {
+        "sort": [
+          {
+            "field": {
+              "Column": {
+                "Expression": {
+                  "SourceRef": {
+                    "Entity": "dim_perfil_demografico"
+                  }
+                },
+                "Property": "faixa_etaria"
+              }
+            },
+            "direction": "Descending"
+          }
+        ],
+        "isDefaultSort": false
+      }
+    },
+    "visualContainerObjects": {
+      "title": [
+        {
+          "properties": {
+            "show": {
+              "expr": {
+                "Literal": {
+                  "Value": "true"
+                }
+              }
+            },
+            "text": {
+              "expr": {
+                "Literal": {
+                  "Value": "'Registros por faixa etária e sexo'"
+                }
+              }
+            }
+          }
+        }
+      ],
+      "subTitle": [
+        {
+          "properties": {
+            "show": {
+              "expr": {
+                "Literal": {
+                  "Value": "true"
+                }
+              }
+            },
+            "text": {
+              "expr": {
+                "Literal": {
+                  "Value": "'Perfil dos REGISTROS (o RD não identifica pacientes)'"
+                }
+              }
+            }
+          }
+        }
+      ]
+    }
+  }
+}

@@ -1,0 +1,298 @@
+/// Medidas DAX do dashboard (docs/powerbi/medidas.dax). Unidade: registro de AIH.
+table _Medidas
+	lineageTag: 83d7bbfb-bc82-577f-94e5-b8ae94b0b500
+
+	/// Formato: número inteiro. Denominador: —. Unidade: registro de AIH.
+	measure 'Registros de AIH' = COUNTROWS ( fato_registro_aih )
+		formatString: #,0
+		displayFolder: Contagens
+		lineageTag: d95b181f-f81e-55f3-9a55-41999b1c8170
+
+	/// Formato: número inteiro. Conta números de AIH distintos (pseudônimo aih_id). Limitação: AIH
+	/// distinta não é paciente nem internação.
+	measure 'AIHs distintas' = DISTINCTCOUNT ( fato_registro_aih[aih_id] )
+		formatString: #,0
+		displayFolder: Contagens
+		lineageTag: e0fba844-9dd5-56df-bbcc-452fecdb1b49
+
+	/// Formato: número inteiro. Registros cujo número de AIH aparece em mais de um registro. Nada foi
+	/// removido: são sinalizados para a página de qualidade.
+	measure 'Registros de AIH repetida' = CALCULATE ( [Registros de AIH], fato_registro_aih[aih_repetida] = 1 )
+		formatString: #,0
+		displayFolder: Contagens
+		lineageTag: 62c0ee6a-2628-5f85-9d3e-71b4584ddedf
+
+	/// Formato: número inteiro. Diferença entre registros e AIHs distintas (base completa: 56).
+	measure 'Registros excedentes de AIH' = [Registros de AIH] - [AIHs distintas]
+		formatString: #,0
+		displayFolder: Contagens
+		lineageTag: 3fed5be8-681b-5f8f-91c8-8768af4eb625
+
+	/// Formato: número inteiro. AIH tipo 5 (longa permanência, fonte secundária).
+	measure 'Registros de longa permanência' = CALCULATE ( [Registros de AIH], dim_tipo_aih[tipo_aih_cod] = "5" )
+		formatString: #,0
+		displayFolder: Contagens
+		lineageTag: 18b1d57f-cbfc-52c6-b40a-bc6641cb9c3a
+
+	/// Formato: número inteiro. Contagem pelo MÊS DE INTERNAÇÃO (relação inativa com dim_mes). Use em
+	/// visuais por mês de internação; o padrão do modelo é o mês de saída.
+	measure 'Registros por mês de internação' =
+			CALCULATE (
+			    [Registros de AIH],
+			    USERELATIONSHIP ( fato_registro_aih[mes_internacao], dim_mes[mes] )
+			)
+		formatString: #,0
+		displayFolder: Contagens
+		lineageTag: d61e56e0-d455-5f3b-ad1a-98ac674b6019
+
+	/// Formato: moeda (R$), 2 casas. Soma de VAL_TOT.
+	measure 'Valor total' = SUM ( fato_registro_aih[valor_total] )
+		formatString: R$ #,0.00
+		displayFolder: Valores financeiros
+		lineageTag: e880eccc-d9b3-589d-9edb-1cb5b2420d04
+
+	/// Formato: moeda (R$), 2 casas. Denominador: registros de AIH (não pacientes).
+	measure 'Valor médio por registro' = DIVIDE ( [Valor total], [Registros de AIH] )
+		formatString: R$ #,0.00
+		displayFolder: Valores financeiros
+		lineageTag: d320b5c5-b55d-5417-8b2c-1c9cd516e0ac
+
+	/// Formato: número inteiro. Registros com VAL_TOT = 0 (na base: 241, todos com ESPEC 87).
+	measure 'Registros com valor zero' = CALCULATE ( [Registros de AIH], fato_registro_aih[valor_total_centavos] = 0 )
+		formatString: #,0
+		displayFolder: Valores financeiros
+		lineageTag: 328bb95f-4c6d-52e9-aceb-a82b92ea7af1
+
+	/// Formato: porcentagem, 2 casas. Participação no valor do contexto selecionado.
+	measure '% do valor' = DIVIDE ( [Valor total], CALCULATE ( [Valor total], ALLSELECTED () ) )
+		formatString: 0.00%
+		displayFolder: Valores financeiros
+		lineageTag: 598c91a7-46c6-5eba-95e2-3c145f1fd521
+
+	/// Formato: porcentagem, 2 casas. Participação no VAL_TOT dos k = INT(0,1·n) registros de maior
+	/// valor do contexto atual. O 2º critério de ordenação (registro_id) desempata o corte para que
+	/// TOPN devolva exatamente k registros (sem ele, TOPN inclui todos os empatados). Base completa:
+	/// 57,74%. A referência histórica de 58,20% NÃO foi reproduzida — não usar.
+	measure 'Concentração do valor - top 10%' =
+			VAR n = [Registros de AIH]
+			VAR k = INT ( n * 0.1 )
+			VAR topk =
+			    TOPN (
+			        k,
+			        fato_registro_aih,
+			        fato_registro_aih[valor_total_centavos], DESC,
+			        fato_registro_aih[registro_id], ASC
+			    )
+			RETURN
+			    IF ( k > 0, DIVIDE ( SUMX ( topk, fato_registro_aih[valor_total] ), [Valor total] ) )
+		formatString: 0.00%
+		displayFolder: Valores financeiros
+		lineageTag: 4f641643-ad83-5aa2-b495-8f18a9d2dc15
+
+	/// Formato: decimal, 2 casas. Média de DIAS_PERM por registro. ATENÇÃO: na AIH tipo 5 (longa
+	/// permanência) DIAS_PERM mede o período coberto por aquele registro (máx. 31 dias), não a
+	/// internação inteira. Analise por tipo de AIH. Base completa 6,12 · tipo 1: 5,93 · tipo 5: 27,90.
+	measure 'Permanência média (dias)' = AVERAGE ( fato_registro_aih[dias_permanencia] )
+		formatString: #,0.00
+		displayFolder: Permanência
+		lineageTag: 51725b47-def5-5226-a8cd-9a4c3af7deb0
+
+	/// Formato: decimal, 2 casas. Permanência média apenas da AIH principal (tipo 1): 5,93.
+	measure 'Permanência média - AIH principal' = CALCULATE ( [Permanência média (dias)], dim_tipo_aih[tipo_aih_cod] = "1" )
+		formatString: #,0.00
+		displayFolder: Permanência
+		lineageTag: 8988b952-e9cc-5f99-8494-6f0b1c459850
+
+	/// Formato: número inteiro. Registros com MORTE = 1.
+	measure 'Óbitos' = SUM ( fato_registro_aih[obito] )
+		formatString: #,0
+		displayFolder: Mortalidade
+		lineageTag: 8ce9546a-cc3c-5fa4-89dc-0b69ad0e0906
+
+	/// Formato: PORCENTAGEM, 2 casas (a medida retorna a razão; não multiplicar por 100). Numerador:
+	/// registros com óbito. Denominador: registros de AIH do contexto. Taxa BRUTA, por registro (não
+	/// por paciente nem por internação), sem ajuste por idade, gravidade ou casemix: não comparar
+	/// estabelecimentos ou grupos como medida de qualidade. Base completa: 0,063850 → 6,39%.
+	measure 'Mortalidade hospitalar (razão)' = DIVIDE ( [Óbitos], [Registros de AIH] )
+		formatString: 0.00%
+		displayFolder: Mortalidade
+		lineageTag: 9c90a694-2054-5c43-bb12-676416365c3f
+
+	/// Formato: decimal, 2 casas. Idade em anos convertida por COD_IDADE (fonte secundária). Registros
+	/// sem unidade de idade válida ficam em branco e não entram na média. Base: 43,85. (O valor
+	/// histórico 43,96 usava IDADE sem a unidade — critério incorreto.)
+	measure 'Idade média (anos)' = AVERAGE ( fato_registro_aih[idade_anos] )
+		formatString: #,0.00
+		displayFolder: Perfil
+		lineageTag: ada5f575-462c-5de0-83d1-8e21523c7437
+
+	/// Formato: porcentagem, 2 casas. Distribuições (faixa etária, sexo, especialidade, município):
+	/// participação no número de registros do contexto selecionado.
+	measure '% dos registros' = DIVIDE ( [Registros de AIH], CALCULATE ( [Registros de AIH], ALLSELECTED () ) )
+		formatString: 0.00%
+		displayFolder: Perfil
+		lineageTag: 8ffaf47e-7e97-53a9-9ff3-f0d59fc636cf
+
+	/// Formato: número inteiro. Estabelecimentos (CNES) com ao menos um registro no contexto.
+	measure 'Estabelecimentos com registros' = DISTINCTCOUNT ( fato_registro_aih[cnes] )
+		formatString: #,0
+		displayFolder: Abrangência
+		lineageTag: 641b35fd-c4bc-58b5-bdd3-f85e586dceb8
+
+	/// Formato: número inteiro. Municípios de residência distintos no contexto.
+	measure 'Municípios de residência' = DISTINCTCOUNT ( fato_registro_aih[municipio_residencia_cod] )
+		formatString: #,0
+		displayFolder: Abrangência
+		lineageTag: 23b94568-a4ea-5e3d-8131-bff951ba619c
+
+	/// Formato: porcentagem, 2 casas. Registros de caráter "Urgência" (CAR_INT = 02) sobre os registros
+	/// do contexto. Base completa: 69,27%.
+	measure '% registros de urgência' =
+			DIVIDE (
+			    CALCULATE ( [Registros de AIH], dim_carater[carater_cod] = "02" ),
+			    [Registros de AIH]
+			)
+		formatString: 0.00%
+		displayFolder: Perfil de atendimento
+		lineageTag: 5b2b2a90-1dc7-5e8d-82da-9bf4ad87b44f
+
+	/// Formato: porcentagem, 2 casas. Registros cujo município de RESIDÊNCIA difere do município do
+	/// ESTABELECIMENTO (atributo de dim_estabelecimento). Mede deslocamento para internação, não
+	/// "evasão" de um município específico. Base completa: 22,36%.
+	measure '% residentes de outro município' =
+			DIVIDE (
+			    SUMX (
+			        fato_registro_aih,
+			        IF (
+			            fato_registro_aih[municipio_residencia_cod]
+			                <> RELATED ( dim_estabelecimento[municipio_estabelecimento_cod] ),
+			            1
+			        )
+			    ),
+			    [Registros de AIH]
+			)
+		formatString: 0.00%
+		displayFolder: Perfil de atendimento
+		lineageTag: 727acc3c-b13e-5aa1-b180-0c0f72901e86
+
+	/// Formato: porcentagem, 2 casas. Registros de residentes fora do RJ (UF de residência ≠ 33). Base
+	/// completa: 0,38%.
+	measure '% residentes fora do RJ' =
+			DIVIDE (
+			    CALCULATE (
+			        [Registros de AIH],
+			        dim_municipio_residencia[uf_residencia_cod] <> "33"
+			    ),
+			    [Registros de AIH]
+			)
+		formatString: 0.00%
+		displayFolder: Perfil de atendimento
+		lineageTag: dc363ed7-4c6b-5e0d-83a1-dc384fe0800d
+
+	/// Formato: PORCENTAGEM, 2 casas. Mortalidade apenas na AIH principal (tipo 1), sem os registros de
+	/// longa permanência (apresentações sucessivas de uma mesma internação). Taxa bruta. Base completa:
+	/// 4.656 / 72.383 = 6,43%.
+	measure 'Mortalidade hospitalar - AIH principal (razão)' = CALCULATE ( [Mortalidade hospitalar (razão)], dim_tipo_aih[tipo_aih_cod] = "1" )
+		formatString: 0.00%
+		displayFolder: Perfil de atendimento
+		lineageTag: a6228876-8c66-522d-a153-f1dfc3261e85
+
+	/// Texto para o subtítulo dos visuais: base selecionada, sempre na unidade correta.
+	measure 'Subtítulo - contexto' =
+			FORMAT ( [Registros de AIH], "#,0", "pt-BR" ) & " registros de AIH · "
+			    & FORMAT ( [Estabelecimentos com registros], "#,0", "pt-BR" ) & " estabelecimentos · "
+			    & "competência 2024-01"
+		displayFolder: Rótulos dinâmicos (títulos e notas)
+		lineageTag: d0eb6fbd-72f3-5260-9c60-63c0d00a58f8
+
+	/// Formato: `#,0;#,0` (inteiro sem sinal). Pirâmide etária: o lado masculino é negativo para a
+	/// barra empilhada crescer para a esquerda; o formato esconde o sinal.
+	measure 'Registros - masculino (pirâmide)' =
+			- CALCULATE (
+			    [Registros de AIH],
+			    dim_perfil_demografico[sexo_descricao_oficial] = "Masculino"
+			)
+		formatString: #,0;#,0
+		displayFolder: Apoio aos visuais
+		lineageTag: d987d118-43eb-5aac-8756-a91113f3e3ca
+
+	/// Formato: `#,0;#,0` (inteiro sem sinal). Lado feminino da pirâmide etária.
+	measure 'Registros - feminino (pirâmide)' =
+			CALCULATE (
+			    [Registros de AIH],
+			    dim_perfil_demografico[sexo_descricao_oficial] = "Feminino"
+			)
+		formatString: #,0;#,0
+		displayFolder: Apoio aos visuais
+		lineageTag: 54295b7b-592a-5380-acd7-5b714ebd8874
+
+	/// Formato: moeda (R$), 2 casas. Valor total apenas dos 10 estabelecimentos de maior valor na
+	/// seleção; em branco para os demais (o visual mostra só o top 10).
+	measure 'Valor total - top 10 estabelecimentos' =
+			IF (
+			    ISINSCOPE ( dim_estabelecimento[estabelecimento_rotulo] )
+			        && RANKX (
+			            ALLSELECTED ( dim_estabelecimento[estabelecimento_rotulo] ),
+			            [Valor total], , DESC
+			        ) <= 10,
+			    [Valor total]
+			)
+		formatString: R$ #,0.00
+		displayFolder: Apoio aos visuais
+		lineageTag: 935c60f4-33d0-5a51-9d65-a58809a05aab
+
+	/// Formato: número inteiro. Registros dos 10 municípios de residência com mais registros.
+	measure 'Registros - top 10 municípios de residência' =
+			IF (
+			    ISINSCOPE ( dim_municipio_residencia[municipio_residencia_rotulo] )
+			        && RANKX (
+			            ALLSELECTED ( dim_municipio_residencia[municipio_residencia_rotulo] ),
+			            [Registros de AIH], , DESC
+			        ) <= 10,
+			    [Registros de AIH]
+			)
+		formatString: #,0
+		displayFolder: Apoio aos visuais
+		lineageTag: 4b983991-0aa0-5815-b466-f2ab710c866c
+
+	/// Formato: número inteiro. Registros dos 10 diagnósticos principais mais frequentes.
+	measure 'Registros - top 10 diagnósticos' =
+			IF (
+			    ISINSCOPE ( dim_diagnostico[diagnostico_rotulo] )
+			        && RANKX (
+			            ALLSELECTED ( dim_diagnostico[diagnostico_rotulo] ),
+			            [Registros de AIH], , DESC
+			        ) <= 10,
+			    [Registros de AIH]
+			)
+		formatString: #,0
+		displayFolder: Apoio aos visuais
+		lineageTag: f525f091-ba3b-5db3-9007-45a91e8f9156
+
+	/// Formato: porcentagem, 2 casas. Curva de Lorenz (tabela auxiliar estática, base completa).
+	measure 'Lorenz - % acumulado do valor' = MAX ( aux_curva_lorenz[pct_valor] )
+		formatString: 0.00%
+		displayFolder: Apoio aos visuais
+		lineageTag: a045ebd3-31da-5fb0-848d-75c2e0535e00
+
+	/// Formato: porcentagem, 2 casas. Linha de igualdade da curva de Lorenz.
+	measure 'Lorenz - linha de igualdade' = MAX ( aux_curva_lorenz[igualdade] )
+		formatString: 0.00%
+		displayFolder: Apoio aos visuais
+		lineageTag: b97529cc-bd65-5039-8314-ec0583408bd5
+
+	column Coluna
+		dataType: string
+		isHidden
+		lineageTag: d3d7b087-ac8d-5365-9394-d987b4729765
+		summarizeBy: none
+		sourceColumn: Coluna
+
+		annotation SummarizationSetBy = Automatic
+
+	partition _Medidas = m
+		mode: import
+		source =
+			#table(type table [Coluna = text], {})
+
+	annotation PBI_ResultType = Table

@@ -1,0 +1,165 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.13.0/schema.json",
+  "name": "40db2c880a0f548ca06b",
+  "position": {
+    "x": 524,
+    "y": 436,
+    "z": 800,
+    "width": 500,
+    "height": 236,
+    "tabOrder": 800
+  },
+  "visual": {
+    "visualType": "clusteredBarChart",
+    "drillFilterOtherVisuals": true,
+    "query": {
+      "queryState": {
+        "Category": {
+          "projections": [
+            {
+              "field": {
+                "Column": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "dim_diagnostico"
+                    }
+                  },
+                  "Property": "diagnostico_rotulo"
+                }
+              },
+              "queryRef": "dim_diagnostico.diagnostico_rotulo",
+              "nativeQueryRef": "diagnostico_rotulo",
+              "displayName": "Diagnóstico"
+            }
+          ]
+        },
+        "Y": {
+          "projections": [
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "_Medidas"
+                    }
+                  },
+                  "Property": "Registros - top 10 diagnósticos"
+                }
+              },
+              "queryRef": "_Medidas.Registros - top 10 diagnósticos",
+              "nativeQueryRef": "Registros - top 10 diagnósticos",
+              "displayName": "Registros"
+            }
+          ]
+        },
+        "Tooltips": {
+          "projections": [
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "_Medidas"
+                    }
+                  },
+                  "Property": "Óbitos"
+                }
+              },
+              "queryRef": "_Medidas.Óbitos",
+              "nativeQueryRef": "Óbitos"
+            },
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "_Medidas"
+                    }
+                  },
+                  "Property": "Mortalidade hospitalar (razão)"
+                }
+              },
+              "queryRef": "_Medidas.Mortalidade hospitalar (razão)",
+              "nativeQueryRef": "Mortalidade hospitalar (razão)"
+            }
+          ]
+        }
+      },
+      "sortDefinition": {
+        "sort": [
+          {
+            "field": {
+              "Measure": {
+                "Expression": {
+                  "SourceRef": {
+                    "Entity": "_Medidas"
+                  }
+                },
+                "Property": "Registros - top 10 diagnósticos"
+              }
+            },
+            "direction": "Descending"
+          }
+        ],
+        "isDefaultSort": false
+      }
+    },
+    "objects": {
+      "labels": [
+        {
+          "properties": {
+            "show": {
+              "expr": {
+                "Literal": {
+                  "Value": "true"
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    "visualContainerObjects": {
+      "title": [
+        {
+          "properties": {
+            "show": {
+              "expr": {
+                "Literal": {
+                  "Value": "true"
+                }
+              }
+            },
+            "text": {
+              "expr": {
+                "Literal": {
+                  "Value": "'Top 10 diagnósticos principais (registros)'"
+                }
+              }
+            }
+          }
+        }
+      ],
+      "subTitle": [
+        {
+          "properties": {
+            "show": {
+              "expr": {
+                "Literal": {
+                  "Value": "true"
+                }
+              }
+            },
+            "text": {
+              "expr": {
+                "Literal": {
+                  "Value": "'Descrições: SIGTAP tb_cid 2024-01'"
+                }
+              }
+            }
+          }
+        }
+      ]
+    }
+  }
+}

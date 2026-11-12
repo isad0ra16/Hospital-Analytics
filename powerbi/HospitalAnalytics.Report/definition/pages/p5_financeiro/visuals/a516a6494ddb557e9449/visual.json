@@ -1,0 +1,133 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.13.0/schema.json",
+  "name": "a516a6494ddb557e9449",
+  "position": {
+    "x": 676,
+    "y": 80,
+    "z": 400,
+    "width": 348,
+    "height": 300,
+    "tabOrder": 400
+  },
+  "visual": {
+    "visualType": "lineChart",
+    "drillFilterOtherVisuals": true,
+    "query": {
+      "queryState": {
+        "Category": {
+          "projections": [
+            {
+              "field": {
+                "Column": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "aux_curva_lorenz"
+                    }
+                  },
+                  "Property": "percentil"
+                }
+              },
+              "queryRef": "aux_curva_lorenz.percentil",
+              "nativeQueryRef": "percentil",
+              "displayName": "% acumulado de registros"
+            }
+          ]
+        },
+        "Y": {
+          "projections": [
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "_Medidas"
+                    }
+                  },
+                  "Property": "Lorenz - % acumulado do valor"
+                }
+              },
+              "queryRef": "_Medidas.Lorenz - % acumulado do valor",
+              "nativeQueryRef": "Lorenz - % acumulado do valor",
+              "displayName": "Valor acumulado"
+            },
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "_Medidas"
+                    }
+                  },
+                  "Property": "Lorenz - linha de igualdade"
+                }
+              },
+              "queryRef": "_Medidas.Lorenz - linha de igualdade",
+              "nativeQueryRef": "Lorenz - linha de igualdade",
+              "displayName": "Igualdade"
+            }
+          ]
+        }
+      },
+      "sortDefinition": {
+        "sort": [
+          {
+            "field": {
+              "Column": {
+                "Expression": {
+                  "SourceRef": {
+                    "Entity": "aux_curva_lorenz"
+                  }
+                },
+                "Property": "percentil"
+              }
+            },
+            "direction": "Ascending"
+          }
+        ],
+        "isDefaultSort": false
+      }
+    },
+    "visualContainerObjects": {
+      "title": [
+        {
+          "properties": {
+            "show": {
+              "expr": {
+                "Literal": {
+                  "Value": "true"
+                }
+              }
+            },
+            "text": {
+              "expr": {
+                "Literal": {
+                  "Value": "'Curva de Lorenz do valor'"
+                }
+              }
+            }
+          }
+        }
+      ],
+      "subTitle": [
+        {
+          "properties": {
+            "show": {
+              "expr": {
+                "Literal": {
+                  "Value": "true"
+                }
+              }
+            },
+            "text": {
+              "expr": {
+                "Literal": {
+                  "Value": "'Base completa (estática: não responde aos filtros)'"
+                }
+              }
+            }
+          }
+        }
+      ]
+    }
+  }
+}

@@ -16,7 +16,7 @@ import sys
 from decimal import Decimal
 from pathlib import Path
 
-from hospital_analytics import powerbi, reference_diagnose
+from hospital_analytics import pbip, powerbi, reference_diagnose
 from hospital_analytics.analysis import run_analysis
 from hospital_analytics.analysis import write_report as analysis_write
 from hospital_analytics.audit import run_audit
@@ -344,6 +344,45 @@ def cmd_powerbi(args: argparse.Namespace) -> int:
                 measures[measure].quantize(q),
             )
         )
+    checks.append(
+        powerbi.ModelCheck(
+            "dashboard: distinct AIH == records - repeated-AIH excess",
+            Decimal(expected["distinct_aih"]),
+            measures["aihs_distintas"],
+        )
+    )
+    analysis_path = root / "reports" / "analysis" / "analysis.json"
+    if analysis_path.is_file():
+        analysis = json.loads(analysis_path.read_text(encoding="utf-8"))
+        lorenz = powerbi.lorenz_points(out)
+        for point in analysis["lorenz"]:
+            p = point["records_pct"]
+            checks.append(
+                powerbi.ModelCheck(
+                    f"aux_curva_lorenz p={p} == analysis report (%, 2 decimals)",
+                    Decimal(point["value_pct"]),
+                    (lorenz[p] * 100).quantize(Decimal("0.01")),
+                )
+            )
+    reference_values = {
+        k: str(v.quantize(Decimal("0.000001"))) for k, v in sorted(measures.items())
+    }
+    (root / "reports" / "powerbi" / "medidas_referencia.json").write_text(
+        json.dumps(
+            {
+                "base": "completa (73.046 registros, competência 2024-01)"
+                if measures["registros_aih"] == 73046
+                else "completa",
+                "nota": "Valores exatos das medidas DAX equivalentes (razões não multiplicadas"
+                " por 100). Use-os para conferir os cartões no Power BI.",
+                "medidas": reference_values,
+            },
+            indent=2,
+            ensure_ascii=False,
+        )
+        + "\n",
+        "utf-8",
+    )
     failed = [c for c in checks if not c.passed]
     for check in checks:
         print(
@@ -355,6 +394,15 @@ def cmd_powerbi(args: argparse.Namespace) -> int:
         f" ({len(checks)} checks)"
     )
     return 0 if not failed else 1
+
+
+def cmd_pbip(args: argparse.Namespace) -> int:
+    """Generate the Power BI Project (TMDL semantic model + PBIR report) under powerbi/."""
+    root = args.root
+    measures = (root / "docs" / "powerbi" / "medidas.dax").read_text(encoding="utf-8")
+    written = pbip.write_project(root / "powerbi", measures)
+    print(f"written {len(written)} files under {_key(root / 'powerbi', root)}/")
+    return 0
 
 
 def cmd_reference_diagnose(args: argparse.Namespace) -> int:
@@ -476,6 +524,9 @@ def build_parser() -> argparse.ArgumentParser:
         "--incoming", type=Path, help="official reference files (default: data/reference/incoming)"
     )
     p.set_defaults(func=cmd_powerbi)
+
+    p = sub.add_parser("pbip", help="generate the Power BI Project (TMDL model + PBIR report)")
+    p.set_defaults(func=cmd_pbip)
 
     p = sub.add_parser(
         "reference-diagnose", help="read-only diagnostic of official reference files"

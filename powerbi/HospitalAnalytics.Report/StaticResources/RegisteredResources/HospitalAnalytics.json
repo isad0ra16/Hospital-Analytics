@@ -1,0 +1,37 @@
+{
+  "name": "Hospital Analytics",
+  "dataColors": [
+    "#2A78D6",
+    "#EC6B35",
+    "#1B9E77",
+    "#7570B3",
+    "#D95F02",
+    "#66A61E",
+    "#E6AB02",
+    "#A6761D",
+    "#666666"
+  ],
+  "background": "#FFFFFF",
+  "foreground": "#252423",
+  "tableAccent": "#2A78D6",
+  "good": "#1B9E77",
+  "neutral": "#E6AB02",
+  "bad": "#B03A2E",
+  "textClasses": {
+    "title": {
+      "fontFace": "Segoe UI Semibold",
+      "fontSize": 12,
+      "color": "#252423"
+    },
+    "label": {
+      "fontFace": "Segoe UI",
+      "fontSize": 10,
+      "color": "#3A3A3A"
+    },
+    "callout": {
+      "fontFace": "Segoe UI Semibold",
+      "fontSize": 24,
+      "color": "#2A78D6"
+    }
+  }
+}

@@ -1,0 +1,112 @@
+/// 1 linha por combinação faixa etária × sexo × raça/cor presente no fato (perfil, não paciente)
+table dim_perfil_demografico
+	lineageTag: 518bbd83-9077-5d14-9766-eac5b4ddde7b
+
+	/// Chave do perfil (origem: derivado)
+	column perfil_id
+		dataType: int64
+		formatString: 0
+		lineageTag: b9885b8d-8170-5e8c-8d3d-af95af76eadc
+		summarizeBy: none
+		sourceColumn: perfil_id
+
+		annotation SummarizationSetBy = User
+
+	/// Ordenação da faixa etária (99 = sem informação) (origem: COD_IDADE, IDADE)
+	column faixa_etaria_ordem
+		dataType: int64
+		formatString: 0
+		isHidden
+		lineageTag: e1acc3a9-f94e-5cd8-82fe-6beeea822b8c
+		summarizeBy: none
+		sourceColumn: faixa_etaria_ordem
+
+		annotation SummarizationSetBy = User
+
+	/// Faixa etária (idade em anos corrigida) (origem: COD_IDADE, IDADE)
+	column faixa_etaria
+		dataType: string
+		sortByColumn: faixa_etaria_ordem
+		lineageTag: 47af0f9e-92b7-5ab1-af89-54af3ccd5b18
+		summarizeBy: none
+		sourceColumn: faixa_etaria
+
+		annotation SummarizationSetBy = User
+
+	/// Código de sexo (origem: SEXO)
+	column sexo_cod
+		dataType: string
+		lineageTag: ed1a419a-758f-5c8c-9ce9-dd3d3715cb43
+		summarizeBy: none
+		sourceColumn: sexo_cod
+
+		annotation SummarizationSetBy = User
+
+	/// Sexo (fonte secundária) (origem: dicionário)
+	column sexo_descricao
+		dataType: string
+		displayFolder: Proveniência e fonte secundária
+		lineageTag: 7f544ab1-e025-5f6e-b23f-ea978a8caaa3
+		summarizeBy: none
+		sourceColumn: sexo_descricao
+
+		annotation SummarizationSetBy = User
+
+	/// Código de raça/cor (origem: RACA_COR)
+	column raca_cor_cod
+		dataType: string
+		lineageTag: f00d4908-7010-5df4-a08d-4798541863b5
+		summarizeBy: none
+		sourceColumn: raca_cor_cod
+
+		annotation SummarizationSetBy = User
+
+	/// Raça/cor (fonte secundária) (origem: dicionário)
+	column raca_cor_descricao
+		dataType: string
+		displayFolder: Proveniência e fonte secundária
+		lineageTag: b59cc851-f8df-5f44-8999-d1e5b62f8ba0
+		summarizeBy: none
+		sourceColumn: raca_cor_descricao
+
+		annotation SummarizationSetBy = User
+
+	/// Sexo (texto oficial) (origem: TabWin SIH/SUS SEXO.CNV)
+	column sexo_descricao_oficial
+		dataType: string
+		lineageTag: b8e1a9d1-ded6-5abd-be0c-c9c80f5ad26d
+		summarizeBy: none
+		sourceColumn: sexo_descricao_oficial
+
+		annotation SummarizationSetBy = User
+
+	/// Raça/cor (texto oficial) (origem: TabWin SIH/SUS RACACOR.CNV)
+	column raca_cor_descricao_oficial
+		dataType: string
+		lineageTag: 342eadd1-00f3-5b08-bf1c-9705f14ed67f
+		summarizeBy: none
+		sourceColumn: raca_cor_descricao_oficial
+
+		annotation SummarizationSetBy = User
+
+	partition dim_perfil_demografico = m
+		mode: import
+		source =
+			let
+			    Fonte = Csv.Document(File.Contents(PastaDados & "dim_perfil_demografico.csv"), [Delimiter = ",", Columns = 9, Encoding = 65001, QuoteStyle = QuoteStyle.Csv]),
+			    Cabecalho = Table.PromoteHeaders(Fonte, [PromoteAllScalars = true]),
+			    Tipos = Table.TransformColumnTypes(Cabecalho, {
+			        {"perfil_id", Int64.Type},
+			        {"faixa_etaria_ordem", Int64.Type},
+			        {"faixa_etaria", type text},
+			        {"sexo_cod", type text},
+			        {"sexo_descricao", type text},
+			        {"raca_cor_cod", type text},
+			        {"raca_cor_descricao", type text},
+			        {"sexo_descricao_oficial", type text},
+			        {"raca_cor_descricao_oficial", type text}
+			    }, "en-US")
+			in
+			    Tipos
+
+	annotation PBI_ResultType = Table

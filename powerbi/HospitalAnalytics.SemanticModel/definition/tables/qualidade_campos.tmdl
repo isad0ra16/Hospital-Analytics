@@ -1,0 +1,79 @@
+/// 1 linha por campo original do RD (reports/audit/audit_rdrj2401.json); sem relacionamento
+table qualidade_campos
+	lineageTag: d9da7233-8a3b-5ec5-b2c4-c99f9b56846e
+
+	/// Campo original do arquivo RD (origem: auditoria)
+	column campo
+		dataType: string
+		lineageTag: 308b1afa-2c31-573a-8f21-bf1add191812
+		summarizeBy: none
+		sourceColumn: campo
+
+		annotation SummarizationSetBy = User
+
+	/// Tipo e tamanho no DBF (origem: auditoria)
+	column tipo_dbf
+		dataType: string
+		lineageTag: 905dbec8-7b9d-5d9c-86a6-c45a2542e211
+		summarizeBy: none
+		sourceColumn: tipo_dbf
+
+		annotation SummarizationSetBy = User
+
+	/// Registros com o campo vazio (origem: auditoria)
+	column vazios
+		dataType: int64
+		formatString: 0
+		lineageTag: 27eb41e0-8e88-517f-9cfa-3b9e6707dcae
+		summarizeBy: none
+		sourceColumn: vazios
+
+		annotation SummarizationSetBy = User
+
+	/// % de registros com o campo vazio (origem: auditoria)
+	column pct_vazios
+		dataType: double
+		formatString: #,0.00
+		lineageTag: 7fad345d-28cd-5613-b32f-b8dbf2da2bf5
+		summarizeBy: none
+		sourceColumn: pct_vazios
+
+		annotation SummarizationSetBy = User
+
+	/// Valores distintos (origem: auditoria)
+	column distintos
+		dataType: int64
+		formatString: 0
+		lineageTag: 82689ac5-0623-5a21-8907-b3a5b7f050da
+		summarizeBy: none
+		sourceColumn: distintos
+
+		annotation SummarizationSetBy = User
+
+	/// sim / não (motivo) (origem: modelo)
+	column exportado_powerbi
+		dataType: string
+		lineageTag: 4bc1af89-70c2-55ac-97c2-ea5e1631b09f
+		summarizeBy: none
+		sourceColumn: exportado_powerbi
+
+		annotation SummarizationSetBy = User
+
+	partition qualidade_campos = m
+		mode: import
+		source =
+			let
+			    Fonte = Csv.Document(File.Contents(PastaDados & "qualidade_campos.csv"), [Delimiter = ",", Columns = 6, Encoding = 65001, QuoteStyle = QuoteStyle.Csv]),
+			    Cabecalho = Table.PromoteHeaders(Fonte, [PromoteAllScalars = true]),
+			    Tipos = Table.TransformColumnTypes(Cabecalho, {
+			        {"campo", type text},
+			        {"tipo_dbf", type text},
+			        {"vazios", Int64.Type},
+			        {"pct_vazios", type number},
+			        {"distintos", Int64.Type},
+			        {"exportado_powerbi", type text}
+			    }, "en-US")
+			in
+			    Tipos
+
+	annotation PBI_ResultType = Table

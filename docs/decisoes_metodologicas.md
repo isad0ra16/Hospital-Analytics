@@ -265,6 +265,67 @@ CADGERRJ, os bytes acentuados decodificam como `ÃÇÉÓÚ` em CP1252 e como des
 **Decisão:** leitor do SIGTAP com padrão CP1252 (posição em bytes = posição em caracteres
 preservada); CADGERRJ lido em CP1252. Diagnóstico em `docs/powerbi/diagnostico_referencias.md`.
 
+## D-035 — Integração das referências oficiais às dimensões
+**Status:** Adotada (etapa de enriquecimento, autorizada pela autora em 2026-11-11)
+**Decisão:** as dimensões recebem **somente colunas novas**, preenchidas por junção exata de código
+a partir da dimensão: SIGTAP 2024-01 (procedimento, grupo, subgrupo, forma de organização, CID-10),
+IBGE (município pelos 6 primeiros dígitos, prefixo único), CNES CADGERRJ (`FANTASIA`) e tabelas
+TabWin do SIH (D-036). Nova `dim_diagnostico` (3.759 códigos) ligada ao fato por
+`diagnostico_principal_cod`. Colunas existentes não mudam; o `fato_registro_aih.csv` permanece byte
+a byte idêntico (SHA-256 `1d1e038b…`, verificado a cada exportação).
+**Salvaguardas:** tamanho e SHA-256 de cada arquivo conferidos **antes** da leitura; chave de
+referência duplicada é erro; cada dimensão tem exatamente as chaves distintas do fato (sem
+*fan-out*); cobertura por coluna verificada (100% em todas) e nunca forçada — código sem
+correspondência fica vazio e reprova a verificação; do cadastro CNES só saem CNES e nome fantasia.
+
+## D-036 — Dicionário oficial do RD: tabelas TabWin do `TAB_SIH.zip`
+**Status:** Adotada
+**Evidência:** o `RD2008.DEF` do pacote oficial do SIH/SUS declara, para cada campo do RD, a tabela
+de conversão e a posição inicial (`ESPEC → LEITOS.CNV`, `IDENT → IDENT.CNV`, `CAR_INT →
+CARATEND.CNV`, `COMPLEX → COMPLEX2.CNV`, `SEXO`, `RACA_COR`, `NAT_JUR → natjur.cnv/esferajur.cnv`,
+`GESTAO`, `DIAG_PRINC → CID10CAP.CNV`, todas na posição 1).
+**Decisão:** somente os 11 arquivos necessários foram extraídos do pacote (o ZIP não é copiado), cada
+um com SHA-256 próprio em `config/params.yaml`. Os rótulos oficiais vão para colunas
+`*_oficial`/`descricao_oficial`, usadas nos visuais; a fonte secundária é mantida ao lado. A
+comparação está em `reports/reference/enriquecimento.md`: 3 divergências (especialidade 03
+"Clínico", tipo de AIH 1 "Normal", textos abreviados de caráter 05/06) — adotado o oficial.
+Resolve P-010 (`ESPEC` 10 "Leito Dia / Aids", 14 "Leito Dia / Saúde Mental", 87 "Saúde Mental
+(Clínico)").
+
+## D-037 — Precedência nas tabelas TabWin: duas regras que precisam concordar
+**Status:** Adotada
+**Contexto:** códigos aparecem em mais de uma categoria (faixa "pega-tudo" listada antes de códigos
+específicos, hierarquias pai/filho); a regra de precedência do formato não está documentada nos
+arquivos.
+**Decisão:** o leitor aplica "o item mais específico vence" (código exato, depois a faixa numérica
+mais estreita) e "o último listado vence"; se divergirem, ou houver empate, é erro — o rótulo nunca
+é adivinhado. Nos 12 arquivos reais, as duas regras concordam para todos os códigos do modelo. A
+chave de busca é o trecho do campo a partir da posição do `.DEF` com a largura do cabeçalho (ex.: 3
+primeiros caracteres da CID para o capítulo).
+
+## D-038 — Nomes de estabelecimentos: cadastro vigente, não o de 2024-01
+**Status:** Adotada, com limitação declarada
+**Decisão:** `estabelecimento_nome` vem do CADGERRJ atualizado em 2026-10-15 (o CNES não publica o
+nome no arquivo `ST` da competência). A fonte e a data acompanham cada linha
+(`estabelecimento_nome_fonte`). Dois nomes fantasia são compartilhados por 4 estabelecimentos:
+os visuais usam `estabelecimento_rotulo` = `nome (CNES)`, único.
+
+## D-039 — Data da consulta ao IBGE
+**Status:** Adotada, com limitação declarada
+**Decisão:** a hora da consulta à API não foi registrada; o carimbo de modificação do arquivo salvo
+pela autora (2026-11-10 19:19, UTC−03:00) é a evidência mais próxima e é registrado como tal
+(`file_timestamp`), não como data de consulta confirmada.
+
+## D-040 — Portabilidade Windows/Linux
+**Status:** Adotada
+**Decisão:** o decodificador C do `.dbc` roda em processo filho isolado (o código C não fecha o
+arquivo de saída quando rejeita a entrada; no Windows o arquivo ficava bloqueado e a limpeza
+falhava); todo I/O de texto declara `encoding` (teste estático impede regressão); o console nunca
+derruba um comando por não codificar um símbolo. Reprodução a partir de um *checkout* limpo no
+Windows, com ambiente criado pelo `uv.lock`, gerou Parquets, relatórios JSON/Markdown e as 13 CSVs
+**byte a byte idênticos** aos gerados no Linux. Exceção: as figuras PNG diferem em ~2–3% dos pixels
+(rasterização de texto); o conteúdo é o mesmo e as versionadas não são substituídas.
+
 ---
 
 ## Decisões pendentes
@@ -279,8 +340,8 @@ preservada); CADGERRJ lido em CP1252. Diagnóstico em `docs/powerbi/diagnostico_
 | ~~P-006~~ | Papel dos arquivos Parquet | **Resolvida:** `raw/RDRJ2401.parquet` (bruto) e `processed/sih_rj_2024_01_tratado.parquet` (D-021). O intermediário histórico `sih_rj_2024_01.parquet` não foi reconstruído (função desconhecida; não necessário) |
 | P-007 | Licença do projeto | Antes da Fase 6 |
 | ~~P-008~~ | Encoding | **Resolvida pela D-019** |
-| P-009 | Confirmar o dicionário na fonte primária (Informe Técnico SIH/SUS) | **Bloqueada** neste ambiente: requer download pela autora |
-| P-010 | Códigos de `ESPEC` 10, 14 e 87 (364 registros) | Aberta: ausentes da fonte secundária |
-| ~~P-011~~ | Grupos SIGTAP 02–05 (rótulos) | **Confirmados** pela `tb_grupo` oficial do SIGTAP 2024-01 (integração pendente de aprovação) |
-| P-012 | Enriquecimento oficial (IBGE, CNES, SIGTAP, CID-10) | **Bloqueada** neste ambiente; decisão A/B em `docs/powerbi/fontes_referencia.md` |
+| P-009 | Confirmar o dicionário na fonte primária (Informe Técnico SIH/SUS) | **Parcial:** rótulos dos códigos confirmados pelas tabelas oficiais do TabWin (D-036); a semântica de campos como `DIAS_PERM` na longa permanência segue sem documento primário |
+| ~~P-010~~ | Códigos de `ESPEC` 10, 14 e 87 (364 registros) | **Resolvida** por `LEITOS.CNV` (D-036) |
+| ~~P-011~~ | Grupos SIGTAP 02–05 (rótulos) | **Resolvida:** `tb_grupo` oficial integrada (`grupo_nome_sigtap`) |
+| ~~P-012~~ | Enriquecimento oficial (IBGE, CNES, SIGTAP, CID-10) | **Resolvida** (D-035 a D-039) |
 | P-013 | Publicação do `.pbix` (incorpora dados) | Decisão da autora após avaliação de privacidade |

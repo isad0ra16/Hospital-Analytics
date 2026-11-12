@@ -17,7 +17,9 @@
           │
           ├── make audit       (audit.py + sql/audit/*.sql)        → reports/audit/
           ├── make indicators  (indicators.py: Pandas × sql/indicators/*.sql) → reports/indicators/
-          └── make analysis    (analysis.py + sql/analysis/*.sql)  → reports/analysis/ (+ figuras)
+          ├── make analysis    (analysis.py + sql/analysis/*.sql)  → reports/analysis/ (+ figuras)
+          └── make powerbi     (powerbi.py + enrichment.py + sql/powerbi/*.sql) → data/powerbi/
+                 ▲ referências oficiais verificadas      └── make pbip (pbip.py) → powerbi/*.pbip
 ```
 
 ## Módulos (`src/hospital_analytics/`)
@@ -37,7 +39,11 @@
 | `audit.py` | auditoria de qualidade | ambas as camadas | `reports/audit/` |
 | `indicators.py` | indicadores, duas engines, reconciliação | camada tratada | `reports/indicators/` |
 | `analysis.py` | análises exploratórias descritivas e gráficos (matplotlib) | camada tratada | `reports/analysis/` |
-| `powerbi.py` | modelo estrela para Power BI: exportação CSV/Parquet, dicionário, Power Query, validação | camada tratada + relatórios | `data/powerbi/`, `reports/powerbi/`, `docs/powerbi/` |
+| `reference.py` | leitores das referências oficiais (SIGTAP de largura fixa pelo leiaute do próprio ZIP, IBGE, tabelas TabWin `.cnv`), chaves, cobertura, guarda de enriquecimento | arquivos oficiais | — |
+| `reference_diagnose.py` | diagnóstico somente leitura das referências (integridade antes da leitura) | `data/reference/incoming/` | `reports/reference/` |
+| `enrichment.py` | carrega as referências verificadas (SHA-256) como tabelas de código únicas; rótulos oficiais dos códigos do RD | `data/reference/incoming/` | — |
+| `powerbi.py` | modelo estrela enriquecido: exportação CSV/Parquet, dicionário, Power Query, validação (122 verificações), relatório de enriquecimento | camada tratada + referências + relatórios | `data/powerbi/`, `reports/powerbi/`, `reports/reference/`, `docs/powerbi/` |
+| `pbip.py` | projeto Power BI (PBIP): modelo TMDL + relatório PBIR de 6 páginas, gerados do esquema e de `medidas.dax` | esquema + `docs/powerbi/medidas.dax` | `powerbi/`, `docs/powerbi/paginas.md` |
 | `cli.py` | comandos `hospital-analytics …` | — | — |
 
 ## Princípios de projeto

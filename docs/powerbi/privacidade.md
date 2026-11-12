@@ -14,6 +14,15 @@ Lista completa em [`dicionario_campos.md`](dicionario_campos.md).
 **Não é anonimização:** quem tiver o arquivo público original pode reconstruir a correspondência.
 Serve para não expor o número da AIH em visuais e arquivos derivados.
 
+## Nomes oficiais acrescentados (enriquecimento)
+
+Do cadastro CNES (CADGERRJ) só são lidos o código CNES e o **nome fantasia** dos estabelecimentos
+presentes no fato — todos pessoas jurídicas (CNPJ de 14 dígitos nos 240; nenhum nome com sequência
+de 11+ dígitos ou título pessoal, ver `diagnostico_referencias.md`). Razão social, CNPJ, endereço,
+telefone e e-mail **nunca** são carregados (teste em `tests/test_enrichment.py`). Nomes de municípios
+(IBGE), procedimentos e diagnósticos (SIGTAP) são tabelas públicas de códigos e não aumentam o risco
+de reidentificação além do que os códigos já permitiam.
+
 ## Medição (k-anonimato) — registros únicos na base de 73.046
 
 | Quasi-identificadores | Únicos (k = 1) | k < 5 |

@@ -32,11 +32,11 @@ de permanência usam `DIAS_PERM` (reproduz o histórico 6,12 / 5,93 / 27,90) e d
                                     ▼ ▼
  dim_estabelecimento ── cnes ─▶ ┌──────────────────────┐ ◀─ municipio_residencia_cod ── dim_municipio_residencia
  dim_procedimento ── proc. ────▶ │  fato_registro_aih   │ ◀─ perfil_id ── dim_perfil_demografico
- dim_especialidade ─────────────▶ │  1 linha = 1 registro│ ◀─ tipo_aih_cod ── dim_tipo_aih
- dim_carater ───────────────────▶ │  de AIH (73.046)     │ ◀─ complexidade_cod ── dim_complexidade
-                                  └──────────────────────┘
+ dim_diagnostico ── CID ───────▶ │  1 linha = 1 registro│ ◀─ tipo_aih_cod ── dim_tipo_aih
+ dim_especialidade ─────────────▶ │  de AIH (73.046)     │ ◀─ complexidade_cod ── dim_complexidade
+ dim_carater ───────────────────▶ └──────────────────────┘
 
- Tabelas auxiliares, sem relacionamento: ref_indicadores_validados · qualidade_campos
+ Tabelas auxiliares, sem relacionamento: ref_indicadores_validados · qualidade_campos · aux_curva_lorenz
 ```
 
 | Tabela | Granularidade | Linhas | Chave |
@@ -46,10 +46,30 @@ de permanência usam `DIAS_PERM` (reproduz o histórico 6,12 / 5,93 / 27,90) e d
 | `dim_estabelecimento` | CNES | 240 | `cnes` |
 | `dim_municipio_residencia` | município de residência | 262 | `municipio_residencia_cod` |
 | `dim_procedimento` | procedimento SIGTAP realizado | 1.094 | `procedimento_cod` |
+| `dim_diagnostico` | código CID-10 do diagnóstico principal | 3.759 | `diagnostico_cod` |
 | `dim_especialidade` · `dim_carater` · `dim_complexidade` · `dim_tipo_aih` | código | 12 · 4 · 2 · 2 | `*_cod` |
 | `dim_perfil_demografico` | faixa etária × sexo × raça/cor | 78 | `perfil_id` |
 | `ref_indicadores_validados` | indicador reconciliado | 26 | `indicador_id` |
 | `qualidade_campos` | campo original do RD | 113 | `campo` |
+| `aux_curva_lorenz` | percentil de registros (0–100), base completa | 101 | `percentil` |
+
+### Nomes e descrições oficiais (enriquecimento)
+
+Colunas **acrescentadas** às dimensões por código exato (nenhuma coluna original foi alterada;
+fato byte a byte idêntico). Cobertura: **100%** em todas — `reports/reference/enriquecimento.md`.
+
+| Dimensão | Colunas para os visuais | Fonte oficial |
+|---|---|---|
+| `dim_estabelecimento` | `estabelecimento_rotulo` (nome + CNES), `municipio_estabelecimento_nome`, `esfera_juridica`, `natureza_juridica_descricao`, `gestao_descricao` | CNES CADGERRJ (cadastro de 2026-10-15), IBGE, TabWin SIH |
+| `dim_municipio_residencia` | `municipio_residencia_rotulo`, `municipio_residencia_nome`, `uf_residencia_sigla`, `municipio_residencia_ibge` (7 dígitos, para mapas) | IBGE |
+| `dim_procedimento` | `procedimento_nome`, `grupo_nome_sigtap`, `subgrupo_nome`, `forma_organizacao_nome` | SIGTAP 2024-01 |
+| `dim_diagnostico` | `diagnostico_rotulo`, `categoria_nome`, `capitulo` (ordenar por `capitulo_ordem`) | SIGTAP 2024-01 (`tb_cid`), TabWin SIH (`CID10CAP.CNV`) |
+| códigos (`dim_especialidade` …) | `descricao_oficial` | TabWin SIH (`LEITOS`, `CARATEND`, `COMPLEX2`, `IDENT`) |
+| `dim_perfil_demografico` | `sexo_descricao_oficial`, `raca_cor_descricao_oficial` | TabWin SIH (`SEXO`, `RACACOR`) |
+
+Limitações: o nome do estabelecimento é o do cadastro **vigente no download**, não o de 2024-01
+(D-038); a data da consulta ao IBGE é o carimbo do arquivo (D-039); textos oficiais mantidos
+literais, inclusive abreviações ("Out tp lesões e envenen…") e grafias ("orgãos").
 
 ## Relacionamentos
 
@@ -62,6 +82,7 @@ Todos **muitos-para-um**, direção de filtro **única** (dimensão → fato), s
 | `cnes` | `dim_estabelecimento[cnes]` | sim |
 | `municipio_residencia_cod` | `dim_municipio_residencia[...]` | sim |
 | `procedimento_cod` | `dim_procedimento[procedimento_cod]` | sim |
+| `diagnostico_principal_cod` | `dim_diagnostico[diagnostico_cod]` | sim |
 | `especialidade_cod`, `carater_cod`, `complexidade_cod`, `tipo_aih_cod` | dimensões de código | sim |
 | `perfil_id` | `dim_perfil_demografico[perfil_id]` | sim |
 
@@ -71,9 +92,12 @@ Todos **muitos-para-um**, direção de filtro **única** (dimensão → fato), s
 estabelecimento nunca se confundem. A única relação inativa é a segunda data, ativada apenas
 dentro de medidas.
 
-Validação automática (`make powerbi`, 64 verificações): chaves únicas e não nulas; **0 órfãos** nas
-10 relações; *join* com todas as dimensões ativas preserva 73.046 linhas e R$ 125.440.636,13;
-medidas equivalentes recalculadas sobre os CSV iguais aos indicadores validados.
+Validação automática (`make powerbi`, 122 verificações): chaves únicas e não nulas (14 tabelas);
+**0 órfãos** nas 11 relações; cada dimensão tem exatamente as chaves distintas do fato (sem
+*fan-out*); *join* com todas as dimensões ativas preserva 73.046 linhas e R$ 125.440.636,13;
+cobertura de 100% em cada coluna enriquecida; `fato_registro_aih.csv` byte a byte idêntico à
+exportação anterior; medidas equivalentes iguais aos indicadores validados; curva de Lorenz igual
+à do relatório de análise.
 
 ## AIHs repetidas e longa permanência
 
@@ -85,8 +109,8 @@ medidas equivalentes recalculadas sobre os CSV iguais aos indicadores validados.
 
 ## Interpretação dos códigos
 
-Rótulos das dimensões de código vêm de fonte **secundária** (`microdatasus`) ou de conhecimento
-prévio não verificado — a coluna `fonte` de cada dimensão declara qual. Códigos sem rótulo
-(`ESPEC` 10, 14, 87) aparecem com descrição vazia e `fonte = "sem rótulo na fonte disponível"`.
-Nomes de municípios, estabelecimentos, procedimentos e diagnósticos dependem de tabelas oficiais
-ainda não integradas (ver [`fontes_referencia.md`](fontes_referencia.md)).
+Cada dimensão de código tem duas descrições: `descricao` (fonte **secundária**, `microdatasus`, ou
+conhecimento prévio — coluna `fonte`) e `descricao_oficial` (tabela de conversão do pacote oficial
+do SIH/SUS para o TabWin — coluna `fonte_oficial`). **Os visuais usam a oficial**; a secundária é
+mantida para rastrear a comparação (`reports/reference/enriquecimento.md`, decisão D-036). `ESPEC`
+10, 14 e 87, sem rótulo na fonte secundária, têm rótulo oficial.

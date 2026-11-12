@@ -1,5 +1,9 @@
 # Plano operacional de enriquecimento — fontes oficiais de referência
 
+> **Revisão 6 (2026-11-11): integração concluída e autorizada.** Colunas oficiais acrescentadas às
+> dimensões, nova `dim_diagnostico`, rótulos do dicionário TabWin do SIH (`TAB_SIH.zip`); os 7
+> testes de aceitação abaixo são verificados a cada `make powerbi` (D-035 a D-040).
+>
 > **Revisão 5:** diagnóstico concluído para todas as fontes (inclui CADGERRJ, TP_PFPJ.CNV,
 > RJ_municip.cnv e Estabelecimento.def; 7/7 arquivos A1). Resultados, riscos e colunas propostas em
 > [`diagnostico_referencias.md`](diagnostico_referencias.md). Integração aguarda aprovação.

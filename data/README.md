@@ -17,6 +17,8 @@ impressão digital do conteúdo. Detecta republicações do DATASUS e qualquer a
 |---|---|
 | `raw/RDRJ2401.dbc` | Original do DATASUS (somente leitura) |
 | `raw/RDRJ2401.parquet` | Conversão direta, sem tratamento: 113 colunas de texto |
+| `reference/incoming/` | Arquivos oficiais de referência (SIGTAP, IBGE, CNES, TabWin SIH), exatamente como obtidos; conferidos por tamanho e SHA-256 (`config/params.yaml`) antes de qualquer leitura |
+| `powerbi/` | Modelo estrela exportado (CSV UTF-8) para o Power BI; regenerado por `make powerbi` |
 
 Recuperação do zero: `make fetch-data && make convert && make validate`
 (ver [`docs/recuperacao_dados.md`](../docs/recuperacao_dados.md)).

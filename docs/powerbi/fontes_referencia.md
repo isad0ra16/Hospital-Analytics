@@ -1,6 +1,11 @@
 # Fontes oficiais para enriquecimento (nomes e descrições)
 
-> **Situação: investigação — nada incorporado.** Do ambiente de execução, **todos** os servidores
+> **Situação (2026-11-11): integrado.** As fontes oficiais foram obtidas pela autora, conferidas por
+> SHA-256 e integradas às dimensões (decisões D-035 a D-039; cobertura em
+> [`reports/reference/enriquecimento.md`](../../reports/reference/enriquecimento.md)). O texto abaixo
+> registra a investigação inicial e é mantido como histórico.
+>
+> **Situação anterior: investigação — nada incorporado.** Do ambiente de execução, **todos** os servidores
 > oficiais testados foram recusados pela política de rede (HTTP 403 no proxy, 2026-11-10):
 > `servicodados.ibge.gov.br`, `www.ibge.gov.br`, `ftp.ibge.gov.br`, `sigtap.datasus.gov.br`,
 > `cnes.datasus.gov.br`, `apidadosabertos.saude.gov.br`, `dadosabertos.saude.gov.br`,

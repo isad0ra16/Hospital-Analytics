@@ -1,6 +1,8 @@
 # Diagnóstico das referências oficiais — enriquecimento das dimensões
 
-> **Status:** diagnóstico concluído; **integração não autorizada**. Nenhuma dimensão de produção e
+> **Status:** diagnóstico concluído; **integração realizada em 2026-11-11** (D-035 a D-039) —
+> resultado em [`reports/reference/enriquecimento.md`](../../reports/reference/enriquecimento.md).
+> Texto original do diagnóstico: Nenhuma dimensão de produção e
 > nenhum arquivo do fato foram alterados (`fato_registro_aih.csv` byte a byte idêntico ao de
 > `reports/powerbi/export_summary.json`). Relatório sanitizado: apenas agregados — nenhum nome,
 > CPF/CNPJ, endereço, telefone ou e-mail. Dados completos: `reports/reference/diagnostico_referencias.json`

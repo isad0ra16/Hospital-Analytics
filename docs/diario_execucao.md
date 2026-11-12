@@ -114,3 +114,29 @@ Branch `work/powerbi-model` (a partir do `-v3`; `main` inalterado — substitui�
   total R$ 125.440.636,13, medidas = indicadores validados). Testes: 175 ✅.
 - Enriquecimento oficial: todos os hosts candidatos recusados pela política de rede → pendente
   (P-012), plano em `docs/powerbi/fontes_referencia.md`.
+
+## 2026-11-11 — Execução local (Windows), enriquecimento oficial e projeto Power BI
+
+Branch `work/reference-enrichment`, primeira execução fora do contêiner, no Windows da autora.
+
+- **Ambiente:** uv 0.13.7, Python 3.13.18, `uv sync --locked` sem alterações. Dados copiados da pasta
+  de origem para `data/raw/` e `data/reference/incoming/` com tamanho e SHA-256 conferidos antes e
+  depois (8 arquivos) e 11 membros extraídos de `TAB_SIH.zip` (CRC e SHA-256); `TAB_CNES.zip` não
+  copiado. Originais intocados.
+- **Portabilidade (D-040):** 11 testes falhavam no Windows (bash do WSL, arquivo somente leitura,
+  `.dbf` preso pelo decodificador C). Corrigido sem afrouxar verificações; mais dois defeitos achados
+  ao rodar o pipeline real (leitura UTF-8 sem `encoding`, console cp1252) e protegidos por teste.
+- **Reprodução:** a partir de um *checkout* limpo com ambiente do `uv.lock`, Parquets, relatórios
+  JSON/Markdown e as 13 CSVs saíram **byte a byte idênticos** aos gerados no Linux; duas exportações
+  seguidas, idênticas. Figuras PNG diferem só na rasterização (versionadas mantidas).
+- **Enriquecimento (D-035 a D-039):** SIGTAP 2024-01, IBGE, CNES e dicionário TabWin do SIH
+  integrados; nova `dim_diagnostico`; cobertura de 100% em todas as colunas; fato byte a byte idêntico
+  (`1d1e038b…`). Resolve P-010, P-011, P-012; P-009 parcial.
+- **Modelo e medidas:** tabela auxiliar da curva de Lorenz (igual ao relatório de análise), 31 medidas
+  DAX com equivalentes SQL conferidos (`reports/powerbi/medidas_referencia.json`). `make powerbi`:
+  **122/122** verificações.
+- **Dashboard:** projeto PBIP gerado (`powerbi/`, modelo TMDL + 6 páginas PBIR), JSON validados contra
+  os esquemas oficiais da Microsoft. **Não aberto no Power BI Desktop** (não instalado); a validação do
+  TMDL com a biblioteca oficial TOM foi bloqueada pela política do ambiente. Passos restantes em
+  `docs/powerbi/README.md`.
+- **Testes:** 342 ✅ · ruff ✅.

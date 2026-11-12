@@ -1,4 +1,4 @@
-.PHONY: hooks hooks-uninstall help install install-notebook test lint format check fetch-data verify convert validate processed audit indicators analysis powerbi pipeline
+.PHONY: hooks hooks-uninstall help install install-notebook test lint format check fetch-data verify convert validate processed audit indicators analysis reference-diagnose powerbi pbip pipeline
 
 help:  ## List available targets
 	@grep -E '^[a-zA-Z_-]+:.*?## ' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "  %-18s %s\n", $$1, $$2}'
@@ -46,10 +46,16 @@ indicators:  ## Historical indicators, pandas x DuckDB -> reports/indicators/
 analysis:  ## Descriptive exploratory analyses -> reports/analysis/
 	uv run hospital-analytics analysis
 
-powerbi:  ## Export the Power BI star schema to data/powerbi/ (CSV) and validate it
+reference-diagnose:  ## Read-only diagnostic of the official reference files -> reports/reference/
+	uv run hospital-analytics reference-diagnose
+
+powerbi:  ## Export the enriched star schema to data/powerbi/ (CSV) and validate it (needs data/reference/incoming)
 	uv run hospital-analytics powerbi
 
-pipeline: convert validate processed audit indicators analysis powerbi  ## Everything after fetch-data
+pbip:  ## Generate the Power BI Project (TMDL model + PBIR report) under powerbi/
+	uv run hospital-analytics pbip
+
+pipeline: convert validate processed audit indicators analysis powerbi pbip  ## Everything after fetch-data
 
 hooks:  ## Enable the versioned git hooks (scripts/git-hooks) for this clone - explicit opt-in
 	git config core.hooksPath scripts/git-hooks

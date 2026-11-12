@@ -30,6 +30,28 @@ Se a Release estiver indisponível, baixar do FTP oficial (`official_url` no man
 versão do arquivo: ela deve ser registrada como **nova fonte**, nunca substituir a atual, e todos
 os indicadores precisam ser reconciliados novamente.
 
+## Arquivos oficiais de referência
+
+Os nomes oficiais das dimensões vêm de arquivos baixados pela autora das fontes oficiais. Cada um está
+declarado em `config/params.yaml` (`reference_sources`) com origem, competência, tamanho e SHA-256, e é
+conferido **antes** de ser lido (`make verify` lista todos). Para reconstruir
+`data/reference/incoming/` (pasta ignorada pelo git):
+
+| Arquivo(s) | Origem oficial | Observação |
+|---|---|---|
+| `TabelaUnificada_202401_v2402072029.zip` | `ftp2.datasus.gov.br/pub/sistemas/tup/downloads/` | SIGTAP, competência 2024-01; copiar o ZIP |
+| `municipios_ibge.json` | `servicodados.ibge.gov.br/api/v1/localidades/municipios` | a API não versiona: outra consulta pode ter outro SHA-256 → registrar como nova versão |
+| `STRJ2401.dbc` | `ftp.datasus.gov.br/dissemin/publicos/CNES/200508_/Dados/ST/` | usado só pelo diagnóstico |
+| `CADGERRJ.dbf`, `RJ_municip.cnv`, `TP_PFPJ.CNV`, `Estabelecimento.def` | membros `DBF/`, `CNV/` e raiz de `TAB_CNES.zip` (`…/CNES/200508_/Auxiliar/`) | extrair só esses (o ZIP tem 128 MB) |
+| `RD2008.DEF` e 10 arquivos `.CNV` (`LEITOS`, `IDENT`, `CARATEND`, `COMPLEX2`, `SEXO`, `RACACOR`, `natjur`, `esferajur`, `GESTAO`, `CID10CAP`) | membros de `TAB_SIH.zip` (`…/SIHSUS/200801_/Auxiliar/`) | extrair só esses; SHA-256 do ZIP também registrado |
+
+Os pacotes auxiliares do DATASUS são atualizados sem versão no nome: um download novo pode trazer
+membros diferentes. Se algum SHA-256 divergir, o arquivo **não é lido** — registre a nova versão em
+`config/params.yaml` (com data e origem) e reconcilie a cobertura (`make powerbi`).
+
+Recomendação: arquivar estes arquivos como o `.dbc` (Release própria, ex.: `ref-2024-01`) — hoje eles
+existem só na cópia local da autora.
+
 ## Identificação da versão dos dados
 
 O DATASUS não versiona os arquivos. A versão é identificada por:

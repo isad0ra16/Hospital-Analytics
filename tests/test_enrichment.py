@@ -146,3 +146,13 @@ def test_personal_fields_of_the_cnes_registry_are_never_exported(tmp_path, proce
     assert "RAZAO SOCIAL SECRETA" not in content
     assert "11111111000191" not in content
     assert "CLINICA FORA DO MODELO" not in content  # only establishments present in the fact
+
+
+def test_synthetic_reference_files_are_deterministic(tmp_path):
+    """The reproducibility tests rebuild these files; their bytes must not depend on the clock."""
+    import time
+
+    first = build_references(tmp_path / "a")
+    time.sleep(2.1)  # longer than the 2-second resolution of ZIP timestamps
+    second = build_references(tmp_path / "b")
+    assert {k: v["sha256"] for k, v in first.items()} == {k: v["sha256"] for k, v in second.items()}

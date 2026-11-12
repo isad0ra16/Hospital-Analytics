@@ -127,8 +127,13 @@ def build_references(directory: Path, *, sigtap_tables: dict | None = None) -> d
     sigtap = directory / "TabelaUnificada_SYNTH.zip"
     with zipfile.ZipFile(sigtap, "w") as zf:
         for table, (fields, rows) in (sigtap_tables or SIGTAP_TABLES).items():
-            zf.writestr(f"{table}_layout.txt", layout(*fields))
-            zf.writestr(f"{table}.txt", fixed_rows(tuple(w for _, w in fields), rows))
+            # Fixed member timestamps: writestr() would stamp the current time, so two builds a
+            # few seconds apart would produce different bytes (and different SHA-256).
+            for name, content in (
+                (f"{table}_layout.txt", layout(*fields)),
+                (f"{table}.txt", fixed_rows(tuple(w for _, w in fields), rows)),
+            ):
+                zf.writestr(zipfile.ZipInfo(name, date_time=(2024, 2, 7, 20, 29, 0)), content)
     municipios = [ibge(3304557, "Rio de Janeiro", 33, "RJ"), ibge(3500001, "Sintética", 35, "SP")]
     (directory / "municipios.json").write_text(json.dumps(municipios), encoding="utf-8")
     write(

@@ -37,7 +37,7 @@ from hospital_analytics.enrichment import (
 )
 from hospital_analytics.indicators import run_indicators
 from hospital_analytics.indicators import write_report as indicators_write
-from hospital_analytics.integrity import sha256_file
+from hospital_analytics.integrity import check_declared
 from hospital_analytics.manifest import (
     ManifestError,
     load_manifest,
@@ -449,13 +449,13 @@ def cmd_verify(args: argparse.Namespace) -> int:
     incoming = root / "data" / "reference" / "incoming"
     for name, spec in load_params()["reference_sources"].items():
         path = incoming / spec["filename"]
-        if not path.is_file():
+        result = check_declared(path, spec)
+        if not result["present"]:
             needed = name in REQUIRED_SOURCES
             status = "MISSING (required by powerbi)" if needed else "not stored (optional)"
         else:
-            ok = path.stat().st_size == spec["size_bytes"] and sha256_file(path) == spec["sha256"]
-            status = "OK" if ok else "SIZE/SHA-256 MISMATCH"
-            all_ok = all_ok and ok
+            status = "OK" if result["integrity_ok"] else "SIZE/SHA-256 MISMATCH"
+            all_ok = all_ok and result["integrity_ok"]
         print(f"[reference] {_key(path, root) if path.is_file() else spec['filename']}: {status}")
     return 0 if all_ok else 1
 

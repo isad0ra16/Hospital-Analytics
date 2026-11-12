@@ -17,8 +17,29 @@ from __future__ import annotations
 import hashlib
 from collections.abc import Iterable, Sequence
 from pathlib import Path
+from typing import Any
 
 _CHUNK_SIZE = 1 << 20  # 1 MiB
+
+
+def check_declared(path: Path, spec: dict[str, Any]) -> dict[str, Any]:
+    """Presence, size and SHA-256 of ``path`` against the values declared in ``spec``
+    (``size_bytes`` and ``sha256``, as in ``config/params.yaml``). ``integrity_ok`` is False when
+    either declared value differs; a value that is not declared is not checked."""
+    if not path.is_file():
+        return {"file": path.name, "present": False}
+    result: dict[str, Any] = {
+        "file": path.name,
+        "present": True,
+        "size_bytes": path.stat().st_size,
+        "sha256": sha256_file(path),
+    }
+    if "size_bytes" in spec:
+        result["size_ok"] = result["size_bytes"] == spec["size_bytes"]
+    if "sha256" in spec:
+        result["sha256_ok"] = result["sha256"] == spec["sha256"].lower()
+    result["integrity_ok"] = result.get("size_ok", True) and result.get("sha256_ok", True)
+    return result
 
 
 def sha256_file(path: Path) -> str:

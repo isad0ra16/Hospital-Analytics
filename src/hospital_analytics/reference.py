@@ -250,42 +250,6 @@ def fact_unchanged(export_summary: Path, fact_csv: Path) -> bool:
 # TabWin conversion files (.cnv)
 # ---------------------------------------------------------------------------
 @dataclass(frozen=True)
-class CnvCategory:
-    sequence: int
-    label: str
-    codes: tuple[str, ...]  # single codes, ranges "a-b", or "" (blank value)
-
-
-def read_cnv(path: Path, encoding: str = "cp1252") -> tuple[tuple[str, ...], list[CnvCategory]]:
-    """Read a TabWin ``.cnv`` file as observed in the official files (RJ_municip.cnv, TP_PFPJ.CNV).
-
-    First line: header tokens (category count, code width, optional flags). Each further line:
-    sequence number, label, and the comma-separated codes (last token). The category count in
-    the header must match. Overlapping codes are kept as published (precedence is not inferred).
-    """
-    lines = [ln for ln in Path(path).read_bytes().decode(encoding).splitlines() if ln.strip()]
-    if not lines:
-        raise ReferenceFormatError(f"{Path(path).name}: empty file")
-    header = tuple(lines[0].split())
-    if not header or not header[0].isdigit():
-        raise ReferenceFormatError(f"{Path(path).name}: header must start with the category count")
-    categories = []
-    for line in lines[1:]:
-        tokens = line.split()
-        if len(tokens) < 3 or not tokens[0].isdigit():
-            raise ReferenceFormatError(f"{Path(path).name}: unexpected line {line!r}")
-        codes = tokens[-1]
-        start = line.index(tokens[0]) + len(tokens[0])
-        label = line[start : line.rindex(codes)].strip()
-        categories.append(CnvCategory(int(tokens[0]), label, tuple(codes.split(","))))
-    if int(header[0]) != len(categories):
-        raise ReferenceFormatError(
-            f"{Path(path).name}: header declares {header[0]} categories, found {len(categories)}"
-        )
-    return header, categories
-
-
-@dataclass(frozen=True)
 class CnvEntry:
     """One category of a TabWin conversion table, with every code item and its file line."""
 
@@ -303,6 +267,12 @@ class CnvTable:
     flags: tuple[str, ...]
     width: int
     entries: tuple[CnvEntry, ...]
+    header: tuple[str, ...] = ()  # first line, as published
+
+    def matches(self, value: str, start: int = 1) -> list[CnvEntry]:
+        """Every category listing ``value`` (file order), without applying precedence."""
+        key = self.key(value, start)
+        return [e for e in self.entries if any(_item_matches(i, key) for i, _ in e.items)]
 
     def entry(self, sequence: str) -> CnvEntry:
         return next(e for e in self.entries if int(e.sequence) == int(sequence))
@@ -435,7 +405,7 @@ def read_cnv_table(path: Path, encoding: str = "cp1252") -> CnvTable:
         CnvEntry(d["sequence"], d["parent"], d["label"], tuple(dict.fromkeys(d["items"])))
         for d in (data[k] for k in order)
     )
-    return CnvTable(path.name, flags, width, entries)
+    return CnvTable(path.name, flags, width, entries, tuple(header))
 
 
 def clean_label(label: str, code: str) -> str:
@@ -448,24 +418,3 @@ def clean_label(label: str, code: str) -> str:
         if label.startswith(code + sep) and len(label) > len(code) + 1:
             return label[len(code) + 1 :].strip()
     return label
-
-
-def cnv_lookup(categories: list[CnvCategory], code: str) -> list[CnvCategory]:
-    """Categories whose code list contains ``code`` (exact code or numeric range a-b)."""
-    found = []
-    for cat in categories:
-        for item in cat.codes:
-            if "-" in item:
-                lo, hi = item.split("-", 1)
-                if (
-                    lo.isdigit()
-                    and hi.isdigit()
-                    and code.isdigit()
-                    and int(lo) <= int(code) <= int(hi)
-                ):
-                    found.append(cat)
-                    break
-            elif item == code:
-                found.append(cat)
-                break
-    return found

@@ -17,7 +17,7 @@ from pathlib import Path
 from typing import Any
 
 from hospital_analytics.dbf import decode_value, inspect_dbf, iter_raw_rows
-from hospital_analytics.integrity import sha256_file
+from hospital_analytics.integrity import check_declared
 from hospital_analytics.reference import (
     CnvTable,
     ReferenceFormatError,
@@ -67,18 +67,18 @@ class References:
 
 def verify(path: Path, spec: dict[str, Any]) -> dict[str, Any]:
     """Size and SHA-256 of ``path`` against ``spec``; raise on any difference."""
-    if not path.is_file():
+    result = check_declared(path, {"size_bytes": spec["size_bytes"], "sha256": spec["sha256"]})
+    if not result["present"]:
         raise ReferenceIntegrityError(
             f"{path.name}: reference file not found in {path.parent} "
-            "(copy it there; see docs/recuperacao_dados.md)"
+            "(copy it there; see docs/01_fontes_de_dados.md)"
         )
-    size, digest = path.stat().st_size, sha256_file(path)
-    if size != spec["size_bytes"] or digest != spec["sha256"].lower():
+    if not result["integrity_ok"]:
         raise ReferenceIntegrityError(
-            f"{path.name}: size/SHA-256 {size}/{digest} differ from the declared "
-            f"{spec['size_bytes']}/{spec['sha256']} — the file is not read"
+            f"{path.name}: size/SHA-256 {result['size_bytes']}/{result['sha256']} differ from the "
+            f"declared {spec['size_bytes']}/{spec['sha256']} — the file is not read"
         )
-    return {"file": path.name, "size_bytes": size, "sha256": digest}
+    return {k: result[k] for k in ("file", "size_bytes", "sha256")}
 
 
 def _unique(pairs: list[tuple[str, str]], what: str) -> dict[str, str]:

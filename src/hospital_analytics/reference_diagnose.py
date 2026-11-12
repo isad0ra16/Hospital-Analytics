@@ -20,13 +20,11 @@ import pyarrow.parquet as pq
 from hospital_analytics.config import load_params
 from hospital_analytics.convert import convert_dbc_to_parquet
 from hospital_analytics.dbf import decode_value, inspect_dbf, iter_raw_rows
-from hospital_analytics.integrity import sha256_file
+from hospital_analytics.integrity import check_declared
 from hospital_analytics.reference import (
     ReferenceFormatError,
-    cnv_lookup,
     coverage,
     key_report,
-    read_cnv,
     read_cnv_table,
     read_ibge_municipios,
     read_sigtap_table,
@@ -37,24 +35,6 @@ def _dimension_keys(powerbi_dir: Path, table: str, column: str) -> list[str]:
     path = powerbi_dir / f"{table}.csv"
     with path.open(encoding="utf-8", newline="") as fh:
         return [row[column] for row in csv.DictReader(fh)]
-
-
-def check_file(path: Path, spec: dict[str, Any]) -> dict[str, Any]:
-    """Presence, size and SHA-256 against the declared values."""
-    if not path.is_file():
-        return {"file": path.name, "present": False}
-    result = {
-        "file": path.name,
-        "present": True,
-        "size_bytes": path.stat().st_size,
-        "sha256": sha256_file(path),
-    }
-    if "size_bytes" in spec:
-        result["size_ok"] = result["size_bytes"] == spec["size_bytes"]
-    if "sha256" in spec:
-        result["sha256_ok"] = result["sha256"] == spec["sha256"].lower()
-    result["integrity_ok"] = result.get("size_ok", True) and result.get("sha256_ok", True)
-    return result
 
 
 def diagnose_cnes_st(path: Path, spec: dict, powerbi_dir: Path) -> dict[str, Any]:
@@ -201,10 +181,10 @@ def _count(values) -> dict[str, int]:
 
 
 def diagnose_cnv(path: Path, lookup_codes: list[str] | None = None) -> dict[str, Any]:
-    header, cats = read_cnv(path)
-    out: dict[str, Any] = {"header": list(header), "categories": len(cats)}
+    table = read_cnv_table(path)
+    out: dict[str, Any] = {"header": list(table.header), "categories": len(table.entries)}
     if lookup_codes is not None:
-        out["lookup"] = {c: [k.label for k in cnv_lookup(cats, c)] for c in lookup_codes}
+        out["lookup"] = {c: [k.label for k in table.matches(c)] for c in lookup_codes}
     return out
 
 
@@ -215,11 +195,12 @@ def diagnose_def(path: Path) -> dict[str, Any]:
 
 
 def diagnose_rj_municip(path: Path, powerbi_dir: Path, incoming: Path) -> dict[str, Any]:
-    _, cats = read_cnv(path)
+    table = read_cnv_table(path)
+    cats = table.entries
     res = _dimension_keys(powerbi_dir, "dim_municipio_residencia", "municipio_residencia_cod")
     est = _dimension_keys(powerbi_dir, "dim_estabelecimento", "municipio_estabelecimento_cod")
     rj = sorted({c for c in res + est if c.startswith("33")})
-    found = {c: cnv_lookup(cats, c) for c in rj}
+    found = {c: table.matches(c) for c in rj}
     out: dict[str, Any] = {
         "categories": len(cats),
         "rj_codes_in_model": len(rj),
@@ -297,7 +278,7 @@ def run_diagnostic(
     readers["sih_rd_def"] = lambda p, s: diagnose_rd_def(p)
     for name, spec in sources.items():
         path = incoming / spec["filename"]
-        entry = {"integrity": check_file(path, spec)}
+        entry = {"integrity": check_declared(path, spec)}
         reader = readers.get(name) or (
             (lambda p, s: diagnose_cnv_table(p, s, powerbi_dir))
             if spec.get("kind") == "cnv"

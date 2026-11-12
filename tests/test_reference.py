@@ -11,13 +11,11 @@ from hospital_analytics.integrity import sha256_file
 from hospital_analytics.reference import (
     ReferenceFormatError,
     clean_label,
-    cnv_lookup,
     coverage,
     enrichment_guard,
     fact_unchanged,
     key_report,
     parse_layout,
-    read_cnv,
     read_cnv_table,
     read_fixed_width,
     read_ibge_municipios,
@@ -244,23 +242,23 @@ CNV = (
 def test_cnv_reader_handles_lists_ranges_and_blank_codes(tmp_path):
     path = tmp_path / "x.cnv"
     path.write_bytes(CNV.encode("cp1252"))
-    header, cats = read_cnv(path)
-    assert header == ("3", "6")
-    assert [(c.sequence, c.label, c.codes) for c in cats] == [
-        (1, "MUNICIPIO IGNORADO - RJ", ("330000", "339999")),
-        (2, "330455 RIO DE JANEIRO", ("330455", "334501-334530")),
-        (3, "Não informado", ("", "0-3")),
+    table = read_cnv_table(path)
+    assert table.header == ("3", "6") and table.width == 6
+    assert [(c.sequence, c.label, tuple(i for i, _ in c.items)) for c in table.entries] == [
+        ("1", "MUNICIPIO IGNORADO - RJ", ("330000", "339999")),
+        ("2", "330455 RIO DE JANEIRO", ("330455", "334501-334530")),
+        ("3", "Não informado", ("0-3", "")),
     ]
-    assert [c.sequence for c in cnv_lookup(cats, "334510")] == [2]  # inside a range
-    assert [c.sequence for c in cnv_lookup(cats, "330455")] == [2]
-    assert cnv_lookup(cats, "330999") == []
+    assert [c.sequence for c in table.matches("334510")] == ["2"]  # inside a range
+    assert [c.sequence for c in table.matches("330455")] == ["2"]
+    assert table.matches("330999") == []
 
 
 def test_cnv_header_count_must_match(tmp_path):
     path = tmp_path / "x.cnv"
     path.write_bytes(CNV.replace("3 6", "4 6", 1).encode("cp1252"))
     with pytest.raises(ReferenceFormatError, match="declares 4"):
-        read_cnv(path)
+        read_cnv_table(path)
 
 
 # ---- TabWin .cnv, full reader (official SIH package variants) ----------------------------

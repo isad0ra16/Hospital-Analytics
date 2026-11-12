@@ -1,24 +1,19 @@
-# data/
+# Dados
 
-Os arquivos de dados **não são versionados** (ver decisão D-002 em
-[`docs/decisoes_metodologicas.md`](../docs/decisoes_metodologicas.md)). Eles são obtidos da fonte
-oficial do DATASUS e regenerados pelo pipeline.
+Esta pasta guarda os dados do pipeline. Nenhum arquivo de dados é versionado: os originais vêm de
+fontes públicas e todo o restante é regenerado pelo pipeline. No Git ficam apenas este README e o
+`MANIFEST.json`.
 
-| Camada | Conteúdo | Regra |
-|---|---|---|
-| `raw/` | `RDRJ2401.dbc` oficial e sua conversão direta para Parquet | Imutável após gravado |
-| `processed/` | Versões tipadas e tratadas (colunas derivadas) | Regenerável a partir de `raw/` |
+| Pasta | Conteúdo | Como é produzida |
+| --- | --- | --- |
+| `raw/` | `RDRJ2401.dbc` original e sua conversão para Parquet, sem tratamento | download oficial; `hospital-analytics convert` |
+| `processed/` | camada tratada: campos originais intactos e colunas derivadas | `hospital-analytics build-processed` |
+| `reference/incoming/` | tabelas oficiais de referência (SIGTAP, IBGE, CNES, TabWin do SIH), como foram obtidas | cópia manual dos arquivos oficiais |
+| `powerbi/` | modelo estrela em CSV para o Power BI | `hospital-analytics powerbi` |
 
-`MANIFEST.json` (versionado) registra, para cada arquivo: origem oficial, cópia arquivada (Release
-do GitHub), data do download, tamanho, SHA-256, versão dos dados e, para derivados, ferramentas e
-impressão digital do conteúdo. Detecta republicações do DATASUS e qualquer alteração local.
+O `MANIFEST.json` registra, para o arquivo original e para cada derivado, a origem, a data de
+obtenção, o tamanho, o SHA-256 e a impressão digital do conteúdo. Os arquivos de referência são
+declarados da mesma forma em `config/params.yaml`. O comando `hospital-analytics verify` confere
+todos eles e aponta qualquer arquivo ausente ou alterado.
 
-| Arquivo | Papel |
-|---|---|
-| `raw/RDRJ2401.dbc` | Original do DATASUS (somente leitura) |
-| `raw/RDRJ2401.parquet` | Conversão direta, sem tratamento: 113 colunas de texto |
-| `reference/incoming/` | Arquivos oficiais de referência (SIGTAP, IBGE, CNES, TabWin SIH), exatamente como obtidos; conferidos por tamanho e SHA-256 (`config/params.yaml`) antes de qualquer leitura |
-| `powerbi/` | Modelo estrela exportado (CSV UTF-8) para o Power BI; regenerado por `make powerbi` |
-
-Recuperação do zero: `make fetch-data && make convert && make validate`
-(ver [`docs/recuperacao_dados.md`](../docs/recuperacao_dados.md)).
+Origem de cada arquivo e como recuperá-los: [`docs/01_fontes_de_dados.md`](../docs/01_fontes_de_dados.md).

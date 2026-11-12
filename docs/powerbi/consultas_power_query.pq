@@ -198,6 +198,19 @@ let
 in
     Tipos
 
+// ---- aux_curva_lorenz ----
+let
+    Fonte = Csv.Document(File.Contents(PastaDados & "aux_curva_lorenz.csv"), [Delimiter = ",", Columns = 4, Encoding = 65001, QuoteStyle = QuoteStyle.Csv]),
+    Cabecalho = Table.PromoteHeaders(Fonte, [PromoteAllScalars = true]),
+    Tipos = Table.TransformColumnTypes(Cabecalho, {
+        {"percentil", Int64.Type},
+        {"pct_registros", type number},
+        {"pct_valor", type number},
+        {"igualdade", type number}
+    }, "en-US")
+in
+    Tipos
+
 // ---- ref_indicadores_validados ----
 let
     Fonte = Csv.Document(File.Contents(PastaDados & "ref_indicadores_validados.csv"), [Delimiter = ",", Columns = 8, Encoding = 65001, QuoteStyle = QuoteStyle.Csv]),

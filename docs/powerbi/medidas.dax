@@ -13,6 +13,10 @@
 // Valores de referência validados no pipeline (base completa, competência 2024-01):
 //   Registros 73.046 · Valor R$ 125.440.636,13 · Valor médio R$ 1.717,28 · Permanência 6,12 dias
 //   Óbitos 4.664 · Mortalidade 6,39% · Idade média 43,85 anos · Top 10% do valor 57,74%
+// Medidas do dashboard (sem histórico; equivalentes SQL em reports/powerbi/medidas_referencia.json):
+//   AIHs distintas 72.990 · Estabelecimentos 240 · Municípios de residência 262
+//   Urgência 69,27% · Residentes de outro município 22,36% · Residentes fora do RJ 0,38%
+//   Mortalidade na AIH principal 6,43%
 // =============================================================================
 
 
@@ -126,3 +130,127 @@ AVERAGE ( fato_registro_aih[idade_anos] )
 // participação no número de registros do contexto selecionado.
 % dos registros =
 DIVIDE ( [Registros de AIH], CALCULATE ( [Registros de AIH], ALLSELECTED () ) )
+
+
+// ---- Abrangência -------------------------------------------------------------
+
+// Formato: número inteiro. Estabelecimentos (CNES) com ao menos um registro no contexto.
+Estabelecimentos com registros =
+DISTINCTCOUNT ( fato_registro_aih[cnes] )
+
+// Formato: número inteiro. Municípios de residência distintos no contexto.
+Municípios de residência =
+DISTINCTCOUNT ( fato_registro_aih[municipio_residencia_cod] )
+
+
+// ---- Perfil de atendimento -----------------------------------------------------
+
+// Formato: porcentagem, 2 casas. Registros de caráter "Urgência" (CAR_INT = 02) sobre os
+// registros do contexto. Base completa: 69,27%.
+% registros de urgência =
+DIVIDE (
+    CALCULATE ( [Registros de AIH], dim_carater[carater_cod] = "02" ),
+    [Registros de AIH]
+)
+
+// Formato: porcentagem, 2 casas. Registros cujo município de RESIDÊNCIA difere do município do
+// ESTABELECIMENTO (atributo de dim_estabelecimento). Mede deslocamento para internação, não
+// "evasão" de um município específico. Base completa: 22,36%.
+% residentes de outro município =
+DIVIDE (
+    SUMX (
+        fato_registro_aih,
+        IF (
+            fato_registro_aih[municipio_residencia_cod]
+                <> RELATED ( dim_estabelecimento[municipio_estabelecimento_cod] ),
+            1
+        )
+    ),
+    [Registros de AIH]
+)
+
+// Formato: porcentagem, 2 casas. Registros de residentes fora do RJ (UF de residência ≠ 33).
+// Base completa: 0,38%.
+% residentes fora do RJ =
+DIVIDE (
+    CALCULATE (
+        [Registros de AIH],
+        dim_municipio_residencia[uf_residencia_cod] <> "33"
+    ),
+    [Registros de AIH]
+)
+
+// Formato: PORCENTAGEM, 2 casas. Mortalidade apenas na AIH principal (tipo 1), sem os registros
+// de longa permanência (apresentações sucessivas de uma mesma internação). Taxa bruta.
+// Base completa: 4.656 / 72.383 = 6,43%.
+Mortalidade hospitalar - AIH principal (razão) =
+CALCULATE ( [Mortalidade hospitalar (razão)], dim_tipo_aih[tipo_aih_cod] = "1" )
+
+
+// ---- Rótulos dinâmicos (títulos e notas) ---------------------------------------
+
+// Texto para o subtítulo dos visuais: base selecionada, sempre na unidade correta.
+Subtítulo - contexto =
+FORMAT ( [Registros de AIH], "#,0", "pt-BR" ) & " registros de AIH · "
+    & FORMAT ( [Estabelecimentos com registros], "#,0", "pt-BR" ) & " estabelecimentos · "
+    & "competência 2024-01"
+
+
+// ---- Apoio aos visuais ---------------------------------------------------------
+
+// Formato: `#,0;#,0` (inteiro sem sinal). Pirâmide etária: o lado masculino é negativo para a
+// barra empilhada crescer para a esquerda; o formato esconde o sinal.
+Registros - masculino (pirâmide) =
+- CALCULATE (
+    [Registros de AIH],
+    dim_perfil_demografico[sexo_descricao_oficial] = "Masculino"
+)
+
+// Formato: `#,0;#,0` (inteiro sem sinal). Lado feminino da pirâmide etária.
+Registros - feminino (pirâmide) =
+CALCULATE (
+    [Registros de AIH],
+    dim_perfil_demografico[sexo_descricao_oficial] = "Feminino"
+)
+
+// Formato: moeda (R$), 2 casas. Valor total apenas dos 10 estabelecimentos de maior valor na
+// seleção; em branco para os demais (o visual mostra só o top 10).
+Valor total - top 10 estabelecimentos =
+IF (
+    ISINSCOPE ( dim_estabelecimento[estabelecimento_rotulo] )
+        && RANKX (
+            ALLSELECTED ( dim_estabelecimento[estabelecimento_rotulo] ),
+            [Valor total], , DESC
+        ) <= 10,
+    [Valor total]
+)
+
+// Formato: número inteiro. Registros dos 10 municípios de residência com mais registros.
+Registros - top 10 municípios de residência =
+IF (
+    ISINSCOPE ( dim_municipio_residencia[municipio_residencia_rotulo] )
+        && RANKX (
+            ALLSELECTED ( dim_municipio_residencia[municipio_residencia_rotulo] ),
+            [Registros de AIH], , DESC
+        ) <= 10,
+    [Registros de AIH]
+)
+
+// Formato: número inteiro. Registros dos 10 diagnósticos principais mais frequentes.
+Registros - top 10 diagnósticos =
+IF (
+    ISINSCOPE ( dim_diagnostico[diagnostico_rotulo] )
+        && RANKX (
+            ALLSELECTED ( dim_diagnostico[diagnostico_rotulo] ),
+            [Registros de AIH], , DESC
+        ) <= 10,
+    [Registros de AIH]
+)
+
+// Formato: porcentagem, 2 casas. Curva de Lorenz (tabela auxiliar estática, base completa).
+Lorenz - % acumulado do valor =
+MAX ( aux_curva_lorenz[pct_valor] )
+
+// Formato: porcentagem, 2 casas. Linha de igualdade da curva de Lorenz.
+Lorenz - linha de igualdade =
+MAX ( aux_curva_lorenz[igualdade] )

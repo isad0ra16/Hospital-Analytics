@@ -187,6 +187,18 @@
 | `sexo_descricao_oficial` | `type text` | sim | TabWin SIH/SUS SEXO.CNV | Sexo (texto oficial) |
 | `raca_cor_descricao_oficial` | `type text` | sim | TabWin SIH/SUS RACACOR.CNV | Raça/cor (texto oficial) |
 
+## `aux_curva_lorenz`
+
+- **Granularidade:** 1 linha por percentil de registros (0–100), base completa; sem relacionamento
+- **Chave:** `percentil`
+
+| Campo | Tipo (Power Query) | Pode ser nulo | Origem | Descrição |
+|---|---|---|---|---|
+| `percentil` | `Int64.Type` | não | derivado | Percentil de registros (0–100) |
+| `pct_registros` | `type number` | não | VAL_TOT | Fração acumulada de registros, do menor para o maior valor |
+| `pct_valor` | `type number` | não | VAL_TOT | Fração acumulada do valor total (VAL_TOT) |
+| `igualdade` | `type number` | não | derivado | Linha de igualdade (= pct_registros) |
+
 ## `ref_indicadores_validados`
 
 - **Granularidade:** 1 linha por indicador reconciliado (reports/indicators/reconciliation.json); sem relacionamento

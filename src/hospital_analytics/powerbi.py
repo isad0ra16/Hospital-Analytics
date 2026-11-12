@@ -438,6 +438,23 @@ TABLES: tuple[Table, ...] = (
         ),
         "dim_perfil_demografico",
     ),
+    Table(
+        "aux_curva_lorenz",
+        ("percentil",),
+        "1 linha por percentil de registros (0–100), base completa; sem relacionamento",
+        (
+            Column("percentil", INT, "Percentil de registros (0–100)", "derivado"),
+            Column(
+                "pct_registros",
+                NUM,
+                "Fração acumulada de registros, do menor para o maior valor",
+                "VAL_TOT",
+            ),
+            Column("pct_valor", NUM, "Fração acumulada do valor total (VAL_TOT)", "VAL_TOT"),
+            Column("igualdade", NUM, "Linha de igualdade (= pct_registros)", "derivado"),
+        ),
+        "aux_curva_lorenz",
+    ),
 )
 
 # Columns that an official reference must fill for every row (coverage is checked, never forced).
@@ -973,6 +990,54 @@ def validate_model(directory: Path, expected: dict[str, Any]) -> list[ModelCheck
     return checks
 
 
+def _dashboard_measures(con, directory: Path) -> dict[str, Decimal]:
+    """Equivalents of the dashboard measures that are not historical indicators (base completa).
+    Written to reports/powerbi/medidas_referencia.json to check the cards in Power BI."""
+    for name in ("dim_estabelecimento", "dim_municipio_residencia", "dim_tipo_aih"):
+        con.execute(f"create or replace view {name} as select * from {_csv(con, directory, name)}")
+    row = con.execute(
+        """select count(*),
+                  count(distinct f.cnes),
+                  count(distinct f.municipio_residencia_cod),
+                  count(*) filter (where f.carater_cod = '02'),
+                  count(*) filter (where f.municipio_residencia_cod
+                                   <> e.municipio_estabelecimento_cod),
+                  count(*) filter (where m.uf_residencia_cod <> '33'),
+                  count(*) filter (where f.tipo_aih_cod = '1'),
+                  sum(cast(f.obito as int)) filter (where f.tipo_aih_cod = '1'),
+                  count(*) filter (where cast(f.valor_total_centavos as bigint) = 0),
+                  count(*) filter (where f.aih_repetida = '1'),
+                  count(distinct f.aih_id),
+                  count(*) filter (where f.tipo_aih_cod = '5')
+           from f
+           join dim_estabelecimento e on e.cnes = f.cnes
+           join dim_municipio_residencia m
+             on m.municipio_residencia_cod = f.municipio_residencia_cod"""
+    ).fetchone()
+    (n, estab, munic, urg, other_munic, other_uf, n1, deaths1, zero, rep, aihs, n5) = row
+    return {
+        "aihs_distintas": Decimal(aihs),
+        "registros_excedentes_aih": Decimal(n - aihs),
+        "registros_aih_repetida": Decimal(rep),
+        "registros_longa_permanencia": Decimal(n5),
+        "registros_valor_zero": Decimal(zero),
+        "estabelecimentos": Decimal(estab),
+        "municipios_residencia": Decimal(munic),
+        "pct_urgencia_razao": Decimal(urg) / n,
+        "pct_residentes_outro_municipio_razao": Decimal(other_munic) / n,
+        "pct_residentes_fora_rj_razao": Decimal(other_uf) / n,
+        "mortalidade_aih_principal_razao": Decimal(deaths1) / n1,
+    }
+
+
+def lorenz_points(directory: Path) -> dict[int, Decimal]:
+    con = duckdb.connect()
+    rows = con.execute(
+        f"select percentil, pct_valor from {_csv(con, directory, 'aux_curva_lorenz')}"
+    ).fetchall()
+    return {int(p): Decimal(v) for p, v in rows}
+
+
 def measure_values(directory: Path) -> dict[str, Decimal]:
     """Python/SQL equivalents of the DAX measures, computed on the exported CSV files."""
     con = duckdb.connect()
@@ -987,7 +1052,8 @@ def measure_values(directory: Path) -> dict[str, Decimal]:
         f"""select sum(c) from (select cast(valor_total_centavos as bigint) c from f
             order by c desc, cast(registro_id as bigint) asc limit {k})"""
     ).fetchone()
-    return {
+    extra = _dashboard_measures(con, directory)
+    return extra | {
         "registros_aih": Decimal(n),
         "valor_total": Decimal(cents) / 100,
         "valor_medio": Decimal(cents) / n / 100,

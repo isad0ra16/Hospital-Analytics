@@ -210,3 +210,35 @@ def test_dax_measures_follow_the_project_rules():
     referenced = set(re.findall(r"(\w+)\[(\w+)\]", dax))
     known = {(t.name, c.name) for t in powerbi.TABLES for c in t.columns}
     assert referenced <= known, referenced - known
+
+
+def test_dashboard_measures_semantics(exported):
+    out, _ = exported
+    m = powerbi.measure_values(out)
+    n = len(RECORDS)
+    assert m["aihs_distintas"] == len({r.n_aih for r in RECORDS})
+    assert m["registros_excedentes_aih"] == n - len({r.n_aih for r in RECORDS})
+    assert m["estabelecimentos"] == len({r.cnes for r in RECORDS})
+    assert m["pct_urgencia_razao"] == Decimal(sum(r.car_int == "02" for r in RECORDS)) / n
+    moved = sum(r.munic_res != r.munic_mov for r in RECORDS)  # residence != establishment
+    assert m["pct_residentes_outro_municipio_razao"] == Decimal(moved) / n
+    assert (
+        m["pct_residentes_fora_rj_razao"]
+        == Decimal(sum(not r.munic_res.startswith("33") for r in RECORDS)) / n
+    )
+    principal = [r for r in RECORDS if r.ident == "1"]
+    assert m["mortalidade_aih_principal_razao"] == Decimal(sum(r.morte for r in principal)) / len(
+        principal
+    )
+
+
+def test_lorenz_table_is_monotonic_and_matches_the_value_shares(exported):
+    out, _ = exported
+    points = powerbi.lorenz_points(out)
+    assert sorted(points) == list(range(101))
+    assert points[0] == 0 and points[100] == 1
+    values = [points[p] for p in range(101)]
+    assert values == sorted(values)  # cumulative share never decreases
+    cents = sorted(int(r.val_tot.replace(".", "")) for r in RECORDS)
+    m = len(cents) * 50 // 100  # floor(n * p / 100), poorest records first
+    assert points[50] == (Decimal(sum(cents[:m])) / sum(cents)).quantize(Decimal("0.000001"))

@@ -208,7 +208,9 @@ def write_report(report: AuditReport, directory: Path, stem: str) -> tuple[Path,
     directory.mkdir(parents=True, exist_ok=True)
     json_path, md_path = directory / f"{stem}.json", directory / f"{stem}.md"
     json_path.write_text(
-        json.dumps(report.to_dict(), indent=2, ensure_ascii=False, default=str) + "\n", "utf-8"
+        json.dumps(report.to_dict(), indent=2, ensure_ascii=False, default=str) + "\n",
+        "utf-8",
+        newline="\n",
     )
-    md_path.write_text(to_markdown(report), "utf-8")
+    md_path.write_text(to_markdown(report), "utf-8", newline="\n")
     return json_path, md_path

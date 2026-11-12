@@ -561,6 +561,8 @@ def to_markdown(report: dict[str, Any]) -> str:
 def write_report(report: dict[str, Any], directory: Path, stem: str) -> tuple[Path, Path]:
     directory.mkdir(parents=True, exist_ok=True)
     json_path, md_path = directory / f"{stem}.json", directory / f"{stem}.md"
-    json_path.write_text(json.dumps(report, indent=2, ensure_ascii=False) + "\n", "utf-8")
-    md_path.write_text(to_markdown(report), "utf-8")
+    json_path.write_text(
+        json.dumps(report, indent=2, ensure_ascii=False) + "\n", "utf-8", newline="\n"
+    )
+    md_path.write_text(to_markdown(report), "utf-8", newline="\n")
     return json_path, md_path

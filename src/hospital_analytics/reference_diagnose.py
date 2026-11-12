@@ -296,5 +296,5 @@ def run_diagnostic(
 def write_diagnostic(report: dict[str, Any], directory: Path) -> Path:
     directory.mkdir(parents=True, exist_ok=True)
     path = directory / "diagnostico_referencias.json"
-    path.write_text(json.dumps(report, indent=2, ensure_ascii=False) + "\n", "utf-8")
+    path.write_text(json.dumps(report, indent=2, ensure_ascii=False) + "\n", "utf-8", newline="\n")
     return path

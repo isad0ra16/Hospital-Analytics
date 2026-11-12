@@ -290,8 +290,10 @@ def cmd_powerbi(args: argparse.Namespace) -> int:
     powerbi.write_summary(summary, summary_path)
     docs = root / "docs" / "powerbi"
     docs.mkdir(parents=True, exist_ok=True)
-    (docs / "dicionario_campos.md").write_text(powerbi.field_dictionary_markdown(), "utf-8")
-    (docs / "consultas_power_query.pq").write_text(powerbi.power_query_m(), "utf-8")
+    (docs / "dicionario_campos.md").write_text(
+        powerbi.field_dictionary_markdown(), "utf-8", newline="\n"
+    )
+    (docs / "consultas_power_query.pq").write_text(powerbi.power_query_m(), "utf-8", newline="\n")
     for name, entry in summary["tables"].items():
         print(f"exported {name:<28} rows={entry['rows']}")
     powerbi.write_enrichment_report(powerbi.enrichment_report(out), reports / "reference")
@@ -320,7 +322,9 @@ def cmd_pbip(args: argparse.Namespace) -> int:
     root = args.root
     measures = (root / "docs" / "powerbi" / "medidas.dax").read_text(encoding="utf-8")
     written = pbip.write_project(root / "powerbi", measures)
-    (root / "docs" / "powerbi" / "paginas.md").write_text(pbip.pages_markdown(), "utf-8")
+    (root / "docs" / "powerbi" / "paginas.md").write_text(
+        pbip.pages_markdown(), "utf-8", newline="\n"
+    )
     print(f"written {len(written)} files under {_key(root / 'powerbi', root)}/")
     return 0
 

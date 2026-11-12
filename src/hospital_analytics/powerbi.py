@@ -870,14 +870,14 @@ def enrichment_markdown(report: dict[str, Any]) -> str:
 def write_enrichment_report(report: dict[str, Any], directory: Path) -> None:
     directory.mkdir(parents=True, exist_ok=True)
     (directory / "enriquecimento.json").write_text(
-        json.dumps(report, indent=2, ensure_ascii=False) + "\n", "utf-8"
+        json.dumps(report, indent=2, ensure_ascii=False) + "\n", "utf-8", newline="\n"
     )
-    (directory / "enriquecimento.md").write_text(enrichment_markdown(report), "utf-8")
+    (directory / "enriquecimento.md").write_text(enrichment_markdown(report), "utf-8", newline="\n")
 
 
 def write_summary(summary: dict[str, Any], path: Path) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(json.dumps(summary, indent=2, ensure_ascii=False) + "\n", "utf-8")
+    path.write_text(json.dumps(summary, indent=2, ensure_ascii=False) + "\n", "utf-8", newline="\n")
 
 
 # ---------------------------------------------------------------------------
@@ -1111,7 +1111,9 @@ def write_measure_reference(measures: dict[str, Decimal], path: Path) -> None:
         "medidas": {k: str(v.quantize(Decimal("0.000001"))) for k, v in sorted(measures.items())},
     }
     path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(json.dumps(document, indent=2, ensure_ascii=False) + "\n", "utf-8")
+    path.write_text(
+        json.dumps(document, indent=2, ensure_ascii=False) + "\n", "utf-8", newline="\n"
+    )
 
 
 def lorenz_points(directory: Path) -> dict[int, Decimal]:

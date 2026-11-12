@@ -51,7 +51,9 @@ def save_manifest(manifest: dict[str, Any], path: Path) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     tmp = path.with_name(path.name + ".partial")
     tmp.write_text(
-        json.dumps(manifest, indent=2, sort_keys=True, ensure_ascii=False) + "\n", "utf-8"
+        json.dumps(manifest, indent=2, sort_keys=True, ensure_ascii=False) + "\n",
+        "utf-8",
+        newline="\n",
     )
     os.replace(tmp, path)
 

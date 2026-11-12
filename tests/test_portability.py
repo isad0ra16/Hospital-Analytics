@@ -47,6 +47,29 @@ def test_source_never_relies_on_the_locale_encoding():
     assert offenders == {}
 
 
+def _writes_without_newline(tree: ast.AST) -> list[int]:
+    """``write_text`` calls without ``newline``: on Windows they would write CRLF."""
+    return [
+        node.lineno
+        for node in ast.walk(tree)
+        if isinstance(node, ast.Call)
+        and isinstance(node.func, ast.Attribute)
+        and node.func.attr == "write_text"
+        and "newline" not in {k.arg for k in node.keywords}
+    ]
+
+
+def test_generated_files_have_the_same_bytes_on_every_platform():
+    """Reports and generated docs are compared by SHA-256 across Linux and Windows."""
+    offenders = {}
+    for path in sorted(SRC.glob("*.py")):
+        found = _writes_without_newline(ast.parse(path.read_text(encoding="utf-8")))
+        if found:
+            offenders[path.name] = found
+    assert offenders == {}
+    assert _writes_without_newline(ast.parse("p.write_text('x', 'utf-8')\n")) == [1]
+
+
 def test_guard_detects_missing_encoding():
     code = "p.read_text()\np.write_text('x')\np.open()\nopen(f, 'w')\np.open('rb')\n"
     assert _text_io_without_encoding(ast.parse(code)) == [1, 2, 3, 4]

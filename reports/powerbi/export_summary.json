@@ -78,6 +78,13 @@
       },
       "rows": 78
     },
+    "aux_curva_lorenz": {
+      "csv": {
+        "file": "aux_curva_lorenz.csv",
+        "sha256": "f4a5688463da6d32230c7c08e5926604969f119d0164e2943a2e5827d14acac7"
+      },
+      "rows": 101
+    },
     "ref_indicadores_validados": {
       "csv": {
         "file": "ref_indicadores_validados.csv",

@@ -1,0 +1,25 @@
+{
+  "base": "completa (73.046 registros, competência 2024-01)",
+  "nota": "Valores exatos das medidas DAX equivalentes (razões não multiplicadas por 100). Use-os para conferir os cartões no Power BI.",
+  "medidas": {
+    "aihs_distintas": "72990.000000",
+    "concentracao_top10_razao": "0.577427",
+    "estabelecimentos": "240.000000",
+    "idade_media_anos": "43.853393",
+    "mortalidade_aih_principal_razao": "0.064324",
+    "mortalidade_razao": "0.063850",
+    "municipios_residencia": "262.000000",
+    "obitos": "4664.000000",
+    "pct_residentes_fora_rj_razao": "0.003751",
+    "pct_residentes_outro_municipio_razao": "0.223626",
+    "pct_urgencia_razao": "0.692728",
+    "permanencia_media": "6.124921",
+    "registros_aih": "73046.000000",
+    "registros_aih_repetida": "106.000000",
+    "registros_excedentes_aih": "56.000000",
+    "registros_longa_permanencia": "663.000000",
+    "registros_valor_zero": "241.000000",
+    "valor_medio": "1717.282755",
+    "valor_total": "125440636.130000"
+  }
+}

@@ -1,18 +1,67 @@
 # Hospital Analytics
 
-Análise das internações hospitalares do SUS no estado do Rio de Janeiro a partir dos microdados públicos
-do SIH/SUS. O projeto cobre o caminho completo: download e conferência do arquivo oficial, conversão sem
-perda, tratamento, auditoria de qualidade, reconciliação com indicadores históricos, enriquecimento com
-tabelas oficiais, modelo dimensional e um dashboard Power BI.
+**Internações do SUS no Rio de Janeiro (SIH/SUS, janeiro de 2024): pipeline de dados reproduzível,
+auditado e reconciliado, com modelo analítico para Power BI.**
 
-O foco é a confiabilidade: cada número pode ser reproduzido a partir do arquivo público, e cada
-interpretação indica a fonte que a sustenta.
+> **Status:** Pipeline validado · Dashboard em validação
+>
+> O pipeline, os relatórios e o modelo analítico estão implementados e documentados. O projeto Power BI
+> foi gerado, mas **ainda não foi aberto no Power BI Desktop**: não há validação visual nem capturas de
+> tela ([`docs/07_dashboard.md`](docs/07_dashboard.md)).
 
-## Problema e objetivos
+## Em resumo
 
-O projeto original, com notebook, scripts e dados tratados, foi perdido junto com o computador em que
-estava. Restaram apenas os valores dos indicadores calculados na época. Os objetivos desta reconstrução
-são:
+- **Problema.** O projeto original, com notebook, scripts e dados tratados, foi perdido junto com o
+  computador em que estava. Restaram apenas os valores dos indicadores calculados na época, sem código
+  que os sustentasse.
+- **Solução.** Reconstruí a análise como um pipeline em Python e SQL que parte do arquivo público do
+  DATASUS, prova por SHA-256 que a base não foi alterada em nenhuma etapa, reproduz os indicadores
+  históricos com duas implementações independentes (Pandas e DuckDB) e entrega um modelo dimensional
+  enriquecido com tabelas oficiais.
+- **Valor.** Cada número pode ser reproduzido a partir do arquivo público, e cada divergência com o
+  histórico é explicada em vez de ajustada: dos 26 valores históricos recuperados, 24 foram reproduzidos
+  exatamente.
+
+**Conteúdo:** [Meu papel](#meu-papel-no-projeto) · [Competências](#competências-demonstradas) ·
+[Objetivos](#objetivos-da-reconstrução) · [Dados](#dados) · [Arquitetura](#arquitetura) · [Metodologia](#metodologia) ·
+[Resultados](#resultados-validados) · [Qualidade](#qualidade-e-validação) ·
+[Dashboard](#dashboard-power-bi) · [Limitações](#limitações) · [Como executar](#como-executar) ·
+[Documentação](#documentação)
+
+## Meu papel no projeto
+
+Projeto individual de portfólio, no qual desenvolvi o pipeline de dados, implementei validações e testes,
+estruturei o modelo analítico e preparei os artefatos do Power BI:
+
+- **Recuperação e proveniência dos dados:** obtenção do `RDRJ2401.dbc` oficial, registro do tamanho e do
+  SHA-256 em [`data/MANIFEST.json`](data/MANIFEST.json) e publicação de uma cópia arquivada na Release
+  `data-rdrj2401`.
+- **Pipeline de ingestão e tratamento:** conversão `.dbc → .dbf → Parquet` sem tratamento, decodificação
+  do texto pela página de código declarada no arquivo (CP850) e camada tratada que preserva os campos
+  originais e acrescenta 50 colunas derivadas reversíveis.
+- **Auditoria e reconciliação:** relatório de qualidade dos 113 campos e comparação de cada indicador
+  histórico com valores exatos, calculados em Pandas e em DuckDB.
+- **Enriquecimento e modelagem:** leitura das tabelas oficiais (SIGTAP, IBGE, CNES e tabelas do SIH para
+  o TabWin), conferidas por SHA-256, e exportação de um esquema estrela validado por 122 verificações.
+- **Projeto Power BI:** geração automática do modelo semântico (TMDL), das 31 medidas DAX e das seis
+  páginas do relatório (PBIR), conferidos contra os esquemas da Microsoft fora do Power BI.
+- **Engenharia e documentação:** pacote Python com CLI, consultas SQL versionadas, testes com dados
+  sintéticos, ambiente fixado com `uv` e registro de 40 decisões metodológicas.
+
+## Competências demonstradas
+
+| Competência | Como aparece no projeto | Onde verificar |
+| --- | --- | --- |
+| Engenharia de dados | Ingestão do formato DATASUS, camadas bruta e tratada em Parquet, exportação de esquema estrela | [`src/hospital_analytics/`](src/hospital_analytics/), [`docs/02_ingestao.md`](docs/02_ingestao.md) |
+| Integridade e rastreabilidade | Manifesto com SHA-256 da fonte e dos derivados, comando `verify`, impressões digitais das colunas originais | [`data/MANIFEST.json`](data/MANIFEST.json), [`docs/01_fontes_de_dados.md`](docs/01_fontes_de_dados.md) |
+| Qualidade de dados | Auditoria de completude, domínios e consistência; reconciliação com o histórico por regra fixa | [`reports/audit/`](reports/audit/), [`reports/indicators/`](reports/indicators/) |
+| SQL e modelagem dimensional | 30 consultas DuckDB versionadas; 14 tabelas exportadas e 11 relacionamentos sem registros órfãos | [`sql/`](sql/), [`docs/04_modelagem.md`](docs/04_modelagem.md) |
+| Engenharia de software | Pacote Python com CLI `hospital-analytics` (11 comandos), suíte pytest com dados sintéticos, lint com ruff | [`src/`](src/), [`tests/`](tests/), [`pyproject.toml`](pyproject.toml) |
+| Reprodutibilidade e automação | Dependências fixadas no `uv.lock`, `Makefile`, relatórios determinísticos, mesma saída em Windows e Linux | [`Makefile`](Makefile), [`docs/05_validacao.md`](docs/05_validacao.md) |
+| Business Intelligence | Projeto Power BI em formato de texto (PBIP), medidas DAX com equivalente em SQL | [`powerbi/`](powerbi/), [`docs/07_dashboard.md`](docs/07_dashboard.md) |
+| Documentação técnica | Documentação por etapa e registro de decisões com contexto e alternativas | [`docs/`](docs/), [`docs/decisoes_metodologicas.md`](docs/decisoes_metodologicas.md) |
+
+## Objetivos da reconstrução
 
 1. recuperar a base exata e provar que ela não foi alterada em nenhuma etapa;
 2. reproduzir os indicadores históricos e explicar cada divergência, sem ajustar dados para obter os
@@ -33,25 +82,6 @@ são:
 A competência é o mês de **processamento**, não o de ocorrência: 40% das saídas são de 2023. A versão
 usada é identificada pelo SHA-256 `a3f0ea9a…0d7dfc9c`. Origem e conferência de cada arquivo:
 [`docs/01_fontes_de_dados.md`](docs/01_fontes_de_dados.md).
-
-## Metodologia
-
-- **Dados brutos imutáveis.** O arquivo oficial é convertido para Parquet como texto, sem tratamento, e
-  impressões digitais comprovam que nenhum valor ou byte mudou.
-- **Nada é removido.** AIHs com número repetido (56 registros excedentes) são sinalizadas, não excluídas;
-  filtros são explícitos em cada indicador.
-- **Valores exatos.** Dinheiro em centavos inteiros e `Decimal`; Pandas e DuckDB calculam os mesmos
-  agregados de forma independente e precisam concordar.
-- **Interpretação com fonte declarada.** Cada código traz a origem do seu rótulo; o modelo usa os rótulos
-  oficiais do SIH e mantém a fonte secundária ao lado para comparação.
-- **Enriquecimento por código exato.** Tabelas oficiais conferidas por SHA-256 antes da leitura, chaves
-  únicas e cobertura verificada; as dimensões só ganham colunas, e a tabela fato permanece idêntica byte
-  a byte.
-- **Unidade de análise explícita.** Todas as taxas são por registro de AIH: a base não identifica
-  pacientes e não permite reconstruir internações.
-
-As decisões estão registradas, com contexto e alternativas, em
-[`docs/decisoes_metodologicas.md`](docs/decisoes_metodologicas.md).
 
 ## Arquitetura
 
@@ -81,10 +111,27 @@ data/processed/sih_rj_2024_01_tratado.parquet
 | `tests/` | testes automatizados com dados sintéticos |
 | `data/` | dados locais, fora do Git ([`data/README.md`](data/README.md)) |
 
-## Tecnologias
+**Tecnologias:** Python 3.13 · pandas · PyArrow e Parquet · DuckDB · pyreaddbc e dbfread (leitura do
+formato DATASUS) · matplotlib · Power BI (TMDL, PBIR, DAX, Power Query M) · pytest · ruff · uv.
 
-Python 3.13 · pandas · PyArrow e Parquet · DuckDB · pyreaddbc e dbfread (leitura do formato DATASUS) ·
-matplotlib · Power BI (TMDL, PBIR, DAX, Power Query M) · pytest · ruff · uv.
+## Metodologia
+
+- **Dados brutos imutáveis.** O arquivo oficial é convertido para Parquet como texto, sem tratamento, e
+  impressões digitais comprovam que nenhum valor ou byte mudou.
+- **Nada é removido.** AIHs com número repetido (56 registros excedentes) são sinalizadas, não excluídas;
+  filtros são explícitos em cada indicador.
+- **Valores exatos.** Dinheiro em centavos inteiros e `Decimal`; Pandas e DuckDB calculam os mesmos
+  agregados de forma independente e precisam concordar.
+- **Interpretação com fonte declarada.** Cada código traz a origem do seu rótulo; o modelo usa os rótulos
+  oficiais do SIH e mantém a fonte secundária ao lado para comparação.
+- **Enriquecimento por código exato.** Tabelas oficiais conferidas por SHA-256 antes da leitura, chaves
+  únicas e cobertura verificada; as dimensões só ganham colunas, e a tabela fato permanece idêntica byte
+  a byte.
+- **Unidade de análise explícita.** Todas as taxas são por registro de AIH: a base não identifica
+  pacientes e não permite reconstruir internações.
+
+As decisões estão registradas, com contexto e alternativas, em
+[`docs/decisoes_metodologicas.md`](docs/decisoes_metodologicas.md).
 
 ## Resultados validados
 
@@ -101,8 +148,11 @@ Indicadores da base completa, conferidos contra o histórico e entre duas implem
 | Idade média | 43,85 anos | o histórico (43,96) ignorava a unidade da idade |
 | Valor dos 10% maiores registros | 57,74% | histórico de 58,20% não reproduzido |
 
-Das 24 referências históricas comparadas, 22 foram reproduzidas exatamente. A reconciliação completa e
-os achados estão em [`docs/05_validacao.md`](docs/05_validacao.md).
+Dos 26 valores históricos recuperados, 24 foram reproduzidos exatamente; as exceções são a mortalidade
+bruta e a concentração dos 10% maiores registros. O relatório gerado pela etapa `indicators` cobre 24
+desses valores e reproduz 22; os outros dois são conferidos em outras etapas: o número de colunas em
+`validate` e a preservação dos campos originais em `build-processed`. A reconciliação completa e os achados estão em
+[`docs/05_validacao.md`](docs/05_validacao.md).
 
 Destaques descritivos do modelo enriquecido:
 
@@ -120,17 +170,6 @@ Destaques descritivos do modelo enriquecido:
 A análise exploratória completa, com perfil demográfico, hospitalar, mortalidade, valores e permanência,
 está em [`docs/06_analise_exploratoria.md`](docs/06_analise_exploratoria.md).
 
-## Dashboard Power BI
-
-O projeto em [`powerbi/`](powerbi/) tem seis páginas: visão geral, perfil e origem, internações e
-permanência, mortalidade hospitalar, análise financeira e qualidade e metodologia. O modelo semântico
-traz 15 tabelas, 11 relacionamentos e 31 medidas DAX documentadas.
-
-Os arquivos do relatório foram validados contra os esquemas oficiais da Microsoft, e cada medida tem um
-equivalente em SQL conferido sobre os dados exportados. O projeto **ainda não foi aberto no Power BI
-Desktop**, portanto não há validação visual nem capturas de tela. Conteúdo das páginas e passos para
-abrir e conferir: [`docs/07_dashboard.md`](docs/07_dashboard.md).
-
 ## Qualidade e validação
 
 - 0 registros duplicados, 0 datas inválidas e 0 valores monetários malformados nos 73.046 registros.
@@ -140,6 +179,19 @@ abrir e conferir: [`docs/07_dashboard.md`](docs/07_dashboard.md).
   idênticos, byte a byte, aos produzidos no Linux.
 - A suíte de testes usa apenas dados sintéticos e cobre leitura do formato DATASUS, conversão,
   indicadores, enriquecimento, projeto Power BI, higiene do repositório e links da documentação.
+
+## Dashboard Power BI
+
+**Situação: gerado, aguardando validação visual no Power BI Desktop.**
+
+O projeto em [`powerbi/`](powerbi/) tem seis páginas: visão geral, perfil e origem, internações e
+permanência, mortalidade hospitalar, análise financeira e qualidade e metodologia. O modelo semântico
+traz 15 tabelas, 11 relacionamentos e 31 medidas DAX documentadas.
+
+Os arquivos do relatório foram validados contra os esquemas oficiais da Microsoft, e cada medida tem um
+equivalente em SQL conferido sobre os dados exportados. O projeto **ainda não foi aberto no Power BI
+Desktop**, portanto não há validação visual nem capturas de tela. Conteúdo das páginas e passos para
+abrir e conferir: [`docs/07_dashboard.md`](docs/07_dashboard.md).
 
 ## Limitações
 

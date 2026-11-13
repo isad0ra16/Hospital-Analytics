@@ -93,8 +93,12 @@ reproduzido; o critério foi descoberto nesta reconstrução) · **divergente, e
 | 24–25 | Cirúrgicos · clínicos | AIH tipo 1 | 51,57% · 44,38% | 51,57% · 44,38% | participação no **valor**, grupos SIGTAP 04 e 03 | critério identificado |
 | 26 | Grupos com diferenças (preservação) | — | 0 | 0 | impressão digital das colunas originais idêntica em bruto e tratado | critério identificado |
 
-**22 das 24 referências comparadas foram reproduzidas exatamente** (12 com critério documentado e 10
-com critério identificado); as duas restantes são a mortalidade e a concentração. Tabela gerada com valores exatos:
+**24 das 26 referências da tabela foram reproduzidas exatamente** (13 com situação **reproduzido** e 11
+com **critério identificado**); as duas restantes são a mortalidade e a concentração. O relatório gerado
+pela etapa `indicators` cobre 24 dessas referências e reproduz 22 (12 e 10): a linha 2 (colunas) é
+conferida pela etapa `validate`, a linha 26 (preservação dos campos) pela etapa `build-processed`, e a
+concentração aparece em duas linhas (base completa e AIH tipo 1), comparadas ao mesmo valor histórico.
+Tabela gerada com valores exatos:
 [`reports/indicators/reconciliation.md`](../reports/indicators/reconciliation.md).
 
 **Consistência interna do histórico** (automatizada em `tests/test_historical_reference.py`):

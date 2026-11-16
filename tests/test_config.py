@@ -75,11 +75,7 @@ def test_cli_params_use_selected_root_for_non_path_settings(tmp_path):
     config_dir = tmp_path / "config"
     config_dir.mkdir()
     (config_dir / "params.yaml").write_text(
-        "source:\n"
-        "  system: CUSTOM\n"
-        "raw_conversion:\n"
-        "  encoding: latin-1\n"
-        "reference_sources: {}\n",
+        "source:\n  system: CUSTOM\nraw_conversion:\n  encoding: latin-1\nreference_sources: {}\n",
         encoding="utf-8",
     )
     params = _params(tmp_path)

@@ -66,3 +66,23 @@ def test_cli_defaults_use_config_from_selected_root(tmp_path):
         "processed": tmp_path / "custom/processed/OTHER_processed.parquet",
         "manifest": tmp_path / "custom/MANIFEST.json",
     }
+
+
+def test_cli_params_use_selected_root_for_non_path_settings(tmp_path):
+    """Commands must not silently use the repository's original reference values."""
+    from hospital_analytics.cli import _params
+
+    config_dir = tmp_path / "config"
+    config_dir.mkdir()
+    (config_dir / "params.yaml").write_text(
+        "source:\n"
+        "  system: CUSTOM\n"
+        "raw_conversion:\n"
+        "  encoding: latin-1\n"
+        "reference_sources: {}\n",
+        encoding="utf-8",
+    )
+    params = _params(tmp_path)
+    assert params["source"]["system"] == "CUSTOM"
+    assert params["raw_conversion"]["encoding"] == "latin-1"
+    assert params["reference_sources"] == {}

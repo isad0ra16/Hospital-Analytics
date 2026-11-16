@@ -58,9 +58,14 @@ def _key(path: Path, root: Path) -> str:
     return Path(path).resolve().relative_to(root.resolve()).as_posix()
 
 
-def _defaults(root: Path) -> dict[str, Path]:
+def _params(root: Path) -> dict:
+    """Use the selected root's configuration, falling back for synthetic test roots."""
     params_path = root / "config" / "params.yaml"
-    params = load_params(params_path) if params_path.is_file() else load_params()
+    return load_params(params_path) if params_path.is_file() else load_params()
+
+
+def _defaults(root: Path) -> dict[str, Path]:
+    params = _params(root)
     raw = root / params["paths"]["raw"]
     return {
         "source": raw / params["source"]["filename"],
@@ -74,7 +79,7 @@ def cmd_register_source(args: argparse.Namespace) -> int:
     root = args.root
     source = args.source or _defaults(root)["source"]
     manifest_path = args.manifest or _defaults(root)["manifest"]
-    params = load_params()["source"]
+    params = _params(root)["source"]
 
     manifest = load_manifest(manifest_path)
     archive = None
@@ -134,7 +139,7 @@ def cmd_convert(args: argparse.Namespace) -> int:
     report = convert_dbc_to_parquet(
         source,
         destination,
-        encoding=load_params()["raw_conversion"]["encoding"],
+        encoding=_params(root)["raw_conversion"]["encoding"],
         expected_source_sha256=entry["sha256"],
     )
     record_derived(
@@ -168,7 +173,7 @@ def cmd_validate(args: argparse.Namespace) -> int:
     parquet = args.parquet or defaults["parquet"]
     manifest_path = args.manifest or defaults["manifest"]
 
-    params = load_params()
+    params = _params(root)
     targets = ReferenceTargets.from_params(params)
     targets = ReferenceTargets(
         records=args.expect_records if args.expect_records is not None else targets.records,
@@ -273,7 +278,7 @@ def cmd_powerbi(args: argparse.Namespace) -> int:
     reports = root / "reports"
     summary_path = reports / "powerbi" / "export_summary.json"
     try:
-        references = load_references(incoming, load_params()["reference_sources"])
+        references = load_references(incoming, _params(root)["reference_sources"])
     except (ReferenceIntegrityError, ReferenceFormatError) as exc:
         print(f"ERROR: official reference data: {exc}", file=sys.stderr)
         return 1
@@ -371,7 +376,7 @@ def cmd_verify(args: argparse.Namespace) -> int:
         print(f"[{kind}] {key}: {status}")
     # Official reference files declared in config/params.yaml (reference_sources).
     incoming = root / "data" / "reference" / "incoming"
-    for name, spec in load_params()["reference_sources"].items():
+    for name, spec in _params(root)["reference_sources"].items():
         path = incoming / spec["filename"]
         result = check_declared(path, spec)
         if not result["present"]:

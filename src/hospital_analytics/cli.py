@@ -59,7 +59,8 @@ def _key(path: Path, root: Path) -> str:
 
 
 def _defaults(root: Path) -> dict[str, Path]:
-    params = load_params()
+    params_path = root / "config" / "params.yaml"
+    params = load_params(params_path) if params_path.is_file() else load_params()
     raw = root / params["paths"]["raw"]
     return {
         "source": raw / params["source"]["filename"],

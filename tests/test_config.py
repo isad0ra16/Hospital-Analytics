@@ -37,3 +37,32 @@ def test_to_money_is_exact():
 def test_to_money_rejects_float():
     with pytest.raises(TypeError):
         to_money(0.1)
+
+
+def test_cli_defaults_use_config_from_selected_root(tmp_path):
+    """--root must select both the file locations and their YAML configuration."""
+    from hospital_analytics.cli import _defaults
+
+    config_dir = tmp_path / "config"
+    config_dir.mkdir()
+    (config_dir / "params.yaml").write_text(
+        "paths:\n"
+        "  raw: custom/raw\n"
+        "  processed: custom/processed\n"
+        "  manifest: custom/MANIFEST.json\n"
+        "source:\n"
+        "  filename: OTHER.dbc\n"
+        "raw_conversion:\n"
+        "  parquet_filename: OTHER.parquet\n"
+        "processing:\n"
+        "  filename: OTHER_processed.parquet\n",
+        encoding="utf-8",
+    )
+
+    defaults = _defaults(tmp_path)
+    assert defaults == {
+        "source": tmp_path / "custom/raw/OTHER.dbc",
+        "parquet": tmp_path / "custom/raw/OTHER.parquet",
+        "processed": tmp_path / "custom/processed/OTHER_processed.parquet",
+        "manifest": tmp_path / "custom/MANIFEST.json",
+    }

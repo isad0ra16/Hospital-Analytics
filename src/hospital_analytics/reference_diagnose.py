@@ -138,10 +138,8 @@ def diagnose_cadger(path: Path, spec: dict, powerbi_dir: Path) -> dict[str, Any]
         row = {k: decode_value(v, enc) for k, v in zip(names, raw, strict=True)}
         keys.append(row["CNES"])
         by[row["CNES"]] = row
-    dim = {
-        r["cnes"]: r
-        for r in csv.DictReader((powerbi_dir / "dim_estabelecimento.csv").open(encoding="utf-8"))
-    }
+    with (powerbi_dir / "dim_estabelecimento.csv").open(encoding="utf-8", newline="") as fh:
+        dim = {r["cnes"]: r for r in csv.DictReader(fh)}
     sel = [by[c] for c in dim if c in by]
     fantasia = [r[spec["name_column"]] for r in sel]
     counts: dict[str, int] = {}

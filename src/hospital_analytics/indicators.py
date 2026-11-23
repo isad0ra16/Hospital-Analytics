@@ -497,13 +497,15 @@ def reconcile(agg: dict[str, Any], params: dict[str, Any] | None = None) -> list
     return results
 
 
-def run_indicators(processed: Path) -> dict[str, Any]:
-    """Compute aggregates with both engines, check agreement, reconcile with the history."""
+def run_indicators(processed: Path, params: dict[str, Any] | None = None) -> dict[str, Any]:
+    """Compute aggregates with both engines, check agreement, reconcile with the history.
+
+    ``params``: the project parameters (default: ``config/params.yaml`` of this project)."""
     df = pd.read_parquet(processed)
     agg_pd = aggregates_pandas(df)
     agg_sql = aggregates_sql(processed)
     disagreements = engines_agree(agg_pd, agg_sql)
-    results = reconcile(agg_pd)
+    results = reconcile(agg_pd, params)
     return {
         "source": Path(processed).name,
         "engines_agree": not disagreements,

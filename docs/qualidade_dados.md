@@ -2,7 +2,7 @@
 
 Auditoria somente leitura da base recuperada. Números completos e reproduzíveis em
 [`reports/audit/audit_rdrj2401.md`](../reports/audit/audit_rdrj2401.md) (gerado por `make audit`;
-consultas em `sql/audit/`). Nenhum registro foi removido ou corrigido.
+consultas em `src/hospital_analytics/sql/audit/`). Nenhum registro foi removido ou corrigido.
 
 ## Resumo
 

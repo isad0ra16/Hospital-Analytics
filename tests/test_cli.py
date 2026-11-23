@@ -1,17 +1,34 @@
 """CLI end to end in a temporary project root, with SYNTHETIC data."""
 
 import json
+import shutil
 import stat
 
 import pytest
+import yaml
 from synthetic_data import SYNTHETIC_FIELDS, money_sum
 
 from hospital_analytics.cli import main
+from hospital_analytics.config import PARAMS_RELATIVE_PATH, project_root
 from hospital_analytics.integrity import sha256_file
+
+
+def copy_params(root, **changes):
+    """Give a temporary project root its own config/params.yaml (``--root`` reads it)."""
+    params = yaml.safe_load((project_root() / PARAMS_RELATIVE_PATH).read_text(encoding="utf-8"))
+    for dotted, value in changes.items():
+        node = params
+        *path, last = dotted.split(".")
+        for key in path:
+            node = node[key]
+        node[last] = value
+    (root / "config").mkdir(parents=True, exist_ok=True)
+    (root / PARAMS_RELATIVE_PATH).write_text(yaml.safe_dump(params, allow_unicode=True), "utf-8")
 
 
 @pytest.fixture
 def project(tmp_path, dbc_file):
+    copy_params(tmp_path)
     raw = tmp_path / "data" / "raw"
     raw.mkdir(parents=True)
     source = raw / "SYNTH.dbc"
@@ -121,3 +138,31 @@ def test_verify_reports_ok_missing_and_mismatch(project, capsys):
     source.unlink()  # a missing original source is fatal
     assert main([*common, "verify"]) == 1
     assert "[source] data/raw/SYNTH.dbc: MISSING" in capsys.readouterr().out
+
+
+def test_root_option_reads_the_params_of_that_root(tmp_path, dbc_file, capsys):
+    """Regression: --root used to change only the paths; the parameters (file names, layer
+    directories, encoding) still came from the repository's own config/params.yaml."""
+    copy_params(
+        tmp_path,
+        **{
+            "paths.raw": "brutos",
+            "source.filename": "OUTRO.dbc",
+            "raw_conversion.parquet_filename": "OUTRO.parquet",
+        },
+    )
+    (tmp_path / "brutos").mkdir()
+    shutil.copyfile(dbc_file, tmp_path / "brutos" / "OUTRO.dbc")
+    common = ["--root", str(tmp_path)]
+    args = [*common, "register-source", "--official-url", "ftp://example.invalid/OUTRO.dbc",
+            "--obtained-at", "2026-01-01", "--obtained-by", "test"]  # fmt: skip
+    assert main(args) == 0  # no --source: the default comes from the params of --root
+    assert main([*common, "convert"]) == 0
+    manifest = json.loads((tmp_path / "data" / "MANIFEST.json").read_text())
+    assert set(manifest["sources"]) == {"brutos/OUTRO.dbc"}
+    assert set(manifest["derived"]) == {"brutos/OUTRO.parquet"}
+
+
+def test_root_without_params_is_an_error(tmp_path, capsys):
+    assert main(["--root", str(tmp_path), "verify"]) == 1
+    assert "params.yaml" in capsys.readouterr().err

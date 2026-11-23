@@ -1,5 +1,8 @@
+from pathlib import Path
+
 import pytest
 
+import hospital_analytics
 from hospital_analytics.sql import SQL_DIR, connect, query, read_sql
 
 
@@ -22,3 +25,17 @@ def test_views_and_parameters(sih_layers):
     ident5 = query(con, "indicators/proc_group_value_share", ident="5")
     assert sum(r["records"] for r in all_rows) == 11
     assert sum(r["records"] for r in ident5) == 1
+
+
+def test_sql_files_ship_inside_the_package():
+    """Regression: the queries must be found relative to the package, not to the repository
+    root, so that an installed package (wheel) works outside a clone."""
+    package_dir = Path(hospital_analytics.__file__).resolve().parent
+    assert package_dir / "sql" == SQL_DIR
+    assert {p.parent.name for p in SQL_DIR.rglob("*.sql")} == {
+        "analysis",
+        "audit",
+        "indicators",
+        "powerbi",
+    }
+    assert not (package_dir.parents[1] / "sql").exists()  # no second copy at the root

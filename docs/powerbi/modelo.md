@@ -1,7 +1,7 @@
 # Modelo dimensional para Power BI
 
 Camada analítica gerada por `make powerbi` (`src/hospital_analytics/powerbi.py`, SQL em
-`sql/powerbi/`). Dicionário completo de campos: [`dicionario_campos.md`](dicionario_campos.md)
+`src/hospital_analytics/sql/powerbi/`). Dicionário completo de campos: [`dicionario_campos.md`](dicionario_campos.md)
 (gerado). Medidas: [`medidas.dax`](medidas.dax). Decisões: D-028 a D-033.
 
 ## Conceitos — leia antes de usar o modelo

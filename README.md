@@ -67,7 +67,7 @@ Módulos e princípios: [`docs/arquitetura.md`](docs/arquitetura.md). Pipeline e
 
 ## Tecnologias
 
-Python 3.13 · pandas · PyArrow/Parquet · DuckDB (SQL versionado em `sql/`) · pyreaddbc + dbfread ·
+Python 3.13 · pandas · PyArrow/Parquet · DuckDB (SQL versionado em `src/hospital_analytics/sql/`) · pyreaddbc + dbfread ·
 matplotlib · pytest · ruff · uv (lockfile) · GitHub Releases (arquivamento dos dados brutos).
 
 ## Como reproduzir

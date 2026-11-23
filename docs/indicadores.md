@@ -1,7 +1,7 @@
 # Indicadores (Fase 4)
 
 Tabela completa, gerada e reproduzível: [`reports/indicators/reconciliation.md`](../reports/indicators/reconciliation.md)
-(`make indicators`). Código: `indicators.py` · SQL: `sql/indicators/`.
+(`make indicators`). Código: `indicators.py` · SQL: `src/hospital_analytics/sql/indicators/`.
 
 ## Método
 

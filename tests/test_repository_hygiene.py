@@ -60,7 +60,7 @@ def test_sensitive_or_bulky_paths_are_ignored(path):
         "pyproject.toml",
         "uv.lock",
         "src/hospital_analytics/config.py",
-        "sql/.gitkeep",
+        "src/hospital_analytics/sql/powerbi/base.sql",
     ],
 )
 def test_project_files_are_not_ignored(path):

@@ -21,7 +21,7 @@ from hospital_analytics.analysis import run_analysis
 from hospital_analytics.analysis import write_report as analysis_write
 from hospital_analytics.audit import run_audit
 from hospital_analytics.audit import write_report as audit_write
-from hospital_analytics.config import load_params, project_root, to_money
+from hospital_analytics.config import PARAMS_RELATIVE_PATH, load_params, project_root, to_money
 from hospital_analytics.convert import (
     DeletedRecordsError,
     EncodingMismatchError,
@@ -52,8 +52,13 @@ def _key(path: Path, root: Path) -> str:
     return Path(path).resolve().relative_to(root.resolve()).as_posix()
 
 
+def _params(root: Path) -> dict:
+    """Parameters of the project at ``root`` (``--root``), never of the installed package."""
+    return load_params(root / PARAMS_RELATIVE_PATH)
+
+
 def _defaults(root: Path) -> dict[str, Path]:
-    params = load_params()
+    params = _params(root)
     raw = root / params["paths"]["raw"]
     return {
         "source": raw / params["source"]["filename"],
@@ -67,7 +72,7 @@ def cmd_register_source(args: argparse.Namespace) -> int:
     root = args.root
     source = args.source or _defaults(root)["source"]
     manifest_path = args.manifest or _defaults(root)["manifest"]
-    params = load_params()["source"]
+    params = _params(root)["source"]
 
     manifest = load_manifest(manifest_path)
     archive = None
@@ -127,7 +132,7 @@ def cmd_convert(args: argparse.Namespace) -> int:
     report = convert_dbc_to_parquet(
         source,
         destination,
-        encoding=load_params()["raw_conversion"]["encoding"],
+        encoding=_params(root)["raw_conversion"]["encoding"],
         expected_source_sha256=entry["sha256"],
     )
     record_derived(
@@ -161,7 +166,7 @@ def cmd_validate(args: argparse.Namespace) -> int:
     parquet = args.parquet or defaults["parquet"]
     manifest_path = args.manifest or defaults["manifest"]
 
-    params = load_params()
+    params = _params(root)
     targets = ReferenceTargets.from_params(params)
     targets = ReferenceTargets(
         records=args.expect_records if args.expect_records is not None else targets.records,
@@ -237,7 +242,7 @@ def cmd_audit(args: argparse.Namespace) -> int:
 def cmd_indicators(args: argparse.Namespace) -> int:
     root = args.root
     processed = args.processed or _defaults(root)["processed"]
-    report = run_indicators(processed)
+    report = run_indicators(processed, _params(root))
     json_path, md_path = indicators_write(report, root / "reports" / "indicators", "reconciliation")
     for r in report["indicators"]:
         shown = r["rounded"] or r["reproduced"]
@@ -324,7 +329,9 @@ def cmd_reference_diagnose(args: argparse.Namespace) -> int:
     """Read-only diagnostic of the official reference files (no enrichment)."""
     root = args.root
     incoming = args.incoming or root / "data" / "reference" / "incoming"
-    report = reference_diagnose.run_diagnostic(incoming, root / "data" / "powerbi")
+    report = reference_diagnose.run_diagnostic(
+        incoming, root / "data" / "powerbi", _params(root)["reference_sources"]
+    )
     path = reference_diagnose.write_diagnostic(report, root / "reports" / "reference")
     for name, entry in report["sources"].items():
         integrity = entry["integrity"]
@@ -335,7 +342,10 @@ def cmd_reference_diagnose(args: argparse.Namespace) -> int:
         )
         print(f"{name:<16} {integrity['file']:<45} {status}")
     print(f"written: {_key(path, root)}")
-    return 0
+    failures = reference_diagnose.diagnostic_failures(report)
+    for failure in failures:
+        print(f"ERROR: {failure}", file=sys.stderr)
+    return 1 if failures else 0
 
 
 def cmd_verify(args: argparse.Namespace) -> int:

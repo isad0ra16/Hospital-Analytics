@@ -7,6 +7,8 @@ import zipfile
 import pytest
 from synthetic_data import FieldSpec, build_dbc, build_dbf, write
 
+from hospital_analytics import reference_diagnose
+from hospital_analytics.cli import main
 from hospital_analytics.integrity import sha256_file
 from hospital_analytics.reference import (
     ReferenceFormatError,
@@ -21,7 +23,7 @@ from hospital_analytics.reference import (
     read_ibge_municipios,
     read_sigtap_table,
 )
-from hospital_analytics.reference_diagnose import run_diagnostic
+from hospital_analytics.reference_diagnose import diagnostic_failures, run_diagnostic
 
 LAYOUT = (
     "Coluna,Tamanho,Inicio,Fim,Tipo\r\nCO_PROC,10,1,10,VARCHAR2\r\nNO_PROC,8,11,18,VARCHAR2\r\n"
@@ -259,3 +261,71 @@ def test_cnv_header_count_must_match(tmp_path):
     path.write_bytes(CNV.replace("3 6", "4 6", 1).encode("cp1252"))
     with pytest.raises(ReferenceFormatError, match="declares 4"):
         read_cnv(path)
+
+
+# ---- regressions: integrity must gate every read and fail the command ------------------
+def add_rj_municip(inc, sources):
+    (inc / "rj.cnv").write_bytes(CNV.encode("cp1252"))
+    sources["rj_municip"] = {
+        "filename": "rj.cnv",
+        "size_bytes": (inc / "rj.cnv").stat().st_size,
+        "sha256": sha256_file(inc / "rj.cnv"),
+    }
+
+
+def test_rj_municip_never_reads_an_ibge_file_with_wrong_hash(incoming, monkeypatch):
+    inc, pbi, sources = incoming
+    add_rj_municip(inc, sources)
+    sources["ibge_municipios"]["sha256"] = "0" * 64  # declared hash no longer matches
+    calls = []
+    real = reference_diagnose.read_ibge_municipios
+    monkeypatch.setattr(
+        reference_diagnose, "read_ibge_municipios", lambda p: calls.append(p) or real(p)
+    )
+    report = run_diagnostic(inc, pbi, sources)["sources"]
+    assert report["ibge_municipios"]["integrity"]["integrity_ok"] is False
+    assert report["rj_municip"]["structure"]["names_equal_to_ibge"] is None
+    assert calls == []  # the divergent IBGE file was not read by any reader
+
+
+def test_rj_municip_compares_names_with_a_verified_ibge_file(incoming):
+    inc, pbi, sources = incoming
+    add_rj_municip(inc, sources)
+    report = run_diagnostic(inc, pbi, sources)["sources"]
+    assert (
+        report["rj_municip"]["structure"]["names_equal_to_ibge"] == 0
+    )  # "Rio" != "RIO DE JANEIRO"
+
+
+def test_failures_cover_divergent_and_unreadable_files_but_not_absent_ones(incoming):
+    inc, pbi, sources = incoming
+    assert diagnostic_failures(run_diagnostic(inc, pbi, sources)) == []  # tab_cnes absent: ok
+    sources["cnes_st"]["sha256"] = "0" * 64
+    (inc / "m.json").write_text("not json", encoding="utf-8")  # unreadable but no hash declared
+    failures = diagnostic_failures(run_diagnostic(inc, pbi, sources))
+    assert any(f.startswith("cnes_st:") for f in failures)
+    assert any(f.startswith("ibge_municipios:") for f in failures)
+
+
+def cli_project(tmp_path, inc, pbi, sources):
+    import shutil
+
+    import yaml
+
+    root = tmp_path / "root"
+    (root / "config").mkdir(parents=True)
+    (root / "config" / "params.yaml").write_text(
+        yaml.safe_dump({"reference_sources": sources}), encoding="utf-8"
+    )
+    shutil.copytree(pbi, root / "data" / "powerbi")
+    return ["--root", str(root), "reference-diagnose", "--incoming", str(inc)]
+
+
+def test_reference_diagnose_command_fails_on_divergent_hash(incoming, tmp_path, capsys):
+    inc, pbi, sources = incoming
+    args = cli_project(tmp_path, inc, pbi, sources)
+    assert main(args) == 0
+    sources["cnes_st"]["sha256"] = "0" * 64
+    args = cli_project(tmp_path / "second", inc, pbi, sources)
+    assert main(args) == 1
+    assert "cnes_st: size/SHA-256 differs" in capsys.readouterr().err

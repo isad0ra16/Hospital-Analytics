@@ -1,4 +1,7 @@
-"""Versioned SQL (DuckDB): load ``sql/<group>/<name>.sql`` and run it against the data layers.
+"""Versioned SQL (DuckDB): load ``<group>/<name>.sql`` and run it against the data layers.
+
+The queries live inside the package (``hospital_analytics/sql/``), so they are shipped with it
+and found wherever the package is installed, not only inside a clone of the repository.
 
 Views registered on every connection:
 
@@ -15,13 +18,11 @@ from typing import Any
 
 import duckdb
 
-from hospital_analytics.config import project_root
-
-SQL_DIR = project_root() / "sql"
+SQL_DIR = Path(__file__).resolve().parent / "sql"
 
 
 def read_sql(name: str) -> str:
-    """Return the text of ``sql/<name>.sql`` (``name`` like ``"audit/discharge_year"``)."""
+    """Return the text of ``<SQL_DIR>/<name>.sql`` (``name`` like ``"audit/discharge_year"``)."""
     path = SQL_DIR / f"{name}.sql"
     if not path.is_file():
         raise FileNotFoundError(f"SQL file not found: {path}")

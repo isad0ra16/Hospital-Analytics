@@ -1,7 +1,7 @@
 # Análises exploratórias (Fase 5)
 
 Relatório completo, gerado e reproduzível: [`reports/analysis/analysis.md`](../reports/analysis/analysis.md)
-(`make analysis`; SQL em `sql/analysis/`). **Todas as análises são descritivas.** Nenhuma diferença
+(`make analysis`; SQL em `src/hospital_analytics/sql/analysis/`). **Todas as análises são descritivas.** Nenhuma diferença
 entre grupos é apresentada como causal ou como medida de qualidade assistencial. Unidade de análise:
 registro de AIH (não paciente). Rótulos de códigos: fonte secundária (D-020). Permanência = `DIAS_PERM`.
 Idade = anos corrigidos por `COD_IDADE` (D-025).

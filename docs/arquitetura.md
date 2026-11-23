@@ -49,7 +49,7 @@
    interpretação de códigos depende de fonte declarada (D-020, D-021).
 4. **Dinheiro exato.** Centavos inteiros e `Decimal`; nunca `float` em comparações monetárias.
 5. **Duas engines.** Pandas e DuckDB precisam concordar nos agregados (D-024).
-6. **SQL versionado.** Consultas em `sql/` com cabeçalho e parâmetros `$nome` (nunca concatenação).
+6. **SQL versionado.** Consultas em `src/hospital_analytics/sql/` (empacotadas com o código) com cabeçalho e parâmetros `$nome` (nunca concatenação). Nos diagramas, `sql/` abrevia esse caminho.
 7. **Saídas determinísticas e sem dados sensíveis** (D-026).
 8. **Falhar alto.** Formatos inesperados, encoding contraditório, registros excluídos, colisões de
    nomes e divergência entre engines interrompem a execução com mensagem clara.

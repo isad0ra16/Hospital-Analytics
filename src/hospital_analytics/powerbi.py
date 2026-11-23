@@ -62,7 +62,7 @@ class Table:
     key: tuple[str, ...]
     grain: str
     columns: tuple[Column, ...]
-    sql: str  # sql/powerbi/<sql>.sql, or "report:<name>" for auxiliary tables built from reports
+    sql: str  # package sql/powerbi/<sql>.sql, or "report:<name>" for tables built from reports
     code_dimension: tuple[str, str] | None = None  # (source column, codebook field)
 
     @property

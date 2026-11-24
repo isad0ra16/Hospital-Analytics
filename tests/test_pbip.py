@@ -126,7 +126,8 @@ def test_committed_project_is_up_to_date():
         path = directory / relative
         assert path.is_file(), relative
         assert path.read_text(encoding="utf-8") == content, (
-            f"{relative}: run hospital-analytics pbip"
+            f"{relative}: differs from the generator; if it was edited in Power BI Desktop, keep "
+            "it and update this test instead of regenerating"
         )
     generated = {Path(k).as_posix() for k in FILES}
     on_disk = {
@@ -148,3 +149,46 @@ def test_pages_document_is_generated_from_the_same_specification():
     assert doc == pbip.pages_markdown(), "run hospital-analytics pbip"
     for page in pbip.PAGES:
         assert f"## {page.title}" in doc
+
+
+# ---- protection of a hand-customised report -------------------------------------------
+@pytest.fixture
+def pbip_root(tmp_path):
+    (tmp_path / "docs" / "powerbi").mkdir(parents=True)
+    (tmp_path / "docs" / "powerbi" / "medidas.dax").write_text(MEASURES_TEXT, encoding="utf-8")
+    return tmp_path
+
+
+def test_pbip_refuses_to_overwrite_a_hand_edited_project(pbip_root, capsys):
+    from hospital_analytics.cli import main
+
+    args = ["--root", str(pbip_root), "pbip"]
+    assert main(args) == 0  # fresh folder
+    assert main(args) == 0  # identical content: regenerating is harmless
+    page = next((pbip_root / "powerbi").rglob("page.json"))
+    custom = page.read_text(encoding="utf-8").replace('"displayName"', '"displayName" ', 1)
+    page.write_text(custom, encoding="utf-8")
+    extra = page.parent / "visuals" / "manual" / "visual.json"
+    extra.parent.mkdir(parents=True)
+    extra.write_text("{}", encoding="utf-8")
+    capsys.readouterr()
+    assert main(args) == 1
+    err = capsys.readouterr().err
+    assert "Nothing was written" in err and "modified:" in err and "not generated:" in err
+    assert page.read_text(encoding="utf-8") == custom and extra.is_file()  # untouched
+
+    assert main([*args, "--force"]) == 0  # explicit decision to discard the edits
+    assert not extra.exists() and pbip.manual_changes(pbip_root / "powerbi", MEASURES_TEXT) == []
+
+
+def test_crlf_line_endings_are_not_reported_as_manual_changes(pbip_root):
+    pbip.write_project(pbip_root / "powerbi", MEASURES_TEXT)
+    page = next((pbip_root / "powerbi").rglob("page.json"))
+    page.write_bytes(page.read_bytes().replace(b"\n", b"\r\n"))
+    assert pbip.manual_changes(pbip_root / "powerbi", MEASURES_TEXT) == []
+
+
+def test_pipeline_target_never_regenerates_the_report():
+    makefile = (ROOT / "Makefile").read_text(encoding="utf-8")
+    pipeline = next(ln for ln in makefile.splitlines() if ln.startswith("pipeline:"))
+    assert "pbip" not in pipeline.split("##")[0]

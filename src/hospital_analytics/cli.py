@@ -327,6 +327,18 @@ def cmd_pbip(args: argparse.Namespace) -> int:
     """Generate the Power BI Project (TMDL semantic model + PBIR report) under powerbi/."""
     root = args.root
     measures = (root / "docs" / "powerbi" / "medidas.dax").read_text(encoding="utf-8")
+    # The report may have been customised by hand in Power BI Desktop: never overwrite or delete
+    # such work silently. Regeneration over a changed project requires an explicit --force.
+    changes = pbip.manual_changes(root / "powerbi", measures)
+    if changes and not args.force:
+        print(
+            f"ERROR: {len(changes)} file(s) under powerbi/ differ from the generated project "
+            "(edited in Power BI Desktop?). Nothing was written. Use --force only to discard them:",
+            file=sys.stderr,
+        )
+        for change in changes[:20]:
+            print(f"  {change}", file=sys.stderr)
+        return 1
     written = pbip.write_project(root / "powerbi", measures)
     (root / "docs" / "powerbi" / "paginas.md").write_text(
         pbip.pages_markdown(), "utf-8", newline="\n"
@@ -339,7 +351,9 @@ def cmd_reference_diagnose(args: argparse.Namespace) -> int:
     """Read-only diagnostic of the official reference files (no enrichment)."""
     root = args.root
     incoming = args.incoming or root / "data" / "reference" / "incoming"
-    report = reference_diagnose.run_diagnostic(incoming, root / "data" / "powerbi")
+    report = reference_diagnose.run_diagnostic(
+        incoming, root / "data" / "powerbi", _params(root)["reference_sources"]
+    )
     path = reference_diagnose.write_diagnostic(report, root / "reports" / "reference")
     for name, entry in report["sources"].items():
         integrity = entry["integrity"]
@@ -350,7 +364,10 @@ def cmd_reference_diagnose(args: argparse.Namespace) -> int:
         )
         print(f"{name:<16} {integrity['file']:<45} {status}")
     print(f"written: {_key(path, root)}")
-    return 0
+    failures = reference_diagnose.diagnostic_failures(report)
+    for failure in failures:
+        print(f"ERROR: {failure}", file=sys.stderr)
+    return 1 if failures else 0
 
 
 def cmd_verify(args: argparse.Namespace) -> int:
@@ -456,6 +473,11 @@ def build_parser() -> argparse.ArgumentParser:
     p.set_defaults(func=cmd_powerbi)
 
     p = sub.add_parser("pbip", help="generate the Power BI Project (TMDL model + PBIR report)")
+    p.add_argument(
+        "--force",
+        action="store_true",
+        help="overwrite powerbi/ even if files were changed by hand (discards those changes)",
+    )
     p.set_defaults(func=cmd_pbip)
 
     p = sub.add_parser(

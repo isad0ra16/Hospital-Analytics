@@ -1148,5 +1148,27 @@ def write_project(directory: Path, measures_text: str) -> list[Path]:
     return written
 
 
+def manual_changes(directory: Path, measures_text: str) -> list[str]:
+    """Files under ``directory`` that differ from what this generator would write.
+
+    A non-empty result means the project was edited outside the generator (for example,
+    customised in Power BI Desktop): regenerating it would overwrite or delete that work.
+    Line endings are ignored (``read_text`` normalises them), so a CRLF checkout is not a change.
+    """
+    directory = Path(directory)
+    files = project_files(measures_text)
+    changes = []
+    for relative, content in files.items():
+        path = directory / relative
+        if path.is_file() and path.read_text(encoding="utf-8") != content:
+            changes.append(f"modified: {relative}")
+    for item in (f"{PROJECT}.SemanticModel", f"{PROJECT}.Report"):
+        for path in sorted((directory / item).rglob("*")):
+            relative = path.relative_to(directory).as_posix()
+            if path.is_file() and relative not in files and not _local_only(relative):
+                changes.append(f"not generated: {relative}")
+    return changes
+
+
 def _local_only(relative: str) -> bool:
     return relative.endswith((".pbi/localSettings.json", ".pbi/cache.abf"))

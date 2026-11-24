@@ -49,7 +49,7 @@ reference-diagnose:  ## Read-only diagnostic of the official reference files -> 
 powerbi:  ## Export the enriched star schema to data/powerbi/ (CSV) and validate it (needs data/reference/incoming)
 	uv run hospital-analytics powerbi
 
-pbip:  ## Generate the Power BI Project (TMDL model + PBIR report) under powerbi/
+pbip:  ## Generate the Power BI Project under powerbi/ (refuses to overwrite hand-edited files)
 	uv run hospital-analytics pbip
 
-pipeline: convert validate processed audit indicators analysis powerbi pbip  ## Everything after fetch-data
+pipeline: convert validate processed audit indicators analysis powerbi  ## Everything after fetch-data (pbip is separate: it never runs implicitly)

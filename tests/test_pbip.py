@@ -7,13 +7,12 @@ tests/fixtures/powerbi_schemas, so validation needs no network.
 
 import json
 import re
-from pathlib import Path
 
 import pytest
 from jsonschema import Draft7Validator
 from referencing import Registry, Resource
 
-from hospital_analytics import pbip, powerbi
+from hospital_analytics import pbip, pbip_contract, powerbi
 from hospital_analytics.config import project_root
 
 ROOT = project_root()
@@ -120,24 +119,86 @@ def test_project_holds_no_data_and_no_local_path():
     assert not any(k.endswith((".csv", ".abf", ".pbix")) for k in FILES)
 
 
-def test_committed_project_is_up_to_date():
-    directory = ROOT / "powerbi"
-    for relative, content in FILES.items():
-        path = directory / relative
-        assert path.is_file(), relative
-        assert path.read_text(encoding="utf-8") == content, (
-            f"{relative}: differs from the generator; if it was edited in Power BI Desktop, keep "
-            "it and update this test instead of regenerating"
-        )
-    generated = {Path(k).as_posix() for k in FILES}
-    on_disk = {
-        p.relative_to(directory).as_posix()
-        for p in directory.rglob("*")
+# ---- the committed project: semantic contract, not visual equality ---------------------
+# The committed report may be customised in Power BI Desktop. It must keep the semantic layer
+# (tables, columns, relationships, measures, valid field references); its look is free.
+PROJECT_DIR = ROOT / "powerbi"
+
+
+@pytest.fixture(scope="module")
+def generated_contract(tmp_path_factory):
+    directory = tmp_path_factory.mktemp("generated")
+    pbip.write_project(directory, MEASURES_TEXT)
+    return pbip_contract.read_semantic_contract(directory, pbip.PROJECT)
+
+
+def test_generator_output_is_deterministic_in_an_isolated_folder(tmp_path):
+    """The generator is tested on its own, in a temporary folder, never on powerbi/."""
+    pbip.write_project(tmp_path, MEASURES_TEXT)
+    written = {
+        p.relative_to(tmp_path).as_posix(): p.read_text(encoding="utf-8")
+        for p in tmp_path.rglob("*")
         if p.is_file()
-        and ".pbi/localSettings.json" not in p.as_posix()
-        and not p.name.endswith(".abf")
     }
-    assert on_disk == generated, on_disk ^ generated
+    assert written == FILES
+    pbip.write_project(tmp_path, MEASURES_TEXT)
+    assert pbip.manual_changes(tmp_path, MEASURES_TEXT) == []
+
+
+def test_generated_contract_matches_the_export_schema(generated_contract):
+    exported = {t.name: t.column_names for t in powerbi.ALL_TABLES}
+    assert {k: v for k, v in generated_contract.tables.items() if k in exported} == exported
+    assert len(generated_contract.relationships) == len(powerbi.RELATIONSHIPS)
+    assert sum(not active for *_, active in generated_contract.relationships) == 1
+    assert {name for _, name in generated_contract.measures} == set(MEASURES)
+
+
+def test_committed_project_keeps_the_semantic_contract(generated_contract):
+    actual = pbip_contract.read_semantic_contract(PROJECT_DIR, pbip.PROJECT)
+    report = pbip_contract.compare_contracts(generated_contract, actual)
+    assert report.ok, report.errors
+
+
+def test_committed_visuals_only_use_fields_of_the_model():
+    actual = pbip_contract.read_semantic_contract(PROJECT_DIR, pbip.PROJECT)
+    assert pbip_contract.broken_visual_fields(PROJECT_DIR, pbip.PROJECT, actual) == []
+
+
+def test_committed_report_has_the_six_documented_pages():
+    definition = PROJECT_DIR / f"{pbip.PROJECT}.Report" / "definition"
+    order = json.loads((definition / "pages" / "pages.json").read_text("utf-8"))["pageOrder"]
+    assert len(order) == 6
+    assert all((definition / "pages" / page / "page.json").is_file() for page in order)
+
+
+def test_committed_json_is_valid_and_schema_checked_when_the_schema_is_known():
+    """Every JSON file parses; files declaring a vendored schema version are validated against it.
+    A newer schema version written by Power BI Desktop is not an error (just not vendored)."""
+    validated = 0
+    for path in sorted(PROJECT_DIR.rglob("*")):
+        if path.suffix not in {".json", ".pbir", ".pbism", ".pbip"} or ".pbi" in path.parts:
+            continue
+        document = json.loads(path.read_text(encoding="utf-8"))
+        url = document.get("$schema") if isinstance(document, dict) else None
+        if not url:
+            continue
+        try:
+            schema = REGISTRY.get_or_retrieve(url).value.contents
+        except Exception:  # schema version not vendored: reported by `pbip --check`, not an error
+            continue
+        errors = list(Draft7Validator(schema, registry=REGISTRY).iter_errors(document))
+        assert not errors, (path.name, [e.message for e in errors[:3]])
+        validated += 1
+    assert validated > 0
+
+
+def test_committed_project_holds_no_data_and_no_personal_path():
+    for path in PROJECT_DIR.rglob("*"):
+        if not path.is_file() or ".pbi" in path.parts:
+            continue
+        assert path.suffix.lower() not in {".csv", ".abf", ".pbix", ".parquet"}, path
+        text = path.read_text(encoding="utf-8", errors="replace")
+        assert "\\Users\\" not in text and "/Users/" not in text and "/home/" not in text, path
 
 
 def test_generation_is_deterministic():
@@ -192,3 +253,98 @@ def test_pipeline_target_never_regenerates_the_report():
     makefile = (ROOT / "Makefile").read_text(encoding="utf-8")
     pipeline = next(ln for ln in makefile.splitlines() if ln.startswith("pipeline:"))
     assert "pbip" not in pipeline.split("##")[0]
+
+
+# ---- the contract tolerates Desktop rewrites and visual edits, and catches semantic ones ----
+@pytest.fixture
+def desktop_like(tmp_path):
+    """A generated project rewritten the way Power BI Desktop saves it."""
+    pbip.write_project(tmp_path, MEASURES_TEXT)
+    definition = tmp_path / f"{pbip.PROJECT}.SemanticModel" / "definition"
+    measures = definition / "tables" / f"{pbip.MEASURES_TABLE}.tmdl"
+    text = measures.read_text(encoding="utf-8")
+    head = "\tmeasure 'Concentração do valor - top 10%' =\n"
+    assert head in text
+    # Desktop wraps multi-line DAX in ``` fences and adds bookkeeping lines.
+    start = text.index(head)
+    close = text.index("\t\tformatString:", start)  # first property line of THIS measure
+    text = (
+        text[:start]
+        + head.replace("=\n", "= ```\n")
+        + text[start + len(head) : close]
+        + "\t\t\t```\n"
+        + text[close:]
+    )
+    text += "\n\tannotation PBI_Id = 123\n"
+    measures.write_text(text, encoding="utf-8")
+    (definition / "tables" / "LocalDateTable_x.tmdl").write_text(
+        "table LocalDateTable_x\n\tisHidden\n\n\tcolumn Date\n\t\tdataType: dateTime\n",
+        encoding="utf-8",
+    )
+    rel = definition / "relationships.tmdl"
+    rel.write_text(
+        rel.read_text(encoding="utf-8") + "\nrelationship abc\n\tjoinOnDateBehavior: datePartOnly\n"
+        "\tfromColumn: fato_registro_aih.mes_saida\n\ttoColumn: LocalDateTable_x.Date\n",
+        encoding="utf-8",
+    )
+    page = next((tmp_path / f"{pbip.PROJECT}.Report").rglob("visual.json"))
+    visual = json.loads(page.read_text(encoding="utf-8"))
+    visual["position"]["x"] = visual["position"]["x"] + 7  # a purely visual edit
+    page.write_text(json.dumps(visual), encoding="utf-8")
+    return tmp_path
+
+
+def _check(directory, generated_contract):
+    actual = pbip_contract.read_semantic_contract(directory, pbip.PROJECT)
+    return pbip_contract.compare_contracts(generated_contract, actual), actual
+
+
+def test_desktop_rewrites_and_visual_edits_keep_the_contract(desktop_like, generated_contract):
+    report, actual = _check(desktop_like, generated_contract)
+    assert report.ok, report.errors
+    assert any("auto date/time table" in n for n in report.notes)
+    assert pbip_contract.broken_visual_fields(desktop_like, pbip.PROJECT, actual) == []
+    changes = pbip.manual_changes(desktop_like, MEASURES_TEXT)
+    assert changes  # the hand edits are detected ...
+    assert all(c.startswith(("modified:", "not generated:")) for c in changes)  # ... and listed
+
+
+def test_pbip_check_reports_hand_edits_without_failing(desktop_like, capsys):
+    from hospital_analytics.cli import main
+
+    root = desktop_like.parent / "root"
+    (root / "docs" / "powerbi").mkdir(parents=True)
+    (root / "docs" / "powerbi" / "medidas.dax").write_text(MEASURES_TEXT, encoding="utf-8")
+    desktop_like.rename(root / "powerbi")
+    before = {p: p.read_bytes() for p in (root / "powerbi").rglob("*") if p.is_file()}
+    assert main(["--root", str(root), "pbip", "--check"]) == 0
+    out = capsys.readouterr().out
+    assert "semantic contract OK" in out and "files changed by hand (informational): 0" not in out
+    assert before == {p: p.read_bytes() for p in (root / "powerbi").rglob("*") if p.is_file()}
+
+
+@pytest.mark.parametrize(
+    ("edit", "expected"),
+    [
+        (lambda t: t.replace("DISTINCTCOUNT ( fato_registro_aih[aih_id] )",
+                             "COUNTROWS ( fato_registro_aih )"), "measure expression changed"),
+        (lambda t: t.replace("\tisActive: false\n", ""), "relationship now active"),
+    ],
+)  # fmt: skip
+def test_semantic_changes_break_the_contract(desktop_like, generated_contract, edit, expected):
+    definition = desktop_like / f"{pbip.PROJECT}.SemanticModel" / "definition"
+    for path in [definition / "relationships.tmdl", *definition.glob("tables/*.tmdl")]:
+        path.write_text(edit(path.read_text(encoding="utf-8")), encoding="utf-8")
+    report, _ = _check(desktop_like, generated_contract)
+    assert any(e.startswith(expected) for e in report.errors), report.errors
+
+
+def test_removed_column_and_broken_visual_field_are_reported(desktop_like, generated_contract):
+    table = desktop_like / f"{pbip.PROJECT}.SemanticModel/definition/tables/dim_carater.tmdl"
+    text = table.read_text(encoding="utf-8")
+    assert "\tcolumn descricao_oficial\n" in text  # used by visuals on pages 3 and 4
+    table.write_text(text.replace("\tcolumn descricao_oficial\n", "\tcolumn rotulo\n"), "utf-8")
+    report, actual = _check(desktop_like, generated_contract)
+    assert any("columns removed from dim_carater" in e for e in report.errors)
+    broken = pbip_contract.broken_visual_fields(desktop_like, pbip.PROJECT, actual)
+    assert any("dim_carater[descricao_oficial]" in b for b in broken)

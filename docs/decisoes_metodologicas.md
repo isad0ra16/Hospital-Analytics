@@ -380,9 +380,11 @@ Status: **Adotada** · **Pendente** (aguarda verificação) · **Substituída**.
   e, se algum arquivo foi alterado ou acrescentado, não escreve nada, lista as diferenças e termina com
   erro; regenerar sobre essas alterações exige `--force`. `pbip` saiu do alvo `pipeline`. Ajustes
   visuais passam a viver nos arquivos do projeto, não no código do gerador.
-- **Consequência:** ao versionar a versão personalizada, o teste que exige `powerbi/` idêntico ao
-  gerador (`test_committed_project_is_up_to_date`) precisa ser revisto para conferir o modelo semântico
-  e não a aparência do relatório.
+- **Separação entre gerado e personalizado:** o gerador é testado numa pasta temporária; o projeto
+  versionado é testado por um **contrato semântico** (tabelas, colunas, relacionamentos, medidas e
+  campos dos visuais), não por igualdade com o gerador. Assim a versão personalizada pode ser
+  versionada sem quebrar os testes, e uma alteração no modelo, como medida removida ou relacionamento
+  ativado, continua sendo detectada. `pbip --check` faz a mesma conferência sem escrever nada.
 
 ---
 

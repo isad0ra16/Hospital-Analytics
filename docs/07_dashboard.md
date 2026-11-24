@@ -49,10 +49,17 @@ O detalhamento de cada visual, com campos, medidas e ordenação, está em
 | Todos os arquivos JSON do relatório seguem os esquemas oficiais da Microsoft | `tests/test_pbip.py`, com os esquemas em `tests/fixtures/powerbi_schemas/` (licença MIT) |
 | Cada campo e cada medida usados nos visuais existem no modelo | `tests/test_pbip.py` |
 | Tabelas, colunas e relacionamentos do TMDL correspondem ao esquema exportado | `tests/test_pbip.py` |
-| O projeto versionado é idêntico ao que o gerador produz | `tests/test_pbip.py` |
+| O gerador é determinístico (testado numa pasta temporária, nunca em `powerbi/`) | `tests/test_pbip.py` |
+| O projeto versionado, gerado ou personalizado, mantém o **contrato semântico**: todas as tabelas, colunas, relacionamentos (inclusive o inativo) e medidas com a mesma expressão DAX; todo campo usado num visual existe no modelo; seis páginas; nenhum dado ou caminho pessoal | `tests/test_pbip.py`, `hospital-analytics pbip --check` |
 | Cada medida DAX tem um equivalente em SQL igual aos indicadores reconciliados | `hospital-analytics powerbi`; valores em [`medidas_referencia.json`](../reports/powerbi/medidas_referencia.json) |
 
 O TMDL não tem esquema JSON público; sua sintaxe é validada pelo Power BI Desktop ao abrir o projeto.
+
+**Personalização visual não é erro.** `hospital-analytics pbip --check` não escreve nada: lista os
+arquivos alterados à mão (informativo) e só termina com erro se o contrato semântico for quebrado.
+Acréscimos (uma medida ou visual novo) e o que o Power BI Desktop acrescenta ao salvar
+(`lineageTag`, anotações, tabelas de data automáticas) são apenas informados. O código do contrato
+está em `src/hospital_analytics/pbip_contract.py`.
 
 ## Abrir o projeto no Power BI Desktop
 

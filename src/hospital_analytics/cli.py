@@ -15,7 +15,7 @@ import stat
 import sys
 from pathlib import Path
 
-from hospital_analytics import pbip, powerbi, reference_diagnose
+from hospital_analytics import pbip, pbip_contract, powerbi, reference_diagnose
 from hospital_analytics.analysis import run_analysis
 from hospital_analytics.analysis import write_report as analysis_write
 from hospital_analytics.audit import run_audit
@@ -327,6 +327,8 @@ def cmd_pbip(args: argparse.Namespace) -> int:
     """Generate the Power BI Project (TMDL semantic model + PBIR report) under powerbi/."""
     root = args.root
     measures = (root / "docs" / "powerbi" / "medidas.dax").read_text(encoding="utf-8")
+    if args.check:
+        return _pbip_check(root / "powerbi", measures)
     # The report may have been customised by hand in Power BI Desktop: never overwrite or delete
     # such work silently. Regeneration over a changed project requires an explicit --force.
     changes = pbip.manual_changes(root / "powerbi", measures)
@@ -345,6 +347,35 @@ def cmd_pbip(args: argparse.Namespace) -> int:
     )
     print(f"written {len(written)} files under {_key(root / 'powerbi', root)}/")
     return 0
+
+
+def _pbip_check(project_dir: Path, measures: str) -> int:
+    """Read-only check of powerbi/ against the generator. Visual customisation is reported, not an
+    error; a broken semantic contract (removed/changed table, column, relationship or measure, or
+    a visual using a field that no longer exists) is."""
+    import tempfile
+
+    with tempfile.TemporaryDirectory() as tmp:
+        pbip.write_project(Path(tmp), measures)
+        expected = pbip_contract.read_semantic_contract(Path(tmp), pbip.PROJECT)
+    actual = pbip_contract.read_semantic_contract(project_dir, pbip.PROJECT)
+    report = pbip_contract.compare_contracts(expected, actual)
+    broken = pbip_contract.broken_visual_fields(project_dir, pbip.PROJECT, actual)
+    manual = pbip.manual_changes(project_dir, measures)
+    print(
+        f"semantic model: {len(actual.tables)} tables, {len(actual.relationships)} relationships,"
+        f" {len(actual.measures)} measures"
+    )
+    print(f"files changed by hand (informational): {len(manual)}")
+    for change in manual[:20]:
+        print(f"  {change}")
+    for note in report.notes:
+        print(f"NOTE: {note}")
+    for problem in [*report.errors, *(f"visual field missing: {b}" for b in broken)]:
+        print(f"ERROR: {problem}", file=sys.stderr)
+    ok = report.ok and not broken
+    print(f"RESULT: semantic contract {'OK' if ok else 'BROKEN'}")
+    return 0 if ok else 1
 
 
 def cmd_reference_diagnose(args: argparse.Namespace) -> int:
@@ -477,6 +508,11 @@ def build_parser() -> argparse.ArgumentParser:
         "--force",
         action="store_true",
         help="overwrite powerbi/ even if files were changed by hand (discards those changes)",
+    )
+    p.add_argument(
+        "--check",
+        action="store_true",
+        help="write nothing: report hand edits and fail only if the semantic contract is broken",
     )
     p.set_defaults(func=cmd_pbip)
 

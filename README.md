@@ -210,8 +210,9 @@ uv run hospital-analytics analysis
 uv run hospital-analytics powerbi
 ```
 
-O comando `uv run hospital-analytics pbip` regenera o projeto base do Power BI e recusa sobrescrever
-arquivos alterados à mão. Testes e verificação de estilo:
+O dashboard não faz parte do pipeline. `uv run hospital-analytics pbip --check` confere se o projeto
+em `powerbi/` mantém tabelas, relacionamentos e medidas, sem alterar nada; `pbip` (sem `--check`)
+regenera o projeto base e recusa sobrescrever arquivos alterados à mão. Testes e verificação de estilo:
 
 ```bash
 uv run pytest

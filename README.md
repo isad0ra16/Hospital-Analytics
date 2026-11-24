@@ -1,219 +1,198 @@
 # Hospital Analytics
 
-**Internações do SUS no Rio de Janeiro (SIH/SUS, janeiro de 2024): pipeline de dados reproduzível,
-auditado e reconciliado, com modelo analítico para Power BI.**
+**Análise das internações do SUS no estado do Rio de Janeiro a partir dos microdados públicos do
+SIH/SUS (DATASUS), com dashboard em Power BI apoiado por um pipeline em Python e SQL que torna cada
+número reproduzível e auditável.**
 
-> **Status:** Pipeline validado · Dashboard em validação
->
-> O pipeline, os relatórios e o modelo analítico estão implementados e documentados. O projeto Power BI
-> foi gerado, mas **ainda não foi aberto no Power BI Desktop**: não há validação visual nem capturas de
-> tela ([`docs/07_dashboard.md`](docs/07_dashboard.md)).
-
-## Em resumo
-
-- **Problema.** O projeto original, com notebook, scripts e dados tratados, foi perdido junto com o
-  computador em que estava. Restaram apenas os valores dos indicadores calculados na época, sem código
-  que os sustentasse.
-- **Solução.** Reconstruí a análise como um pipeline em Python e SQL que parte do arquivo público do
-  DATASUS, prova por SHA-256 que a base não foi alterada em nenhuma etapa, reproduz os indicadores
-  históricos com duas implementações independentes (Pandas e DuckDB) e entrega um modelo dimensional
-  enriquecido com tabelas oficiais.
-- **Valor.** Cada número pode ser reproduzido a partir do arquivo público, e cada divergência com o
-  histórico é explicada em vez de ajustada: dos 26 valores históricos recuperados, 24 foram reproduzidos
-  exatamente.
-
-**Conteúdo:** [Meu papel](#meu-papel-no-projeto) · [Competências](#competências-demonstradas) ·
-[Objetivos](#objetivos-da-reconstrução) · [Dados](#dados) · [Arquitetura](#arquitetura) · [Metodologia](#metodologia) ·
-[Resultados](#resultados-validados) · [Qualidade](#qualidade-e-validação) ·
-[Dashboard](#dashboard-power-bi) · [Limitações](#limitações) · [Como executar](#como-executar) ·
-[Documentação](#documentação)
-
-## Meu papel no projeto
-
-Projeto individual de portfólio, no qual desenvolvi o pipeline de dados, implementei validações e testes,
-estruturei o modelo analítico e preparei os artefatos do Power BI:
-
-- **Recuperação e proveniência dos dados:** obtenção do `RDRJ2401.dbc` oficial, registro do tamanho e do
-  SHA-256 em [`data/MANIFEST.json`](data/MANIFEST.json) e publicação de uma cópia arquivada na Release
-  `data-rdrj2401`.
-- **Pipeline de ingestão e tratamento:** conversão `.dbc → .dbf → Parquet` sem tratamento, decodificação
-  do texto pela página de código declarada no arquivo (CP850) e camada tratada que preserva os campos
-  originais e acrescenta 50 colunas derivadas reversíveis.
-- **Auditoria e reconciliação:** relatório de qualidade dos 113 campos e comparação de cada indicador
-  histórico com valores exatos, calculados em Pandas e em DuckDB.
-- **Enriquecimento e modelagem:** leitura das tabelas oficiais (SIGTAP, IBGE, CNES e tabelas do SIH para
-  o TabWin), conferidas por SHA-256, e exportação de um esquema estrela validado por 122 verificações.
-- **Projeto Power BI:** geração automática do modelo semântico (TMDL), das 31 medidas DAX e das seis
-  páginas do relatório (PBIR), conferidos contra os esquemas da Microsoft fora do Power BI.
-- **Engenharia e documentação:** pacote Python com CLI, consultas SQL versionadas, testes com dados
-  sintéticos, ambiente fixado com `uv` e registro de 40 decisões metodológicas.
-
-## Competências demonstradas
-
-| Competência | Como aparece no projeto | Onde verificar |
-| --- | --- | --- |
-| Engenharia de dados | Ingestão do formato DATASUS, camadas bruta e tratada em Parquet, exportação de esquema estrela | [`src/hospital_analytics/`](src/hospital_analytics/), [`docs/02_ingestao.md`](docs/02_ingestao.md) |
-| Integridade e rastreabilidade | Manifesto com SHA-256 da fonte e dos derivados, comando `verify`, impressões digitais das colunas originais | [`data/MANIFEST.json`](data/MANIFEST.json), [`docs/01_fontes_de_dados.md`](docs/01_fontes_de_dados.md) |
-| Qualidade de dados | Auditoria de completude, domínios e consistência; reconciliação com o histórico por regra fixa | [`reports/audit/`](reports/audit/), [`reports/indicators/`](reports/indicators/) |
-| SQL e modelagem dimensional | 30 consultas DuckDB versionadas; 14 tabelas exportadas e 11 relacionamentos sem registros órfãos | [`sql/`](sql/), [`docs/04_modelagem.md`](docs/04_modelagem.md) |
-| Engenharia de software | Pacote Python com CLI `hospital-analytics` (11 comandos), suíte pytest com dados sintéticos, lint com ruff | [`src/`](src/), [`tests/`](tests/), [`pyproject.toml`](pyproject.toml) |
-| Reprodutibilidade e automação | Dependências fixadas no `uv.lock`, `Makefile`, relatórios determinísticos, mesma saída em Windows e Linux | [`Makefile`](Makefile), [`docs/05_validacao.md`](docs/05_validacao.md) |
-| Business Intelligence | Projeto Power BI em formato de texto (PBIP), medidas DAX com equivalente em SQL | [`powerbi/`](powerbi/), [`docs/07_dashboard.md`](docs/07_dashboard.md) |
-| Documentação técnica | Documentação por etapa e registro de decisões com contexto e alternativas | [`docs/`](docs/), [`docs/decisoes_metodologicas.md`](docs/decisoes_metodologicas.md) |
-
-## Objetivos da reconstrução
-
-1. recuperar a base exata e provar que ela não foi alterada em nenhuma etapa;
-2. reproduzir os indicadores históricos e explicar cada divergência, sem ajustar dados para obter os
-   valores esperados;
-3. descrever o perfil das internações com indicadores bem definidos e unidades de análise explícitas;
-4. entregar um modelo analítico e um dashboard que preservem as ressalvas metodológicas.
-
-## Dados
-
-| Item | Descrição |
+| | |
 | --- | --- |
-| Fonte | SIH/SUS (DATASUS), arquivo RD — *AIH Reduzida* |
-| Recorte | Rio de Janeiro, competência janeiro de 2024 (`RDRJ2401.dbc`) |
-| Volume | 73.046 registros de AIH, 113 campos, R$ 125.440.636,13 aprovados |
-| Período das saídas | agosto de 2023 a janeiro de 2024 |
-| Referências oficiais | SIGTAP 2024-01, IBGE (municípios), CNES (estabelecimentos), tabelas do SIH para o TabWin |
+| **Pergunta central** | Quem é internado pelo SUS no RJ, em que leitos e procedimentos, com que desfechos e como o valor aprovado se distribui? |
+| **Fonte** | SIH/SUS (DATASUS), arquivo RD — *AIH Reduzida* — `RDRJ2401.dbc` |
+| **Recorte** | Estado do Rio de Janeiro, competência de processamento janeiro de 2024 (saídas de agosto de 2023 a janeiro de 2024) |
+| **Volume** | 73.046 registros de AIH · 113 campos · R$ 125.440.636,13 aprovados · 240 estabelecimentos |
+| **Produto final** | Dashboard Power BI com seis páginas, sobre um modelo dimensional validado |
 
-A competência é o mês de **processamento**, não o de ocorrência: 40% das saídas são de 2023. A versão
-usada é identificada pelo SHA-256 `a3f0ea9a…0d7dfc9c`. Origem e conferência de cada arquivo:
-[`docs/01_fontes_de_dados.md`](docs/01_fontes_de_dados.md).
+> **Prévia do dashboard:** as capturas das seis páginas da versão final, personalizada no Power BI
+> Desktop, ainda não foram publicadas. Elas entrarão em [`assets/dashboard/`](assets/dashboard/).
+> A pasta [`powerbi/`](powerbi/) contém hoje o projeto base gerado pelo pipeline
+> ([situação do dashboard](#dashboard-power-bi)).
 
-## Arquitetura
+## Principais resultados
 
-```text
-RDRJ2401.dbc (DATASUS)
-  │ convert            .dbc → .dbf → Parquet, 113 colunas de texto, CP850
-  ▼
-data/raw/RDRJ2401.parquet                 validate: contagens, VAL_TOT, impressões digitais
-  │ build-processed    originais intactos + 50 colunas derivadas reversíveis
-  ▼
-data/processed/sih_rj_2024_01_tratado.parquet
-  ├─ audit             → reports/audit/        qualidade dos dados
-  ├─ indicators        → reports/indicators/   reconciliação, Pandas × DuckDB
-  ├─ analysis          → reports/analysis/     análise exploratória e gráficos
-  └─ powerbi           → data/powerbi/         esquema estrela + nomes oficiais (SIGTAP, IBGE, CNES, TabWin)
-                           └─ pbip → powerbi/HospitalAnalytics.pbip
-```
-
-| Pasta | Conteúdo |
-| --- | --- |
-| `src/hospital_analytics/` | pacote Python com o pipeline e a CLI `hospital-analytics` |
-| `sql/` | consultas DuckDB versionadas (auditoria, indicadores, análises, modelo) |
-| `config/params.yaml` | parâmetros, valores históricos e proveniência das referências oficiais |
-| `reports/` | relatórios gerados (JSON e Markdown) e gráficos |
-| `powerbi/` | projeto Power BI gerado (modelo TMDL e relatório PBIR) |
-| `docs/` | documentação por etapa |
-| `tests/` | testes automatizados com dados sintéticos |
-| `data/` | dados locais, fora do Git ([`data/README.md`](data/README.md)) |
-
-**Tecnologias:** Python 3.13 · pandas · PyArrow e Parquet · DuckDB · pyreaddbc e dbfread (leitura do
-formato DATASUS) · matplotlib · Power BI (TMDL, PBIR, DAX, Power Query M) · pytest · ruff · uv.
-
-## Metodologia
-
-- **Dados brutos imutáveis.** O arquivo oficial é convertido para Parquet como texto, sem tratamento, e
-  impressões digitais comprovam que nenhum valor ou byte mudou.
-- **Nada é removido.** AIHs com número repetido (56 registros excedentes) são sinalizadas, não excluídas;
-  filtros são explícitos em cada indicador.
-- **Valores exatos.** Dinheiro em centavos inteiros e `Decimal`; Pandas e DuckDB calculam os mesmos
-  agregados de forma independente e precisam concordar.
-- **Interpretação com fonte declarada.** Cada código traz a origem do seu rótulo; o modelo usa os rótulos
-  oficiais do SIH e mantém a fonte secundária ao lado para comparação.
-- **Enriquecimento por código exato.** Tabelas oficiais conferidas por SHA-256 antes da leitura, chaves
-  únicas e cobertura verificada; as dimensões só ganham colunas, e a tabela fato permanece idêntica byte
-  a byte.
-- **Unidade de análise explícita.** Todas as taxas são por registro de AIH: a base não identifica
-  pacientes e não permite reconstruir internações.
-
-As decisões estão registradas, com contexto e alternativas, em
-[`docs/decisoes_metodologicas.md`](docs/decisoes_metodologicas.md).
-
-## Resultados validados
-
-Indicadores da base completa, conferidos contra o histórico e entre duas implementações independentes:
-
-| Indicador | Valor | Situação |
+| Indicador (base completa) | Valor | Como ler |
 | --- | ---: | --- |
-| Registros de AIH | 73.046 | igual ao histórico |
-| Valor total aprovado | R$ 125.440.636,13 | igual ao histórico, ao centavo |
-| Valor médio por registro | R$ 1.717,28 | igual ao histórico |
-| Permanência média (`DIAS_PERM`) | 6,12 dias (tipo 1: 5,93; tipo 5: 27,90) | igual; critério identificado |
-| Óbitos | 4.664 | igual; critério identificado |
-| Mortalidade hospitalar bruta | 6,39% | histórico registrava 6,38%, explicável só por truncamento |
-| Idade média | 43,85 anos | o histórico (43,96) ignorava a unidade da idade |
-| Valor dos 10% maiores registros | 57,74% | histórico de 58,20% não reproduzido |
+| Registros de AIH | 73.046 | 72.990 números de AIH distintos; registro não é paciente |
+| Valor total aprovado | R$ 125.440.636,13 | valor pago pelo SUS segundo o SIH, não o custo real do atendimento |
+| Valor médio por registro | R$ 1.717,28 | mediana de R$ 689,11: a distribuição é muito assimétrica |
+| Permanência média | 6,12 dias | AIH principal: 5,93 dias; longa permanência (tipo 5): 27,90 |
+| Mortalidade hospitalar bruta | 6,39% | 4.664 registros com óbito; taxa sem ajuste de risco |
+| Idade média | 43,85 anos | calculada pela unidade de idade do registro (dias, meses ou anos) |
+| Valor nos 10% maiores registros | 57,74% | metade dos registros de menor valor soma 11,37% |
 
-Dos 26 valores históricos recuperados, 24 foram reproduzidos exatamente; as exceções são a mortalidade
-bruta e a concentração dos 10% maiores registros. O relatório gerado pela etapa `indicators` cobre 24
-desses valores e reproduz 22; os outros dois são conferidos em outras etapas: o número de colunas em
-`validate` e a preservação dos campos originais em `build-processed`. A reconciliação completa e os achados estão em
-[`docs/05_validacao.md`](docs/05_validacao.md).
+O que os dados mostram:
 
-Destaques descritivos do modelo enriquecido:
+- **Obstetrícia lidera o volume.** Gravidez, parto e puerpério é o capítulo da CID-10 mais frequente
+  (16,5% dos registros), e o parto normal é o procedimento mais registrado (4.250 registros).
+- **A urgência domina.** 69,3% dos registros são de urgência, que responde por 58,8% do valor.
+- **O valor é concentrado.** A alta complexidade tem 8,1% dos registros e 29,1% do valor; os 10
+  estabelecimentos de maior valor somam 30,9% do total com 18,3% dos registros.
+- **A mortalidade acompanha o perfil dos casos.** Ela cresce com a idade (21,8 óbitos por 100 registros
+  a partir de 75 anos) e é mais alta nas doenças infecciosas (20,8%) e respiratórias (16,4%). São taxas
+  brutas: refletem a gravidade dos casos atendidos, não a qualidade do cuidado.
+- **O paciente se desloca.** Em 22,4% dos registros, o município de residência é diferente do município
+  do estabelecimento.
+- **Achados de qualidade.** Os 241 registros com valor zero são exatamente os 241 do leito "Saúde Mental
+  (Clínico)"; 56 registros excedentes compartilham número de AIH com outro registro e foram sinalizados,
+  não removidos.
 
-- Gravidez, parto e puerpério é o capítulo da CID-10 mais frequente, com 16,5% dos registros; o
-  procedimento mais registrado é o parto normal (4.250 registros).
-- 69,3% dos registros são de urgência, e em 22,4% o paciente reside em município diferente do
-  estabelecimento.
-- Hospitais da administração pública municipal concentram 38,9% do valor; os 10 estabelecimentos de
-  maior valor somam 30,9% do total.
-- A mortalidade bruta é maior nas doenças infecciosas (20,8%) e respiratórias (16,4%). São taxas sem
-  ajuste de risco, que refletem o perfil dos casos e não a qualidade do cuidado.
+## Contexto e problema
 
-![Registros por faixa etária e sexo](reports/analysis/figures/age_pyramid.png)
+O SIH/SUS registra as internações pagas pelo SUS. Os microdados são públicos, mas chegam em um formato
+compactado específico do DATASUS, com códigos sem descrição, datas em texto e regras que mudam o
+significado dos números: uma internação longa gera vários registros, a competência é o mês de
+processamento e não o de ocorrência, e o valor aprovado não é o custo do atendimento. Usá-los sem
+esses cuidados leva a conclusões erradas.
 
-A análise exploratória completa, com perfil demográfico, hospitalar, mortalidade, valores e permanência,
-está em [`docs/06_analise_exploratoria.md`](docs/06_analise_exploratoria.md).
+Este projeto nasceu como uma análise exploratória dessa base. O código e os dados tratados originais
+foram perdidos com o computador em que estavam; restaram apenas os indicadores calculados na época.
+A reconstrução virou uma oportunidade: refazer a análise de forma que **cada número possa ser
+reproduzido a partir do arquivo público** e que cada divergência com os valores antigos seja explicada,
+não ajustada.
 
-## Qualidade e validação
+### Perguntas analíticas
 
-- 0 registros duplicados, 0 datas inválidas e 0 valores monetários malformados nos 73.046 registros.
-- 122 verificações do modelo analítico: chaves únicas, nenhum registro órfão nos 11 relacionamentos,
-  totais preservados, 100% de cobertura dos nomes oficiais e tabela fato idêntica à exportação anterior.
-- O pipeline executado a partir de um *checkout* limpo no Windows gerou Parquets, relatórios e CSV
-  idênticos, byte a byte, aos produzidos no Linux.
-- A suíte de testes usa apenas dados sintéticos e cobre leitura do formato DATASUS, conversão,
-  indicadores, enriquecimento, projeto Power BI, higiene do repositório e links da documentação.
+1. Qual é o perfil demográfico dos registros de internação (idade, sexo, raça/cor)?
+2. Em que leitos, com que caráter e em quais procedimentos e diagnósticos as internações se concentram?
+3. Quanto tempo duram as internações e como a longa permanência altera essa leitura?
+4. Como a mortalidade hospitalar bruta varia por idade, caráter e capítulo da CID-10?
+5. Como o valor aprovado se distribui entre registros, complexidades, procedimentos e estabelecimentos?
+6. Os indicadores históricos podem ser reproduzidos, e a base tem problemas de qualidade que afetam a
+   leitura?
 
 ## Dashboard Power BI
 
-**Situação: gerado, aguardando validação visual no Power BI Desktop.**
+O dashboard é a forma de leitura para quem não vai abrir código nem relatórios. Todas as páginas trazem
+a unidade de análise e a fonte no rodapé, e cinco segmentações sincronizadas: tipo de AIH, caráter,
+complexidade, faixa etária e sexo.
 
-O projeto em [`powerbi/`](powerbi/) tem seis páginas: visão geral, perfil e origem, internações e
-permanência, mortalidade hospitalar, análise financeira e qualidade e metodologia. O modelo semântico
-traz 15 tabelas, 11 relacionamentos e 31 medidas DAX documentadas.
+| Página | Objetivo e perguntas | Indicadores e visuais | Cuidados de leitura |
+| --- | --- | --- | --- |
+| **1. Visão geral** | Dimensão da base e onde está o valor | cartões de registros, AIHs distintas, valor total e médio, permanência e mortalidade; registros por tipo de AIH e por mês de saída; valor por complexidade | o mês de saída não é série histórica |
+| **2. Perfil e origem** | Quem são os registros e de onde vêm | pirâmide etária por sexo, raça/cor, idade média, % de outro município e de fora do RJ, 10 principais municípios de residência | perfil de registros, não de pacientes |
+| **3. Internações e permanência** | Leitos, caráter, procedimentos e duração | registros e permanência por especialidade do leito, caráter, permanência da AIH principal, tabela de procedimentos SIGTAP | ler a permanência por tipo de AIH |
+| **4. Mortalidade hospitalar** | Como a mortalidade bruta varia | óbitos, mortalidade geral e da AIH principal; por faixa etária, caráter, capítulo e principais diagnósticos | aviso fixo: taxa sem ajuste de risco |
+| **5. Análise financeira** | Como o valor se concentra | valor total e médio, parcela dos 10% maiores, curva de Lorenz, grupos SIGTAP, 10 estabelecimentos de maior valor, esfera jurídica | valor aprovado ≠ custo; nomes do CNES de 2026 |
+| **6. Qualidade e metodologia** | Quanto confiar nos números | reconciliação com o histórico, completude dos 113 campos, AIHs repetidas, valor zero, fontes e limitações | divergências explicadas, nunca ajustadas |
 
-Os arquivos do relatório foram validados contra os esquemas oficiais da Microsoft, e cada medida tem um
-equivalente em SQL conferido sobre os dados exportados. O projeto **ainda não foi aberto no Power BI
-Desktop**, portanto não há validação visual nem capturas de tela. Conteúdo das páginas e passos para
-abrir e conferir: [`docs/07_dashboard.md`](docs/07_dashboard.md).
+**Situação.** O modelo semântico (15 tabelas, 11 relacionamentos e 31 medidas DAX) e o relatório de seis
+páginas foram gerados pelo pipeline em formato de projeto (PBIP), validados contra os esquemas oficiais
+da Microsoft e conferidos medida a medida por equivalentes em SQL. A versão final foi personalizada
+visualmente no Power BI Desktop pela autora e **ainda não está versionada** neste repositório, assim
+como as capturas das páginas. Detalhes, conferência dos cartões e pendências:
+[`docs/07_dashboard.md`](docs/07_dashboard.md).
+
+## Arquitetura
+
+```mermaid
+flowchart LR
+    A["DATASUS<br/>RDRJ2401.dbc"] --> B["Ingestão<br/>.dbc → .dbf → Parquet<br/>texto bruto, CP850"]
+    B --> C["Validação<br/>contagens, VAL_TOT,<br/>SHA-256 e impressões digitais"]
+    C --> D["Tratamento<br/>113 campos intactos<br/>+ 50 colunas derivadas"]
+    R["Referências oficiais<br/>SIGTAP · IBGE · CNES · TabWin"] --> E
+    D --> E["Modelagem e enriquecimento<br/>esquema estrela, nomes oficiais"]
+    D --> F["Análise<br/>auditoria, indicadores<br/>Pandas × DuckDB, EDA"]
+    E --> G["Power BI<br/>TMDL + PBIR, 31 medidas DAX"]
+    F --> H["Relatórios<br/>reports/"]
+```
+
+| Etapa | Comando | Saída |
+| --- | --- | --- |
+| Ingestão | `convert` | `data/raw/RDRJ2401.parquet`: 113 colunas de texto, sem tratamento |
+| Validação | `validate`, `verify` | conferência com o manifesto e com os valores históricos |
+| Tratamento | `build-processed` | camada tratada com campos originais intactos e colunas derivadas reversíveis |
+| Auditoria e indicadores | `audit`, `indicators` | [`reports/audit/`](reports/audit/), [`reports/indicators/`](reports/indicators/) |
+| Análise exploratória | `analysis` | [`reports/analysis/`](reports/analysis/) e gráficos |
+| Modelo analítico | `powerbi` | 14 tabelas em CSV em `data/powerbi/`, 122 verificações |
+| Projeto Power BI | `pbip` | [`powerbi/`](powerbi/); recusa sobrescrever arquivos editados à mão |
+
+## Metodologia
+
+**O que foi feito e por quê.** Cada etapa responde a um risco concreto desta base:
+
+- **Base intocada.** O arquivo oficial é convertido para Parquet como texto, sem tratamento. O tamanho e
+  o SHA-256 da fonte e de cada derivado ficam em [`data/MANIFEST.json`](data/MANIFEST.json), e
+  impressões digitais provam que nenhum valor original mudou nas etapas seguintes.
+- **Valores exatos.** Dinheiro em centavos inteiros e `Decimal`, nunca ponto flutuante: o total confere
+  ao centavo.
+- **Duas implementações.** Os indicadores são calculados em Pandas e em SQL (DuckDB) de forma
+  independente, e os agregados precisam coincidir.
+- **Nada é removido.** Registros com número de AIH repetido, valor zero ou permanência atípica são
+  sinalizados e contados; os filtros de cada indicador são explícitos.
+- **Rótulos com fonte.** Procedimentos e diagnósticos vêm do SIGTAP 2024-01, municípios do IBGE,
+  estabelecimentos do CNES e os demais códigos das tabelas do SIH para o TabWin. Cada arquivo de
+  referência é conferido por SHA-256 antes da leitura, e o enriquecimento só acrescenta colunas às
+  dimensões: a tabela fato permanece idêntica.
+
+**Dificuldades encontradas.** O formato `.dbc` precisa de descompressão específica; o texto usa a página
+de código CP850, declarada no próprio arquivo; a idade é registrada em dias, meses ou anos; e alguns
+indicadores antigos tinham critérios incorretos ou não documentados. Cada caso virou uma decisão
+registrada, com contexto e alternativas, em
+[`docs/decisoes_metodologicas.md`](docs/decisoes_metodologicas.md).
+
+**Validação.**
+
+- **Reconciliação com o histórico.** Dos 26 valores históricos recuperados, 24 foram reproduzidos: 22
+  indicadores no relatório de reconciliação, mais o número de colunas e a preservação dos campos
+  originais, conferidos em outras etapas. "Reproduzido" significa que o critério original foi
+  identificado, mesmo quando era inadequado, e os dois números aparecem lado a lado:
+  - a idade média histórica (43,96) somava dias e meses como se fossem anos; a corrigida é **43,85**;
+  - os "51,57% cirúrgicos" eram parcela do **valor**, não do número de internações (44,97%).
+- **Divergências explicadas.** A mortalidade de 4.664 / 73.046 é 6,385%, que arredonda para **6,39%**; o
+  histórico de 6,38% só se explica por truncamento. A concentração histórica de 58,20% não foi
+  reproduzida pelo critério documentado (57,74%), e o critério original não foi recuperado.
+- **Qualidade.** 0 registros duplicados, 0 datas inválidas e 0 valores monetários malformados.
+- **Modelo.** 122 verificações: chaves únicas, nenhum registro órfão nos 11 relacionamentos, totais
+  preservados e 100% de cobertura dos nomes oficiais.
+- **Reprodutibilidade.** O pipeline executado a partir do arquivo oficial gera Parquets e relatórios
+  idênticos, byte a byte, aos versionados, no Linux e no Windows.
+- **Testes.** Suíte pytest com dados sintéticos: formato DATASUS, conversão, indicadores,
+  enriquecimento, projeto Power BI e links da documentação.
+
+Detalhes: [`docs/05_validacao.md`](docs/05_validacao.md).
 
 ## Limitações
 
-- A unidade é o registro de AIH: não há como contar pacientes nem internações completas.
+- A unidade de análise é o **registro de AIH**: não há identificador de paciente, então não é possível
+  contar pacientes, reconstruir internações completas nem identificar reinternações.
 - Uma única competência não forma série histórica.
-- As taxas são brutas e não permitem comparar o desempenho de hospitais ou grupos.
+- As taxas são brutas, sem ajuste por idade ou gravidade, e não comparam o desempenho de hospitais.
+- O valor aprovado é o que o SUS paga pela AIH, não o custo real do atendimento.
 - Os nomes dos estabelecimentos vêm do cadastro CNES de 2026-10, não de 2024-01.
 
 Lista completa: [`docs/08_limitacoes.md`](docs/08_limitacoes.md).
 
-## Como executar
+## Tecnologias
 
-Requisitos: [uv](https://docs.astral.sh/uv/), que instala o Python 3.13 e as dependências fixadas no
-`uv.lock`. Os comandos abaixo funcionam no Windows (PowerShell) e no Linux.
+| Área | Ferramentas |
+| --- | --- |
+| Análise e transformação | Python 3.13, pandas, PyArrow e Parquet, `Decimal` |
+| SQL | DuckDB, com 30 consultas versionadas em [`sql/`](sql/) |
+| Leitura do formato DATASUS | pyreaddbc, dbfread |
+| Visualização | Power BI (modelo TMDL, relatório PBIR, DAX, Power Query M), matplotlib |
+| Qualidade e reprodutibilidade | pytest, ruff, uv com dependências fixadas em `uv.lock`, SHA-256 |
+
+## Como reproduzir
+
+Requisito: [uv](https://docs.astral.sh/uv/), que instala o Python 3.13 e as dependências fixadas. Os
+comandos funcionam no Windows (PowerShell) e no Linux.
 
 ```bash
 uv sync --locked
 ```
 
-Coloque os arquivos de entrada nas pastas indicadas em [`data/README.md`](data/README.md): o
-`RDRJ2401.dbc`, disponível na Release `data-rdrj2401` deste repositório, em `data/raw/`; as tabelas
-oficiais de referência em `data/reference/incoming/`. Depois confira a integridade:
+Coloque o `RDRJ2401.dbc`, disponível na Release `data-rdrj2401` deste repositório, em `data/raw/`, e as
+tabelas oficiais de referência em `data/reference/incoming/` ([`data/README.md`](data/README.md)).
+Depois confira a integridade de todos os arquivos:
 
 ```bash
 uv run hospital-analytics verify
@@ -229,18 +208,17 @@ uv run hospital-analytics audit
 uv run hospital-analytics indicators
 uv run hospital-analytics analysis
 uv run hospital-analytics powerbi
-uv run hospital-analytics pbip
 ```
 
-Testes e verificação de estilo:
+O comando `uv run hospital-analytics pbip` regenera o projeto base do Power BI e recusa sobrescrever
+arquivos alterados à mão. Testes e verificação de estilo:
 
 ```bash
 uv run pytest
 uv run ruff check .
 ```
 
-Em sistemas com `make`, o [`Makefile`](Makefile) oferece os mesmos passos como atalhos (`make pipeline`,
-`make check`).
+Em sistemas com `make`, o [`Makefile`](Makefile) oferece os mesmos passos (`make pipeline`, `make check`).
 
 ## Documentação
 
@@ -261,4 +239,5 @@ campos, consultas Power Query, medidas DAX e guia das páginas.
 
 ## Autoria
 
-Isadora Veiga — projeto de portfólio em engenharia e análise de dados aplicadas à saúde.
+**Isadora Veiga** — projeto individual de portfólio em análise de dados e Business Intelligence
+aplicados à saúde.

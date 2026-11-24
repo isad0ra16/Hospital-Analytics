@@ -370,6 +370,20 @@ Status: **Adotada** · **Pendente** (aguarda verificação) · **Substituída**.
   **byte a byte idênticos** aos gerados no Linux. Exceção: as figuras PNG diferem em ~2–3% dos pixels
   (rasterização de texto); o conteúdo é o mesmo e as versionadas não são substituídas.
 
+## D-041 — Dashboard personalizado à mão é artefato protegido
+
+- **Status:** Adotada
+- **Contexto:** `hospital-analytics pbip` reescrevia todos os arquivos de `powerbi/` e apagava os que não
+  estivessem na especificação do código, e fazia parte de `make pipeline`. Uma versão do relatório
+  personalizada no Power BI Desktop seria perdida sem aviso numa execução rotineira do pipeline.
+- **Decisão:** o comando compara `powerbi/` com o que o gerador produziria (ignorando finais de linha)
+  e, se algum arquivo foi alterado ou acrescentado, não escreve nada, lista as diferenças e termina com
+  erro; regenerar sobre essas alterações exige `--force`. `pbip` saiu do alvo `pipeline`. Ajustes
+  visuais passam a viver nos arquivos do projeto, não no código do gerador.
+- **Consequência:** ao versionar a versão personalizada, o teste que exige `powerbi/` idêntico ao
+  gerador (`test_committed_project_is_up_to_date`) precisa ser revisto para conferir o modelo semântico
+  e não a aparência do relatório.
+
 ---
 
 ## Decisões pendentes

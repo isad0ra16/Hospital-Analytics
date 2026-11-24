@@ -7,12 +7,14 @@ ressalvas metodológicas: cada página informa a unidade de análise, a fonte e 
 
 ## Situação
 
-O dashboard existe como **projeto Power BI em formato de texto (PBIP)**, em
-[`powerbi/HospitalAnalytics.pbip`](../powerbi/HospitalAnalytics.pbip), gerado por
-`hospital-analytics pbip`. Ele foi validado fora do Power BI (ver [Verificações](#verificações)), mas
-**ainda não foi aberto no Power BI Desktop**, que não estava disponível no ambiente de construção.
-Portanto, não há validação visual nem capturas de tela: posição, legibilidade e aparência dos visuais
-precisam ser conferidas no aplicativo.
+O dashboard nasceu como **projeto Power BI em formato de texto (PBIP)**, gerado por
+`hospital-analytics pbip` e validado fora do Power BI (ver [Verificações](#verificações)). Esse
+**projeto base** é o que está hoje em [`powerbi/HospitalAnalytics.pbip`](../powerbi/HospitalAnalytics.pbip).
+
+A autora abriu o projeto no Power BI Desktop e personalizou a apresentação visual. Essa **versão final
+personalizada ainda não está versionada** neste repositório, e as capturas das páginas ainda não foram
+publicadas. Por isso, a descrição abaixo corresponde à estrutura do projeto base; ajustes visuais da
+versão final (cores, posições, fundos) não estão documentados aqui.
 
 O projeto não contém dados. Ao atualizar o modelo, o Power BI importa os CSV de `data/powerbi/`
 indicados pelo parâmetro `PastaDados`.
@@ -63,9 +65,11 @@ O TMDL não tem esquema JSON público; sua sintaxe é validada pelo Power BI Des
    distintas, R$ 125.440.636,13, R$ 1.717,28 por registro, 6,12 dias, mortalidade de 6,39%, idade média
    de 43,85 anos, 57,74% do valor nos 10% maiores registros e 69,27% de urgência. Uma divergência indica
    problema no projeto, não nos dados.
-5. Revise cada página. Para manter ajustes visuais, transfira-os para `PAGES` em
-   `src/hospital_analytics/pbip.py`: `hospital-analytics pbip` regenera a pasta a partir do código.
-6. Salve capturas das seis páginas para a documentação.
+5. Revise cada página. Ajustes visuais feitos no Power BI Desktop ficam nos arquivos de `powerbi/` e
+   **não devem ser regenerados**: `hospital-analytics pbip` recusa sobrescrever arquivos alterados à
+   mão e só o faz com `--force`, que descarta esses ajustes.
+6. Exporte as capturas das seis páginas para [`assets/dashboard/`](../assets/dashboard/), com os nomes
+   indicados no README daquela pasta.
 
 Se o Desktop recusar o relatório (por exemplo, por uma versão de esquema mais nova que a instalada), o
 modelo continua utilizável: crie um relatório sobre ele e monte as páginas seguindo
@@ -79,6 +83,8 @@ de reidentificação em [`04_modelagem.md`](04_modelagem.md#privacidade-e-risco-
 
 ## Limitações
 
-- Sem validação visual: nenhuma afirmação sobre a aparência do dashboard foi verificada.
+- A versão personalizada e as capturas ainda não estão no repositório: a aparência final do
+  dashboard não pode ser conferida por quem acessa o GitHub.
 - A curva de Lorenz é estática (base completa) e não responde às segmentações.
-- As medidas foram conferidas por equivalentes em SQL, não executadas no motor do Power BI.
+- As medidas foram conferidas por equivalentes em SQL fora do Power BI. A conferência dos cartões
+  no Power BI Desktop contra `medidas_referencia.json` (passo 4) deve ser registrada com as capturas.

@@ -46,7 +46,8 @@ específicas do seu procedimento.
 
 ## Dashboard e publicação
 
-- O projeto Power BI ainda não foi aberto no Power BI Desktop: não há validação visual.
+- A versão do dashboard personalizada no Power BI Desktop e suas capturas ainda não estão
+  versionadas; o repositório contém o projeto base gerado pelo pipeline.
 - Os dados permitem identificar combinações raras de atributos. Um `.pbix` com dados importados não deve
   ser publicado sem a avaliação de privacidade de [`04_modelagem.md`](04_modelagem.md) (P-013).
 - A licença do projeto ainda não foi definida; a dependência `pyreaddbc` é AGPL-3.0 (P-007).

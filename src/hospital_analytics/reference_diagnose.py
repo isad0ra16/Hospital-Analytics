@@ -10,6 +10,7 @@ from __future__ import annotations
 import csv
 import json
 import tempfile
+import unicodedata
 import zipfile
 from dataclasses import asdict
 from pathlib import Path
@@ -192,7 +193,11 @@ def diagnose_def(path: Path) -> dict[str, Any]:
     return {"lines_referencing_CADGERRJ": lines}
 
 
-def diagnose_rj_municip(path: Path, powerbi_dir: Path, incoming: Path) -> dict[str, Any]:
+def diagnose_rj_municip(
+    path: Path, powerbi_dir: Path, verified_ibge: Path | None
+) -> dict[str, Any]:
+    """RJ codes of the model in RJ_municip.cnv; names are compared with IBGE only when the IBGE
+    file passed its own integrity check (``verified_ibge`` is None otherwise)."""
     table = read_cnv_table(path)
     cats = table.entries
     res = _dimension_keys(powerbi_dir, "dim_municipio_residencia", "municipio_residencia_cod")
@@ -206,27 +211,25 @@ def diagnose_rj_municip(path: Path, powerbi_dir: Path, incoming: Path) -> dict[s
         "not_found": [c for c, v in found.items() if not v],
         "ambiguous": [c for c, v in found.items() if len(v) > 1],
     }
-    ibge_path = incoming / "municipios_ibge.json"
-    if ibge_path.is_file():
-        import unicodedata
-
-        def norm(s: str) -> str:
-            s = unicodedata.normalize("NFKD", s.upper())
-            return (
-                "".join(ch for ch in s if not unicodedata.combining(ch))
-                .replace("'", " ")
-                .replace("-", " ")
-            )
-
-        ibge = {r["id"][:6]: r["nome"] for r in read_ibge_municipios(ibge_path)}
-        same = 0
-        for c, v in found.items():
-            if len(v) == 1 and c in ibge:
-                label = v[0].label
-                label = label[len(c) :].strip() if label.startswith(c) else label
-                same += norm(label) == norm(ibge[c])
-        out["names_equal_to_ibge"] = same
+    if verified_ibge is None:
+        out["names_equal_to_ibge"] = None  # IBGE absent or divergent: not read
+        return out
+    ibge = {r["id"][:6]: r["nome"] for r in read_ibge_municipios(verified_ibge)}
+    same = 0
+    for c, v in found.items():
+        if len(v) == 1 and c in ibge:
+            label = v[0].label
+            label = label[len(c) :].strip() if label.startswith(c) else label
+            same += _normalize_name(label) == _normalize_name(ibge[c])
+    out["names_equal_to_ibge"] = same
     return out
+
+
+def _normalize_name(name: str) -> str:
+    """Upper case without accents; apostrophes and hyphens as spaces (for name comparison)."""
+    decomposed = unicodedata.normalize("NFKD", name.upper())
+    plain = "".join(ch for ch in decomposed if not unicodedata.combining(ch))
+    return plain.replace("'", " ").replace("-", " ")
 
 
 RD_FIELDS_OF_INTEREST = (
@@ -262,6 +265,16 @@ def run_diagnostic(
 ) -> dict[str, Any]:
     sources = sources or load_params()["reference_sources"]
     report: dict[str, Any] = {"incoming": Path(incoming).name, "sources": {}}
+    # Integrity of EVERY declared file first, so that no reader can use a divergent file,
+    # not even indirectly (the IBGE names used by the RJ_municip check).
+    integrity = {
+        name: check_declared(incoming / spec["filename"], spec) for name, spec in sources.items()
+    }
+    verified = {
+        name: incoming / sources[name]["filename"]
+        for name, result in integrity.items()
+        if result.get("present") and result.get("integrity_ok")
+    }
     readers = {
         "cnes_st": lambda p, s: diagnose_cnes_st(p, s, powerbi_dir),
         "sigtap": lambda p, s: diagnose_sigtap(p, s, powerbi_dir),
@@ -269,26 +282,43 @@ def run_diagnostic(
         "ibge_municipios": lambda p, s: diagnose_ibge(p, powerbi_dir),
         "cnes_cadger": lambda p, s: diagnose_cadger(p, s, powerbi_dir),
         "tp_pfpj": lambda p, s: diagnose_cnv(p, ["1", "3"]),
-        "rj_municip": lambda p, s: diagnose_rj_municip(p, powerbi_dir, incoming),
+        "rj_municip": lambda p, s: diagnose_rj_municip(
+            p, powerbi_dir, verified.get("ibge_municipios")
+        ),
         "cnes_def": lambda p, s: diagnose_def(p),
     }
     readers["tab_sih"] = readers["tab_cnes"]
     readers["sih_rd_def"] = lambda p, s: diagnose_rd_def(p)
     for name, spec in sources.items():
         path = incoming / spec["filename"]
-        entry = {"integrity": check_declared(path, spec)}
+        entry: dict[str, Any] = {"integrity": integrity[name]}
         reader = readers.get(name) or (
             (lambda p, s: diagnose_cnv_table(p, s, powerbi_dir))
             if spec.get("kind") == "cnv"
             else None
         )
-        if reader and entry["integrity"].get("present") and entry["integrity"].get("integrity_ok"):
+        if reader and name in verified:
             try:
                 entry["structure"] = reader(path, spec)
             except (ReferenceFormatError, ValueError, KeyError, zipfile.BadZipFile) as exc:
                 entry["structure"] = {"error": f"{type(exc).__name__}: {exc}"}
         report["sources"][name] = entry
     return report
+
+
+def diagnostic_failures(report: dict[str, Any]) -> list[str]:
+    """Problems that must fail the command: a present file whose size or SHA-256 differs from
+    the declared values, or a file that could not be read. Absent files are reported but are not
+    failures (some declared sources are deliberately not stored)."""
+    failures = []
+    for name, entry in report["sources"].items():
+        integrity = entry["integrity"]
+        if integrity.get("present") and not integrity.get("integrity_ok"):
+            failures.append(f"{name}: size/SHA-256 differs from the declared values")
+        error = entry.get("structure", {}).get("error")
+        if error:
+            failures.append(f"{name}: {error}")
+    return failures
 
 
 def write_diagnostic(report: dict[str, Any], directory: Path) -> Path:
